@@ -29,12 +29,11 @@
 <span class="loading">opening today's ritual</span>
 
 <script>
-// Supabase config — replace these with your actual values
+// Supabase config
 var SB_URL = 'https://bfzqxqhuxfcpzigayqji.supabase.co';
 var SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmenF4cWh1eGZjcHppZ2F5cWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzY1MjgsImV4cCI6MjA4ODI1MjUyOH0.EckWMCz1y7TZBvkwxcKqLz6m8Rr2HDLDOPoCOZw2HkI';
 
 // Map of word_text (with diacritics) to sanitized ASCII filename.
-// Must match the filenames in words/.
 var FILENAME_MAP = {
   'aloríssī': 'alorissi',
   'amalgré': 'amalgre',
@@ -50,13 +49,22 @@ var FILENAME_MAP = {
 
 function sanitize(word) {
   if (FILENAME_MAP[word]) return FILENAME_MAP[word];
-  // Fallback: strip diacritics
   return word.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
+var redirected = false;
 function goToLexicon() {
-  window.location.href = 'lexicon.html';
+  if (redirected) return;
+  redirected = true;
+  window.location.replace('lexicon.html');
 }
+function goToWord(filename) {
+  if (redirected) return;
+  redirected = true;
+  window.location.replace('words/' + filename + '.html');
+}
+
+var fallbackTimer = setTimeout(goToLexicon, 5000);
 
 fetch(
   SB_URL + '/rest/v1/lexicon?is_published=eq.true&select=word_text,published_at&order=published_at.desc&limit=1',
@@ -64,19 +72,17 @@ fetch(
 )
 .then(function(r) { return r.json(); })
 .then(function(data) {
+  clearTimeout(fallbackTimer);
   if (Array.isArray(data) && data.length > 0 && data[0].word_text) {
-    var filename = sanitize(data[0].word_text);
-    window.location.href = 'words/' + filename + '.html';
+    goToWord(sanitize(data[0].word_text));
   } else {
     goToLexicon();
   }
 })
 .catch(function() {
+  clearTimeout(fallbackTimer);
   goToLexicon();
 });
-
-// Ultimate fallback: if fetch hangs for 5 seconds, go to lexicon
-setTimeout(goToLexicon, 5000);
 </script>
 
 </body>
