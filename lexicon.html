@@ -30,11 +30,15 @@
     display: flex;
     justify-content: center;
     margin-bottom: 5rem;
+    width: 100%;
+    overflow: hidden;
   }
   .letters-row {
     display: flex;
     gap: 0;
     align-items: flex-end;
+    transform-origin: center center;
+    max-width: 100%;
   }
   .letter-svg { display: block; }
 
@@ -229,6 +233,7 @@
 
   <div class="page-nav">
     <a href="index.html">home</a>
+    <a href="lexicon.html">the liminal lexicon</a>
     <a href="about.html">who</a>
   </div>
 
@@ -3451,6 +3456,21 @@ function renderTitle() {
 }
 
 try { renderTitle(); } catch(e) { console.error('Title render error:', e); }
+
+// Scale title down on narrow screens
+function scaleTitle() {
+  var row = document.getElementById('lettersRow');
+  var block = row.parentElement;
+  var blockWidth = block.clientWidth - 40; // padding
+  row.style.transform = 'scale(1)';
+  var rowWidth = row.scrollWidth;
+  if (rowWidth > blockWidth) {
+    var scale = blockWidth / rowWidth;
+    row.style.transform = 'scale(' + scale + ')';
+  }
+}
+scaleTitle();
+window.addEventListener('resize', scaleTitle);
 
 // ── Random alt routing ───────────────────────────────────
 document.querySelectorAll('.lex-entry').forEach(function(entry) {
