@@ -3,278 +3,378 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tendrela — The Liminal Lexicon</title>
+<title>Tendrela — uñtakhluk</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --letter-color: hsl(40, 15%, 88%);
-    --bg-color: hsl(240, 7%, 4%);
+    --letter-color: hsl(45, 35%, 22%);
+    --bg-color: hsl(55, 62%, 88%);
+    --text-color: hsl(45, 35%, 22%);
+    --word-width: 480px;
   }
 
   body {
     background: var(--bg-color);
-    color: var(--letter-color);
+    color: var(--text-color);
     font-family: 'Spectral', Georgia, serif;
     min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+  body.ritual-started {
+    overflow-y: auto;
+  }
+
+  .threshold {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-color);
+    z-index: 200;
+    cursor: pointer;
+    transition: opacity 0.8s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .threshold.dismissed {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .threshold-prompt {
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 1.6rem;
+    font-style: italic;
+    letter-spacing: 0.12em;
+    color: var(--text-color);
+    opacity: 0.35;
   }
 
   .page {
     max-width: 720px;
     margin: 0 auto;
-    padding: 10vh 2.5rem 6rem;
+    padding: 12vh 2.5rem 6rem;
   }
 
-  .title-block {
+  .word-block {
     display: flex;
     justify-content: center;
-    margin-bottom: 5rem;
-    width: 100%;
-    overflow: hidden;
+    margin-bottom: 2rem;
   }
   .letters-row {
     display: flex;
     gap: 0;
     align-items: flex-end;
-    transform-origin: center center;
-    max-width: 100%;
   }
   .letter-svg { display: block; }
 
-  .lex-entry {
+  .pronunciation-block {
+    text-align: center;
     margin-bottom: 3.5rem;
-    cursor: pointer;
-    transition: opacity 0.2s;
   }
-  .lex-entry:hover {
-    opacity: 0.85;
-  }
-  .lex-entry:last-child {
-    margin-bottom: 0;
-  }
-
-  .lex-word {
+  .pronunciation {
     font-size: 1.6rem;
-    font-weight: 400;
+    opacity: 0.55;
     letter-spacing: 0.04em;
-    opacity: 0.7;
-    margin: 0 0 0.3rem;
   }
 
-  .lex-pronunciation {
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 3rem;
+    margin-bottom: 5rem;
+    padding: 0 0.5rem;
+  }
+
+  .def-col {
+    flex: 1;
+  }
+  .def-label {
     font-size: 1.0rem;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
     opacity: 0.45;
-    letter-spacing: 0.04em;
-    margin: 0 0 0.5rem;
+    margin-bottom: 0.4rem;
+    font-style: italic;
   }
-
-  .lex-definition {
+  .def-text {
     font-size: 1.4rem;
-    font-weight: 400;
     line-height: 1.6;
     opacity: 0.75;
-    margin: 0 0 0.3rem;
-    max-width: 540px;
+  }
+  .def-translation {
+    font-size: 1.0rem;
+    line-height: 1.5;
+    opacity: 0.50;
+    margin-top: 0.5rem;
+    font-style: italic;
   }
 
-  .lex-date {
+  .roots-col {
+    flex: 1;
+    text-align: right;
+  }
+  .roots-label {
+    font-size: 1.0rem;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    opacity: 0.45;
+    margin-bottom: 0.4rem;
+    font-style: italic;
+  }
+  .root-entry {
+    margin-bottom: 0.4rem;
+  }
+  .root-word {
+    font-size: 1.2rem;
+    font-style: italic;
+    opacity: 0.65;
+    line-height: 1.4;
+  }
+  .root-meaning {
+    font-size: 1.0rem;
+    opacity: 0.48;
+    line-height: 1.4;
+  }
+
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: var(--text-color);
+    opacity: 0.1;
+    margin: 0 auto 4rem;
+  }
+
+  .iching-glyph {
+    position: fixed;
+    top: 1.5rem;
+    left: 3.5rem;
+    opacity: 0.1;
+    color: var(--text-color);
+    z-index: 10;
+  }
+
+  .essay {
+    max-width: 540px;
+    margin: 0 auto 5rem;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  .essay.visible {
+    opacity: 1;
+  }
+  .essay-para {
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.85;
+    opacity: 0.75;
+    margin-bottom: 1.4em;
+    text-align: left;
+  }
+  .essay-para:last-child {
+    margin-bottom: 0;
+  }
+  .essay-para em {
+    font-style: italic;
+  }
+
+  .footnotes {
+    max-width: 720px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 2rem;
+    margin-bottom: 3rem;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .footnotes.visible {
+    opacity: 1;
+  }
+  .fn-block {
+    display: flex;
+    flex-direction: column;
+  }
+  .fn-reasoning {
+    font-size: 1.0rem;
+    font-weight: 400;
+    line-height: 1.5;
+    opacity: 0.50;
+    text-align: left;
+  }
+  .fn-label {
+    font-family: 'Courier New', monospace;
+    font-size: 1.0rem;
+    opacity: 0.38;
+    text-align: right;
+    letter-spacing: 0.03em;
+    margin-top: 0.2rem;
+  }
+
+  .colophon {
+    text-align: center;
+    margin-top: 3rem;
+    padding-bottom: 1.5rem;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .colophon.visible {
+    opacity: 1;
+  }
+  .date-forged {
     font-family: 'Courier New', monospace;
     font-size: 1.0rem;
     opacity: 0.35;
     letter-spacing: 0.03em;
-    margin: 0;
-  }
-
-  .lex-divider {
-    width: 30px;
-    height: 1px;
-    background: var(--letter-color);
-    opacity: 0.08;
-    margin: 0 0 3.5rem;
-  }
-
-  .page-nav {
-    text-align: center;
-    margin-top: 5rem;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 3rem;
-  }
-  .page-nav a {
-    font-size: 0.9rem;
-    letter-spacing: 0.16em;
-    text-transform: lowercase;
-    text-decoration: none;
-    color: var(--letter-color);
-    opacity: 0.6;
-    transition: opacity 0.3s;
-  }
-  .page-nav a:hover {
-    opacity: 0.8;
   }
 
   @media (max-width: 640px) {
     .page {
       padding: 8vh 1.5rem 4rem;
     }
-    .title-block {
-      margin-bottom: 3.5rem;
+    .meta-row {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .roots-col {
+      text-align: left;
+    }
+    .footnotes {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.2rem 1.5rem;
     }
   }
 </style>
 </head>
 <body>
 
+<div class="threshold" id="threshold"><span class="threshold-prompt">listen</span></div>
+
+<svg class="iching-glyph" viewBox="0 0 20 29.0" width="20" height="29.0">
+    <rect x="1.75" y="0" width="3.5" height="10" fill="currentColor"/>
+    <rect x="8.25" y="0" width="3.5" height="10" fill="currentColor"/>
+    <rect x="14.75" y="0" width="3.5" height="10" fill="currentColor"/>
+    <rect x="0" y="15.0" width="8.4" height="3" fill="currentColor"/>
+    <rect x="11.6" y="15.0" width="8.4" height="3" fill="currentColor"/>
+    <rect x="0" y="20.5" width="20" height="3" fill="currentColor"/>
+    <rect x="0" y="26.0" width="8.4" height="3" fill="currentColor"/>
+    <rect x="11.6" y="26.0" width="8.4" height="3" fill="currentColor"/>
+  </svg>
+
 <div class="page">
 
-  <div class="title-block">
+  <div class="word-block">
     <div class="letters-row" id="lettersRow">
-      <svg id="svg_0_t" class="letter-svg"></svg>
-      <svg id="svg_1_h" class="letter-svg"></svg>
-      <svg id="svg_2_e" class="letter-svg"></svg>
-      <svg id="svg_3_l" class="letter-svg"></svg>
-      <svg id="svg_4_i" class="letter-svg"></svg>
-      <svg id="svg_5_m" class="letter-svg"></svg>
-      <svg id="svg_6_i" class="letter-svg"></svg>
-      <svg id="svg_7_n" class="letter-svg"></svg>
-      <svg id="svg_8_a" class="letter-svg"></svg>
-      <svg id="svg_9_l" class="letter-svg"></svg>
-      <svg id="svg_10_l" class="letter-svg"></svg>
-      <svg id="svg_11_e" class="letter-svg"></svg>
-      <svg id="svg_12_x" class="letter-svg"></svg>
-      <svg id="svg_13_i" class="letter-svg"></svg>
-      <svg id="svg_14_c" class="letter-svg"></svg>
-      <svg id="svg_15_o" class="letter-svg"></svg>
-      <svg id="svg_16_n" class="letter-svg"></svg>
+      <svg id="svg_0_u" class="letter-svg"></svg>
+      <svg id="svg_1_ñ" class="letter-svg"></svg>
+      <svg id="svg_2_t" class="letter-svg"></svg>
+      <svg id="svg_3_a" class="letter-svg"></svg>
+      <svg id="svg_4_k" class="letter-svg"></svg>
+      <svg id="svg_5_h" class="letter-svg"></svg>
+      <svg id="svg_6_l" class="letter-svg"></svg>
+      <svg id="svg_7_u" class="letter-svg"></svg>
+      <svg id="svg_8_k" class="letter-svg"></svg>
     </div>
   </div>
 
-  <div class="lex-entry" data-versions="alorissi.html,alorissi_alt1.html,alorissi_alt2.html,alorissi_alt3.html">
-    <p class="lex-word">aloríssī</p>
-    <p class="lex-pronunciation">/ah-loh-REE-ssee/</p>
-    <p class="lex-definition">naming the unnamed</p>
-    <p class="lex-date">2026-04-10</p>
-  </div>
-  <div class="lex-divider"></div>
-
-  <div class="lex-entry" data-versions="amalgre.html,amalgre_alt1.html,amalgre_alt2.html,amalgre_alt3.html,amalgre_alt4.html">
-    <p class="lex-word">amalgré</p>
-    <p class="lex-pronunciation">/ah-mal-GRAY/</p>
-    <p class="lex-definition">love that passed through disgust and remained sweet</p>
-    <p class="lex-date">2026-03-07</p>
-  </div>
-  <div class="lex-divider"></div>
-
-  <div class="lex-entry" data-versions="cedozsabir.html,cedozsabir_alt1.html,cedozsabir_alt2.html,cedozsabir_alt3.html">
-    <p class="lex-word">cedözsabir</p>
-    <p class="lex-pronunciation">/ce-döz-sa-BIR/</p>
-    <p class="lex-definition">the gradual surrender of the self through patience</p>
-    <p class="lex-date">2026-03-07</p>
-  </div>
-  <div class="lex-divider"></div>
-
-  <div class="lex-entry" data-versions="colligakusma.html,colligakusma_alt1.html">
-    <p class="lex-word">colligakūsma</p>
-    <p class="lex-pronunciation">/kol-li-ga-KŪS-ma/</p>
-    <p class="lex-definition">a group that gathers to listen</p>
-    <p class="lex-date">2026-03-07</p>
-  </div>
-  <div class="lex-divider"></div>
-
-  <div class="lex-entry" data-versions="doxamoha.html,doxamoha_alt1.html">
-    <p class="lex-word">doxamoha</p>
-    <p class="lex-pronunciation">/DOK-sa-MO-ha/</p>
-    <p class="lex-definition">fluency in language that is not understood by the speaker</p>
-    <p class="lex-date">2026-04-10</p>
-  </div>
-  <div class="lex-divider"></div>
-
-  <div class="lex-entry" data-versions="goyohawl.html,goyohawl_alt1.html">
-    <p class="lex-word">goyohawl</p>
-    <p class="lex-pronunciation">/go-yo-HAWL/</p>
-    <p class="lex-definition">the shudder when violence speaks calmly</p>
-    <p class="lex-date">2026-04-07</p>
-  </div>
-  <div class="lex-divider"></div>
-
-  <div class="lex-entry" data-versions="idiopillu.html,idiopillu_alt1.html,idiopillu_alt2.html">
-    <p class="lex-word">idiopillu</p>
-    <p class="lex-pronunciation">/ih-dee-oh-PEE-yoo/</p>
-    <p class="lex-definition">an amusing but useless talent</p>
-    <p class="lex-date">2026-03-16</p>
-  </div>
-  <div class="lex-divider"></div>
-
-  <div class="lex-entry" data-versions="kokthuong.html,kokthuong_alt1.html,kokthuong_alt2.html,kokthuong_alt3.html">
-    <p class="lex-word">kökthương</p>
-    <p class="lex-pronunciation">/KUHK-tuung/</p>
-    <p class="lex-definition">to crave the origin of a thing instead of the thing itself</p>
-    <p class="lex-date">2026-04-15</p>
-  </div>
-  <div class="lex-divider"></div>
-
-  <div class="lex-entry" data-versions="privosabi.html,privosabi_alt1.html,privosabi_alt2.html,privosabi_alt3.html,privosabi_alt4.html,privosabi_alt5.html,privosabi_alt6.html">
-    <p class="lex-word">privosabi</p>
-    <p class="lex-pronunciation">/pri-vo-SA-bi/</p>
-    <p class="lex-definition">the beauty of unrecorded moments; the aesthetics of privacy</p>
-    <p class="lex-date">2026-03-07</p>
-  </div>
-  <div class="lex-divider"></div>
-
-  <div class="lex-entry" data-versions="salethedon.html,salethedon_alt1.html">
-    <p class="lex-word">salethedön</p>
-    <p class="lex-pronunciation">/sa-LE-the-dön/</p>
-    <p class="lex-definition">the willingness to suffer the same thing twice</p>
-    <p class="lex-date">2026-04-08</p>
-  </div>
-  <div class="lex-divider"></div>
-
-  <div class="lex-entry" data-versions="untakhluk.html,untakhluk_alt1.html,untakhluk_alt2.html">
-    <p class="lex-word">uñtakhluk</p>
-    <p class="lex-pronunciation">/uñ-TA-khluk/</p>
-    <p class="lex-definition">the revelation of unglamorous belonging</p>
-    <p class="lex-date">2026-04-16</p>
+  <div class="pronunciation-block">
+    <p class="pronunciation">/uñ-TA-khluk/</p>
   </div>
 
-  <div class="page-nav">
-    <a href="index.html">home</a>
-    <a href="lexicon.html">the liminal lexicon</a>
-    <a href="about.html">who</a>
+  <div class="meta-row">
+    <div class="def-col">
+      <p class="def-label">definition</p>
+      <p class="def-text">the revelation of unglamorous belonging</p>
+      <p class="def-label" style="margin-top: 1rem;">approximate translations</p>
+      <p class="def-translation">uñt'asiña jan sumäwi tuqita ukatwa jaqinakampiw mayachasi</p>
+      <p class="def-translation">การเปิดเผยของการเป็นส่วนหนึ่งที่ไม่หรูหรา</p>
+    </div>
+    <div class="roots-col">
+      <p class="roots-label">roots</p>
+      <div class="root-entry">
+        <p class="root-word">uñt'a- [Aymara]</p>
+        <p class="root-meaning">to recognize</p>
+      </div>
+      <div class="root-entry">
+        <p class="root-word">คลุก khluk [Thai]</p>
+        <p class="root-meaning">to roll in; get covered</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="essay" id="essay">
+<p class="essay-para">Someone asked about apes and wiping. Strangers answered with evolutionary biology, fiber intake, squat angles, the mechanics of gluteal cleft depth. No one flinched. No one made it smaller than it was.</p>
+<p class="essay-para">This is where belonging lives — in the willingness to take a ridiculous question and meet it with your whole mind.</p>
+<p class="essay-para"><em>Uña</em> — Quechua, to know through experience, to recognize by having been there. The knowing that only comes from having a body. <em>Takhalluṣ</em> — Arabic, to free oneself, to come through something, the name a poet takes after shedding the given one. <em>Khluk</em> — a Slavic root buried in the word for belonging, for what fits into a place because the place was always shaped for it.</p>
+<p class="essay-para">The Quechua opens the mouth into that nasal <em>ñ</em>, tongue pressed to palate like a secret you're about to say anyway. Then the Arabic <em>takh-</em> breaks it forward, aspirated, a small door blown open. And <em>khluk</em> closes it — guttural, warm, the sound of swallowing something you didn't know you were holding.</p>
+<p class="essay-para">Glamorous belonging has a dress code. You've seen it — the curated vulnerability, the photogenic grief, the confession that flatters the confessor. It requires lighting.</p>
+<p class="essay-para">Unglamorous belonging requires nothing. It happens in fluorescent. It happens when you admit you've been wondering about this for years and someone says <em>actually, the colon reabsorbs most of the moisture before —</em> and you're leaning in, genuinely leaning in, and so are forty strangers, and nobody is performing interest because there is nothing to perform. The question is too stupid to be strategic. Too human to be embarrassing.</p>
+<p class="essay-para">That's the revelation. You don't earn your place among people by being impressive. You earn it by being willing to be the one who asks. And they earn theirs by answering as though the question matters. Which it does. All questions about the body matter. The body is the whole situation.</p>
+<p class="essay-para"><em>Uñtakhluk.</em> Three syllables for the moment you realize the room you belong in has no aesthetic. The light is bad. The topic is worse. Everyone is here anyway.</p>
+<p class="essay-para">The poet sheds the given name. The knower sheds the need to have known already. What remains is the actual texture of being a creature among creatures — unglamorous, specific, shared.</p>
+<p class="essay-para">Somewhere tonight someone is going to search "do apes wipe" and find forty people who took it seriously and they are going to feel something they can't name.</p>
+<p class="essay-para">Now they can.</p>
+  </div>
+
+  <div class="footnotes" id="footnotes">
+<div class="fn-block">
+  <p class="fn-reasoning">gravity of shared indignity</p>
+  <p class="fn-label">weight &middot; proprioception</p>
+</div>
+<div class="fn-block">
+  <p class="fn-reasoning">exposed and laughing anyway</p>
+  <p class="fn-label">tension &middot; humor</p>
+</div>
+<div class="fn-block">
+  <p class="fn-reasoning">low to the ground</p>
+  <p class="fn-label">reach &middot; mortality / finitude</p>
+</div>
+<div class="fn-block">
+  <p class="fn-reasoning">unglamorous means unglamorous</p>
+  <p class="fn-label">vibrancy &middot; authenticity</p>
+</div>
+  </div>
+
+  <div class="colophon" id="colophon">
+    <p class="date-forged">2026-04-16</p>
   </div>
 
 </div>
+<style>
+  .tone-btn {
+    position: fixed;
+    top: 1.65rem;
+    left: 1.5rem;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--text-color);
+    opacity: 0.1;
+    background: transparent;
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s;
+    color: var(--text-color);
+  }
+  .tone-btn:hover { opacity: 0.35; }
+  .tone-btn.playing { opacity: 0.4; }
+  .tone-btn.failed { display: none; }
+  .tone-btn svg { width: 10px; height: 10px; fill: currentColor; }
+</style>
+<button class="tone-btn" id="toneBtn" title="Play invocation tone">
+  <svg id="toneBtnIcon" viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg>
+</button>
 
 <script>
-// ── Three title compositions ─────────────────────────────
-// Each has its own colors and typography params.
-// Randomly selected on page load.
-var TITLE_CONFIGS = [
-  {
-    letter: "hsl(45, 78%, 42%)", bg: "hsl(155, 72%, 88%)",
-    params: { weight: 0.62, reach: 0.45, expanse: 0.78, tension: 0.55, fillDir: 'east', floodRain: 'rain', debug: false }
-  },
-  {
-    letter: "hsl(5, 72%, 28%)", bg: "hsl(48, 68%, 86%)",
-    params: { weight: 0.3, reach: 0.69, expanse: 0.62, tension: 0.92, fillDir: 'west', floodRain: 'flood', debug: false }
-  },
-  {
-    letter: "hsl(42, 72%, 88%)", bg: "hsl(225, 68%, 11%)",
-    params: { weight: 0.52, reach: 0.66, expanse: 0.68, tension: 0.15, fillDir: 'east', floodRain: 'rain', debug: false }
-  }
-];
-
-var config = TITLE_CONFIGS[Math.floor(Math.random() * TITLE_CONFIGS.length)];
-var TENDRELA_LETTER_COLOR = config.letter;
-var TENDRELA_BG_COLOR = config.bg;
-
-// Set page colors
-document.documentElement.style.setProperty('--letter-color', config.letter);
-document.documentElement.style.setProperty('--bg-color', config.bg);
-
-// ── Drawing functions ────────────────────────────────────
+const TENDRELA_LETTER_COLOR = "hsl(45, 35%, 22%)";
+const TENDRELA_BG_COLOR = "hsl(55, 62%, 88%)";
 
 
 const K = 0.5523;
@@ -3418,76 +3518,729 @@ function drawOhorn(p) {
 // ============================================================
 
 
+function renderWord() {
+  const p = {
+    weight: 0.95, reach: 0.36, expanse: 0.58, tension: 0.82,
+    fillDir: 'west', floodRain: 'rain', debug: false
+  };
 
+  const fnMap = { drawP, drawA, drawO, drawB, drawD, drawQ, drawG, drawV, drawW, drawN, drawU, drawM, drawH, drawC, drawE, drawEacute, drawEgrave, drawI, drawL, drawJ, drawT, drawF, drawR, drawS, drawX, drawK, drawY, drawZ, drawOe, drawUmacron, drawAmacron, drawImacron, drawOmacron, drawUumlaut, drawNtilde, drawAgrave, drawIacute, drawIgrave, drawUhorn, drawOhorn };
+  const wordChars = [{"id": "svg_0_u", "fn": "drawU"}, {"id": "svg_1_\u00f1", "fn": "drawNtilde"}, {"id": "svg_2_t", "fn": "drawT"}, {"id": "svg_3_a", "fn": "drawA"}, {"id": "svg_4_k", "fn": "drawK"}, {"id": "svg_5_h", "fn": "drawH"}, {"id": "svg_6_l", "fn": "drawL"}, {"id": "svg_7_u", "fn": "drawU"}, {"id": "svg_8_k", "fn": "drawK"}];
 
-// ── Render title ─────────────────────────────────────────
-function renderTitle() {
-  var p = config.params;
-  var fnMap = { drawP: drawP, drawA: drawA, drawO: drawO, drawB: drawB, drawD: drawD, drawQ: drawQ, drawG: drawG, drawV: drawV, drawW: drawW, drawN: drawN, drawU: drawU, drawM: drawM, drawH: drawH, drawC: drawC, drawE: drawE, drawEacute: drawEacute, drawEgrave: drawEgrave, drawI: drawI, drawL: drawL, drawJ: drawJ, drawT: drawT, drawF: drawF, drawR: drawR, drawS: drawS, drawX: drawX, drawK: drawK, drawY: drawY, drawZ: drawZ, drawOe: drawOe, drawUmacron: drawUmacron, drawAmacron: drawAmacron, drawImacron: drawImacron, drawOmacron: drawOmacron, drawUumlaut: drawUumlaut, drawNtilde: drawNtilde, drawAgrave: drawAgrave, drawIacute: drawIacute, drawIgrave: drawIgrave, drawUhorn: drawUhorn, drawOhorn: drawOhorn };
-  var wordChars = [
-    {"id": "svg_0_t", "fn": "drawT"}, {"id": "svg_1_h", "fn": "drawH"},
-    {"id": "svg_2_e", "fn": "drawE"}, {"id": "svg_3_l", "fn": "drawL"},
-    {"id": "svg_4_i", "fn": "drawI"}, {"id": "svg_5_m", "fn": "drawM"},
-    {"id": "svg_6_i", "fn": "drawI"}, {"id": "svg_7_n", "fn": "drawN"},
-    {"id": "svg_8_a", "fn": "drawA"}, {"id": "svg_9_l", "fn": "drawL"},
-    {"id": "svg_10_l", "fn": "drawL"}, {"id": "svg_11_e", "fn": "drawE"},
-    {"id": "svg_12_x", "fn": "drawX"}, {"id": "svg_13_i", "fn": "drawI"},
-    {"id": "svg_14_c", "fn": "drawC"}, {"id": "svg_15_o", "fn": "drawO"},
-    {"id": "svg_16_n", "fn": "drawN"}
-  ];
+  const fullTop = -10;
+  const fullBot = 270;
+  const fullHeight = fullBot - fullTop;
+  const displayFullHeight = 260;
+  const scale = displayFullHeight / fullHeight;
+  let totalDisplayWidth = 0;
 
-  var fullTop = -10;
-  var fullBot = 270;
-  var fullHeight = fullBot - fullTop;
-  var displayFullHeight = 260;
-  var scale = displayFullHeight / fullHeight;
-
-  wordChars.forEach(function(item) {
-    var svg = document.getElementById(item.id);
-    var fn = fnMap[item.fn];
+  wordChars.forEach((item, idx) => {
+    const svg = document.getElementById(item.id);
+    const fn = fnMap[item.fn];
     svg.setAttribute('viewBox', '-10 -20 280 310');
     svg.setAttribute('width', '280');
     svg.setAttribute('height', '310');
-    var raw = fn(p);
-    var bgEsc = TENDRELA_BG_COLOR.replace(/[()%,]/g, '\\$&');
+    let raw = fn(p);
+    const bgEsc = TENDRELA_BG_COLOR.replace(/[()%,]/g, '\\$&');
     raw = raw.replace(new RegExp('<rect[^>]*fill="' + bgEsc + '"[^/]*/>', 'g'), '');
     svg.innerHTML = raw;
-    var bbox = svg.getBBox();
-    var padX = 3;
-    var vbX = bbox.x - padX;
-    var vbW = bbox.width + padX * 2;
-    svg.setAttribute('viewBox', vbX + ' ' + fullTop + ' ' + vbW + ' ' + fullHeight);
-    var displayW = vbW * scale;
+    const bbox = svg.getBBox();
+    const padX = 3;
+    const vbX = bbox.x - padX;
+    const vbW = bbox.width + padX * 2;
+    svg.setAttribute('viewBox', `${vbX} ${fullTop} ${vbW} ${fullHeight}`);
+    const displayW = vbW * scale;
     svg.setAttribute('width', displayW);
     svg.setAttribute('height', displayFullHeight);
+    totalDisplayWidth += displayW;
+    const letter = item.fn.replace('draw', '').toLowerCase();
+    if (letter === 'q') {
+      svg.style.marginLeft = (-displayW * 0.25) + 'px';
+      svg.style.marginRight = (-displayW * 0.25) + 'px';
+      totalDisplayWidth -= displayW * 0.5;
+    }
   });
+  document.documentElement.style.setProperty('--word-width', Math.round(totalDisplayWidth) + 'px');
 }
 
-try { renderTitle(); } catch(e) { console.error('Title render error:', e); }
-
-// Scale title down on narrow screens
-function scaleTitle() {
-  var row = document.getElementById('lettersRow');
-  var block = row.parentElement;
-  var blockWidth = block.clientWidth - 40; // padding
-  row.style.transform = 'scale(1)';
-  var rowWidth = row.scrollWidth;
-  if (rowWidth > blockWidth) {
-    var scale = blockWidth / rowWidth;
-    row.style.transform = 'scale(' + scale + ')';
+function runRitual() {
+  try { renderWord(); } catch(e) {
+    document.body.innerHTML = '<pre style="color:red;padding:2rem">' + e.message + '\n' + e.stack + '</pre>';
+    return;
   }
-}
-scaleTitle();
-window.addEventListener('resize', scaleTitle);
 
-// ── Random alt routing ───────────────────────────────────
-document.querySelectorAll('.lex-entry').forEach(function(entry) {
-  entry.addEventListener('click', function() {
-    var versions = entry.getAttribute('data-versions').split(',');
-    var pick = versions[Math.floor(Math.random() * versions.length)];
-    window.location.href = 'words/' + pick.trim();
+  const threshold = document.getElementById('threshold');
+  const essay = document.getElementById('essay');
+  const footnotes = document.getElementById('footnotes');
+  const colophon = document.getElementById('colophon');
+
+  let ritualStarted = false;
+
+  function beginReveal() {
+    if (ritualStarted) return;
+    ritualStarted = true;
+    threshold.classList.add('dismissed');
+    document.body.classList.add('ritual-started');
+    // Play invocation tone — we're inside a click handler so browser allows it
+    if (window._tendrelaPlayTone) { try { window._tendrelaPlayTone(); } catch(e) {} }
+    setTimeout(() => {
+      if (essay) essay.classList.add('visible');
+      if (footnotes) footnotes.classList.add('visible');
+      if (colophon) colophon.classList.add('visible');
+    }, 1200);
+  }
+
+  threshold.addEventListener('click', beginReveal);
+  threshold.addEventListener('touchstart', beginReveal);
+}
+
+runRitual();
+</script>
+
+<script>
+// ── Invocation Tone (static embed from tones table) ──
+(function() {
+  const TONE_DATA = {"component_data": {"bodies": {"sun": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 24.7538}, "mars": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 3.7271}, "moon": {"sign": "Pisces", "element": "water", "modality": "mutable", "ecliptic_longitude": 352.559}, "pluto": {"sign": "Aquarius", "element": "air", "modality": "fixed", "ecliptic_longitude": 305.0337}, "venus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "ecliptic_longitude": 48.5496}, "saturn": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 6.916}, "uranus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "ecliptic_longitude": 59.0599}, "jupiter": {"sign": "Cancer", "element": "water", "modality": "cardinal", "ecliptic_longitude": 106.604}, "mercury": {"sign": "Pisces", "element": "water", "modality": "mutable", "ecliptic_longitude": 359.549}, "neptune": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 2.3575}}, "aspects": [{"orb": 0.4891, "type": "sextile", "body_a": "mercury", "body_b": "uranus", "orb_tightness": 0.8777}, {"orb": 1.3696, "type": "conjunction", "body_a": "mars", "body_b": "neptune", "orb_tightness": 0.8288}, {"orb": 1.3066, "type": "sextile", "body_a": "mars", "body_b": "pluto", "orb_tightness": 0.6733}, {"orb": 2.8085, "type": "conjunction", "body_a": "mercury", "body_b": "neptune", "orb_tightness": 0.6489}, {"orb": 3.1889, "type": "conjunction", "body_a": "mars", "body_b": "saturn", "orb_tightness": 0.6014}, {"orb": 1.8823, "type": "sextile", "body_a": "saturn", "body_b": "pluto", "orb_tightness": 0.5294}, {"orb": 1.9456, "type": "sextile", "body_a": "venus", "body_b": "jupiter", "orb_tightness": 0.5136}, {"orb": 4.1781, "type": "conjunction", "body_a": "mercury", "body_b": "mars", "orb_tightness": 0.4777}, {"orb": 4.5585, "type": "conjunction", "body_a": "saturn", "body_b": "neptune", "orb_tightness": 0.4302}, {"orb": 2.6762, "type": "sextile", "body_a": "neptune", "body_b": "pluto", "orb_tightness": 0.331}, {"orb": 3.2976, "type": "sextile", "body_a": "uranus", "body_b": "neptune", "orb_tightness": 0.1756}, {"orb": 6.99, "type": "conjunction", "body_a": "moon", "body_b": "mercury", "orb_tightness": 0.1263}], "timestamp": "2026-04-15T01:52:05.062620+00:00", "lunar_phase": 0.9106, "aspect_density": 6.3049, "lunar_phase_name": "Waning Crescent"}, "celestial_snapshot": {"bodies": {"sun": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 24.7538, "ecliptic_longitude": 24.7538}, "mars": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 3.7271, "ecliptic_longitude": 3.7271}, "moon": {"sign": "Pisces", "element": "water", "modality": "mutable", "is_retrograde": false, "degree_in_sign": 22.559, "ecliptic_longitude": 352.559}, "pluto": {"sign": "Aquarius", "element": "air", "modality": "fixed", "is_retrograde": false, "degree_in_sign": 5.0337, "ecliptic_longitude": 305.0337}, "venus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "is_retrograde": false, "degree_in_sign": 18.5496, "ecliptic_longitude": 48.5496}, "saturn": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 6.916, "ecliptic_longitude": 6.916}, "uranus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "is_retrograde": false, "degree_in_sign": 29.0599, "ecliptic_longitude": 59.0599}, "jupiter": {"sign": "Cancer", "element": "water", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 16.604, "ecliptic_longitude": 106.604}, "mercury": {"sign": "Pisces", "element": "water", "modality": "mutable", "is_retrograde": false, "degree_in_sign": 29.549, "ecliptic_longitude": 359.549}, "neptune": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 2.3575, "ecliptic_longitude": 2.3575}}, "aspects": [{"orb": 0.4891, "type": "sextile", "body_a": "mercury", "body_b": "uranus", "exact_angle": 60, "actual_angle": 59.5109, "orb_tightness": 0.8777}, {"orb": 1.3696, "type": "conjunction", "body_a": "mars", "body_b": "neptune", "exact_angle": 0, "actual_angle": 1.3696, "orb_tightness": 0.8288}, {"orb": 1.3066, "type": "sextile", "body_a": "mars", "body_b": "pluto", "exact_angle": 60, "actual_angle": 58.6934, "orb_tightness": 0.6733}, {"orb": 2.8085, "type": "conjunction", "body_a": "mercury", "body_b": "neptune", "exact_angle": 0, "actual_angle": 2.8085, "orb_tightness": 0.6489}, {"orb": 3.1889, "type": "conjunction", "body_a": "mars", "body_b": "saturn", "exact_angle": 0, "actual_angle": 3.1889, "orb_tightness": 0.6014}, {"orb": 1.8823, "type": "sextile", "body_a": "saturn", "body_b": "pluto", "exact_angle": 60, "actual_angle": 61.8823, "orb_tightness": 0.5294}, {"orb": 1.9456, "type": "sextile", "body_a": "venus", "body_b": "jupiter", "exact_angle": 60, "actual_angle": 58.0544, "orb_tightness": 0.5136}, {"orb": 4.1781, "type": "conjunction", "body_a": "mercury", "body_b": "mars", "exact_angle": 0, "actual_angle": 4.1781, "orb_tightness": 0.4777}, {"orb": 4.5585, "type": "conjunction", "body_a": "saturn", "body_b": "neptune", "exact_angle": 0, "actual_angle": 4.5585, "orb_tightness": 0.4302}, {"orb": 2.6762, "type": "sextile", "body_a": "neptune", "body_b": "pluto", "exact_angle": 60, "actual_angle": 57.3238, "orb_tightness": 0.331}, {"orb": 3.2976, "type": "sextile", "body_a": "uranus", "body_b": "neptune", "exact_angle": 60, "actual_angle": 56.7024, "orb_tightness": 0.1756}, {"orb": 6.99, "type": "conjunction", "body_a": "moon", "body_b": "mercury", "exact_angle": 0, "actual_angle": 6.99, "orb_tightness": 0.1263}, {"orb": 7.367, "type": "conjunction", "body_a": "mercury", "body_b": "saturn", "exact_angle": 0, "actual_angle": 7.367, "orb_tightness": 0.0791}, {"orb": 5.955, "type": "trine", "body_a": "moon", "body_b": "jupiter", "exact_angle": 120, "actual_angle": 114.045, "orb_tightness": 0.0075}, {"orb": 5.9738, "type": "trine", "body_a": "uranus", "body_b": "pluto", "exact_angle": 120, "actual_angle": 114.0262, "orb_tightness": 0.0044}], "location": null, "timestamp": "2026-04-15T01:52:05.062620+00:00", "lunar_nodes": {"north_node_sign": "Pisces", "south_node_sign": "Virgo", "north_node_longitude": 336.6579, "south_node_longitude": 156.6579}, "lunar_phase": 0.9106, "random_seed": 3129902457, "aspect_count": 15, "aspect_density": 6.3049, "lunar_phase_name": "Waning Crescent", "eclipse_proximity": {"sun_node_distance": 48.1, "moon_node_distance": 15.9, "lunar_eclipse_factor": 0, "solar_eclipse_factor": 0}}};
+  const cd = TONE_DATA.celestial_snapshot || TONE_DATA;
+  let toneLoaded = false, tonePlaying = false, toneCleanup = [];
+  const btn = document.getElementById('toneBtn');
+  const icon = document.getElementById('toneBtnIcon');
+  if (!btn) return;
+
+  function stopTone() {
+    for (const fn of toneCleanup) { try { fn(); } catch(e) {} }
+    toneCleanup = [];
+    tonePlaying = false;
+    btn.classList.remove('playing');
+    icon.innerHTML = '<polygon points="6,3 20,12 6,21"/>';
+  }
+
+  function reg(item) {
+    if (typeof item === 'number') toneCleanup.push(() => { clearTimeout(item); clearInterval(item); });
+    else if (item?.dispose) toneCleanup.push(() => { try{item.stop?.()}catch(e){} try{item.dispose()}catch(e){} });
+  }
+
+  async function loadToneJS() {
+    if (toneLoaded) return true;
+    const cdns = [
+      'https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js',
+      'https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js'
+    ];
+    for (const url of cdns) {
+      try {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = url;
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+        toneLoaded = true;
+        return true;
+      } catch(e) { continue; }
+    }
+    // All CDNs failed
+    btn.classList.add('failed');
+    return false;
+  }
+
+  // Preload Tone.js immediately so it's ready when user clicks threshold
+  loadToneJS();
+
+  async function playTone() {
+    if (tonePlaying) { stopTone(); return; }
+    if (!toneLoaded) { if (!await loadToneJS()) return; }
+
+    await Tone.start();
+    tonePlaying = true;
+    btn.classList.add('playing');
+    icon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+
+    const MIN_FREQ = 220, MAX_FREQ = 3520;
+    function lonToFreq(lon) { return MIN_FREQ * Math.pow(MAX_FREQ / MIN_FREQ, lon / 360); }
+    function lonToPan(lon) { return Math.sin((lon / 180) * Math.PI) * 0.7; }
+    function computeProminence(key) {
+      let p = key === "moon" ? 0.30 : 0.15;
+      for (const a of cd.aspects) { if (a.body_a === key || a.body_b === key) p += a.orb_tightness * 0.2; }
+      return Math.min(1.0, p);
+    }
+
+    const LUNAR_AMP = 0.35 + 0.65 * Math.sin(cd.lunar_phase * Math.PI);
+    const LEAD_IN = 0.3;
+    const DUR = 7 + LUNAR_AMP * 4;
+    const I_END = 0.10, L_END = 0.65;
+    const stepMs = 50;
+    const OUTER_FIRST = ["pluto","neptune","uranus","saturn","jupiter","mars","venus","mercury","sun","moon"];
+    const gMap = { fire: 0.18, water: 0.22, earth: 0.14, air: 0.20 };
+    const startTime = Date.now();
+
+    const master = new Tone.Gain(0.55).toDestination(); reg(master);
+    const limiter = new Tone.Limiter(-2).connect(master); reg(limiter);
+    const mainGainNode = new Tone.Gain(0).connect(limiter); reg(mainGainNode);
+
+    // ── LAYER 0: ILO SHAPE ENVELOPE ──
+    let elapsed = 0;
+    const iloShape = setInterval(() => {
+      try {
+        elapsed += stepMs / 1000;
+        const p = elapsed / DUR;
+        let amplitude;
+        if (p < I_END) {
+          const iSeconds = elapsed;
+          if (iSeconds < LEAD_IN) { amplitude = Math.pow(iSeconds / LEAD_IN, 2.0) * 0.5; }
+          else { amplitude = 0.5 + ((iSeconds - LEAD_IN) / (I_END * DUR - LEAD_IN)) * 0.6; }
+        } else if (p < L_END) {
+          const lProgress = (p - I_END) / (L_END - I_END);
+          amplitude = 1.1 - lProgress * 0.6;
+        } else if (p <= 1.0) {
+          const oProgress = (p - L_END) / (1.0 - L_END);
+          const roll = Math.sin(oProgress * Math.PI * 2.5) * 0.04 * (1 - oProgress);
+          amplitude = 0.5 * Math.pow(1 - oProgress, 1.2) + roll;
+        } else { amplitude = 0; }
+        mainGainNode.gain.linearRampToValueAtTime(Math.max(0, amplitude * LUNAR_AMP), Tone.now() + stepMs / 1000);
+      } catch(e) { clearInterval(iloShape); }
+    }, stepMs);
+    reg(iloShape);
+
+    // ── REVERB CROSSFADE ──
+    const tightVerb = new Tone.Reverb({ decay: 2, wet: 0.2 }); tightVerb.connect(mainGainNode); reg(tightVerb);
+    const wideVerb = new Tone.Reverb({ decay: 7, wet: 0.45 }); wideVerb.connect(mainGainNode); reg(wideVerb);
+    const tightBus = new Tone.Gain(1.0).connect(tightVerb); reg(tightBus);
+    const wideBus = new Tone.Gain(0.0).connect(wideVerb); reg(wideBus);
+
+    let verbEl = 0;
+    const verbXfade = setInterval(() => {
+      try {
+        verbEl += stepMs / 1000; const p = verbEl / DUR;
+        let tA, wA;
+        if (p < I_END) { tA = 1.0; wA = 0.0; }
+        else if (p < L_END) { const lp = (p - I_END) / (L_END - I_END); tA = 1.0 - lp * 0.8; wA = lp * 0.8; }
+        else { tA = 0.2; wA = 0.8; }
+        tightBus.gain.linearRampToValueAtTime(tA, Tone.now() + stepMs / 1000);
+        wideBus.gain.linearRampToValueAtTime(wA, Tone.now() + stepMs / 1000);
+      } catch(e) { clearInterval(verbXfade); }
+    }, stepMs);
+    reg(verbXfade);
+
+    // ── LAYER 1: VOICES (10 planets × 3 oscillators = 30) ──
+    const voiceSynths = [];
+    for (let oi = 0; oi < OUTER_FIRST.length; oi++) {
+      const key = OUTER_FIRST[oi];
+      const body = cd.bodies[key];
+      const freq = lonToFreq(body.ecliptic_longitude);
+      const prom = computeProminence(key);
+      const v = prom * (gMap[body.element] || 0.15);
+      const panner = new Tone.Panner(lonToPan(body.ecliptic_longitude));
+      panner.connect(tightBus); panner.connect(wideBus); reg(panner);
+
+      let synth;
+      switch(body.element) {
+        case "fire": synth = new Tone.FMSynth({ harmonicity:3.5, modulationIndex:14, oscillator:{type:"sine"}, modulation:{type:"sine"}, envelope:{attack:0.5,decay:2,sustain:0.7,release:3}, modulationEnvelope:{attack:0.4,decay:2,sustain:0.6,release:3} }); break;
+        case "water": synth = new Tone.AMSynth({ harmonicity:1.5, oscillator:{type:"sine"}, modulation:{type:"sine"}, envelope:{attack:0.6,decay:2,sustain:0.7,release:4}, modulationEnvelope:{attack:0.9,decay:2,sustain:0.5,release:3} }); break;
+        case "earth": synth = new Tone.Synth({ oscillator:{type:"sine"}, envelope:{attack:0.7,decay:2,sustain:0.8,release:4} }); break;
+        case "air": synth = new Tone.AMSynth({ harmonicity:5.5, oscillator:{type:"sine"}, modulation:{type:"sine"}, envelope:{attack:0.5,decay:1.5,sustain:0.6,release:3.5}, modulationEnvelope:{attack:0.5,decay:1,sustain:0.3,release:3} }); break;
+        default: synth = new Tone.Synth({ oscillator:{type:"sine"}, envelope:{attack:0.5,decay:2,sustain:0.7,release:3} });
+      }
+
+      const mainG = new Tone.Gain(v).connect(panner); synth.connect(mainG);
+      const startDetune = (Math.random()-0.5) * 24;
+      synth.detune.value = startDetune;
+      reg(synth); reg(mainG);
+
+      const octSynth = new Tone.Synth({ oscillator:{type:"sine"}, envelope:{attack:0.5,decay:2,sustain:0.5,release:3} });
+      const octG = new Tone.Gain(v * 0.3).connect(panner); octSynth.connect(octG);
+      const octStartDetune = (Math.random()-0.5) * 30;
+      octSynth.detune.value = octStartDetune;
+      reg(octSynth); reg(octG);
+
+      const fifthSynth = new Tone.Synth({ oscillator:{type:"sine"}, envelope:{attack:0.6,decay:2,sustain:0.4,release:3} });
+      const fifthG = new Tone.Gain(v * 0.2).connect(panner); fifthSynth.connect(fifthG);
+      const fifthStartDetune = (Math.random()-0.5) * 28;
+      fifthSynth.detune.value = fifthStartDetune;
+      reg(fifthSynth); reg(fifthG);
+
+      reg(setTimeout(() => { try { synth.triggerAttack(freq); octSynth.triggerAttack(freq * 2); fifthSynth.triggerAttack(freq * 1.498); } catch(e) {} }, oi * 30));
+      voiceSynths.push({ key, synth, octSynth, fifthSynth, mainG, octG, fifthG, prom, isInner: oi >= 5 });
+
+      // Effort releasing: detuning narrows over /l/ phase
+      const driftInterval = setInterval(() => {
+        try {
+          const p = (Date.now() - startTime) / 1000 / DUR;
+          if (p < I_END) {
+            synth.detune.value = startDetune + (Math.random()-0.5) * 8;
+          } else if (p < L_END) {
+            const lp = (p - I_END) / (L_END - I_END);
+            const narrow = 1 - lp * 0.85;
+            synth.detune.value = startDetune * narrow + (Math.random()-0.5) * 2;
+            octSynth.detune.value = octStartDetune * narrow + (Math.random()-0.5) * 2;
+            fifthSynth.detune.value = fifthStartDetune * narrow + (Math.random()-0.5) * 2;
+          } else {
+            synth.detune.value = (Math.random()-0.5) * 3;
+            octSynth.detune.value = (Math.random()-0.5) * 3;
+            fifthSynth.detune.value = (Math.random()-0.5) * 3;
+          }
+        } catch(e) { clearInterval(driftInterval); }
+      }, 200);
+      reg(driftInterval);
+    }
+
+    // Inner planet thinning in /o/
+    const innerOrder = voiceSynths.filter(v => v.isInner).sort((a, b) => {
+      if (a.key === "moon") return -1; if (b.key === "moon") return 1;
+      if (a.key === "sun") return -1; if (b.key === "sun") return 1;
+      return a.prom - b.prom;
+    });
+    for (let i = 0; i < innerOrder.length; i++) {
+      const vo = innerOrder[i];
+      const releaseTime = DUR * L_END + (DUR * (1.0 - L_END)) * (i / innerOrder.length) * 0.7;
+      reg(setTimeout(() => {
+        try {
+          vo.mainG.gain.linearRampToValueAtTime(0, Tone.now() + 1.5);
+          vo.octG.gain.linearRampToValueAtTime(0, Tone.now() + 1.0);
+          vo.fifthG.gain.linearRampToValueAtTime(0, Tone.now() + 1.2);
+          setTimeout(() => { try { vo.synth.triggerRelease(); vo.octSynth.triggerRelease(); vo.fifthSynth.triggerRelease(); } catch(e) {} }, 1500);
+        } catch(e) {}
+      }, releaseTime * 1000));
+    }
+
+    for (const vo of voiceSynths.filter(v => !v.isInner)) {
+      reg(setTimeout(() => { try { vo.synth.triggerRelease(); vo.octSynth.triggerRelease(); vo.fifthSynth.triggerRelease(); } catch(e) {} }, (DUR + 2) * 1000));
+    }
+
+    // ── LAYER 2: SUB-BASS ──
+    const tightestConj = cd.aspects.find(a => a.type === "conjunction");
+    if (tightestConj) {
+      const subFreq = (lonToFreq(cd.bodies[tightestConj.body_a].ecliptic_longitude) + lonToFreq(cd.bodies[tightestConj.body_b].ecliptic_longitude)) / 4;
+      const sub = new Tone.Synth({ oscillator:{type:"sine"}, envelope:{attack:0.3,decay:2,sustain:0.8,release:4} });
+      const subGain = new Tone.Gain(0.25).connect(mainGainNode); sub.connect(subGain); reg(sub); reg(subGain);
+      reg(setTimeout(() => { try { sub.triggerAttack(subFreq); } catch(e) {} }, 50));
+      reg(setTimeout(() => { try { sub.triggerRelease(); } catch(e) {} }, (DUR * L_END + DUR * 0.15) * 1000));
+
+      const subNoise = new Tone.Noise({ type:"brown", volume:-8 });
+      const subNF = new Tone.Filter({ frequency: subFreq * 2, type:"lowpass", Q:1, rolloff:-24 });
+      const subNG = new Tone.Gain(0.08).connect(mainGainNode);
+      subNoise.connect(subNF); subNF.connect(subNG); reg(subNoise); reg(subNF); reg(subNG);
+      reg(setTimeout(() => { try { subNoise.start(); } catch(e) {} }, 50));
+      reg(setTimeout(() => { try { subNoise.stop(); } catch(e) {} }, (DUR * L_END + DUR * 0.2) * 1000));
+    }
+
+    // ── LAYER 3: SHIMMER ──
+    const shimNoise = new Tone.Noise({ type:"white", volume:-10 });
+    const shimF = new Tone.Filter({ frequency:2500, type:"highpass", Q:0.3 });
+    const shimG = new Tone.Gain(0); shimG.connect(tightBus); shimG.connect(wideBus);
+    shimNoise.connect(shimF); shimF.connect(shimG); reg(shimNoise); reg(shimF); reg(shimG);
+    reg(setTimeout(() => { try { shimNoise.start(); } catch(e) {} }, 50));
+    let shimEl = 0;
+    const shimShape = setInterval(() => {
+      try {
+        shimEl += stepMs / 1000; const p = shimEl / DUR;
+        let a;
+        if (p < I_END) { a = Math.pow(p / I_END, 0.5) * 0.12; }
+        else if (p < L_END) { const lp = (p - I_END) / (L_END - I_END); a = 0.12 * Math.pow(1 - lp, 1.5); }
+        else { a = 0; }
+        shimG.gain.linearRampToValueAtTime(a, Tone.now()+stepMs/1000);
+      } catch(e) { clearInterval(shimShape); }
+    }, stepMs);
+    reg(shimShape);
+    reg(setTimeout(() => { try { shimNoise.stop(); } catch(e) {} }, (DUR * L_END + 1) * 1000));
+
+    // ── LAYER 4: THE SHAKE (/i/ only) ──
+    const shakeLFO = new Tone.LFO({ frequency:5, min:-5, max:5, type:"sine" });
+    reg(shakeLFO); shakeLFO.start();
+    let shakeEl = 0;
+    const shakeEnv = setInterval(() => {
+      try {
+        shakeEl += stepMs/1000; const p = shakeEl/DUR;
+        let s;
+        if (p < I_END) { s = 8; }
+        else if (p < I_END + 0.10) { const tp = (p - I_END) / 0.10; s = 8 * (1 - tp); }
+        else { s = 0; }
+        shakeLFO.min = -s; shakeLFO.max = s;
+        shakeLFO.frequency.value = 4 + s * 0.5;
+      } catch(e) { clearInterval(shakeEnv); }
+    }, stepMs);
+    reg(shakeEnv);
+
+    // ── LAYER 5: VOCAL FORMANTS ──
+    const vowelN = new Tone.Noise({ type:"pink", volume:-6 }); reg(vowelN);
+    const f1 = new Tone.Filter({ frequency:750, type:"bandpass", Q:12 });
+    const f2 = new Tone.Filter({ frequency:1200, type:"bandpass", Q:9 });
+    const f3 = new Tone.Filter({ frequency:2600, type:"bandpass", Q:7 });
+    const vowelMix = new Tone.Gain(0);
+    vowelMix.connect(tightBus); vowelMix.connect(wideBus);
+    const f1g = new Tone.Gain(0.6).connect(vowelMix);
+    const f2g = new Tone.Gain(0.4).connect(vowelMix);
+    const f3g = new Tone.Gain(0.2).connect(vowelMix);
+    vowelN.connect(f1); f1.connect(f1g);
+    vowelN.connect(f2); f2.connect(f2g);
+    vowelN.connect(f3); f3.connect(f3g);
+    reg(f1);reg(f2);reg(f3);reg(vowelMix);reg(f1g);reg(f2g);reg(f3g);
+    reg(setTimeout(() => { try { vowelN.start(); } catch(e) {} }, 50));
+
+    let vowelEl = 0;
+    const vowelShape = setInterval(() => {
+      try {
+        vowelEl += stepMs/1000; const p = vowelEl/DUR;
+        let a;
+        if (p < I_END) {
+          a = Math.pow(p / I_END, 0.5) * 0.08;
+          f1.Q.value = 12; f2.Q.value = 9; f3.Q.value = 7;
+        } else if (p < L_END) {
+          const lp = (p - I_END) / (L_END - I_END);
+          a = 0.08 + lp * 0.04;
+          f1.Q.value = 12 - lp * 5;
+          f2.Q.value = 9 - lp * 4;
+          f3.Q.value = 7 - lp * 3;
+          const shift = lp * 80;
+          f1.frequency.linearRampToValueAtTime(750 - shift, Tone.now()+stepMs/1000);
+          f2.frequency.linearRampToValueAtTime(1200 - shift * 0.5, Tone.now()+stepMs/1000);
+        } else {
+          const op = (p - L_END) / (1.0 - L_END);
+          a = 0.12 * Math.pow(1 - op, 1.5);
+        }
+        vowelMix.gain.linearRampToValueAtTime(a, Tone.now()+stepMs/1000);
+      } catch(e) { clearInterval(vowelShape); }
+    }, stepMs);
+    reg(vowelShape);
+    reg(setTimeout(() => { try { vowelN.stop(); } catch(e) {} }, (DUR + 2) * 1000));
+
+    // ── LAYER 6: ASPECT ACCENTS ──
+    for (const aspect of cd.aspects) {
+      if (aspect.orb_tightness < 0.5) continue;
+      const freqA = lonToFreq(cd.bodies[aspect.body_a].ecliptic_longitude);
+      const freqB = lonToFreq(cd.bodies[aspect.body_b].ecliptic_longitude);
+      const avgFreq = (freqA + freqB) / 2;
+      const pan = (lonToPan(cd.bodies[aspect.body_a].ecliptic_longitude) + lonToPan(cd.bodies[aspect.body_b].ecliptic_longitude)) / 2;
+      const accentTime = DUR * (I_END * 0.3 + aspect.orb_tightness * (L_END * 0.4));
+
+      const ap = new Tone.Panner(pan);
+      ap.connect(tightBus); ap.connect(wideBus); reg(ap);
+      const ag = new Tone.Gain(0.10 * aspect.orb_tightness).connect(ap); reg(ag);
+
+      const ring = new Tone.FMSynth({
+        harmonicity: 2 + aspect.orb_tightness * 3,
+        modulationIndex: 4 + aspect.orb_tightness * 8,
+        oscillator: { type: "sine" }, modulation: { type: "sine" },
+        envelope: { attack: 0.04, decay: 3 + aspect.orb_tightness * 3, sustain: 0.12, release: 3 },
+        modulationEnvelope: { attack: 0.08, decay: 2 + aspect.orb_tightness * 2, sustain: 0.08, release: 2.5 },
+      }).connect(ag);
+      ring.detune.value = (Math.random() - 0.5) * 4;
+      reg(ring);
+
+      const ringDuration = 2 + aspect.orb_tightness * 4;
+      reg(setTimeout(() => {
+        try { ring.triggerAttackRelease(avgFreq, ringDuration); } catch(e) {}
+      }, accentTime * 1000));
+    }
+
+    // Auto-stop
+    reg(setTimeout(() => { stopTone(); }, (DUR + 4) * 1000));
+  }
+
+  btn.addEventListener('click', playTone);
+
+  // Auto-play hook: called by beginReveal
+  window._tendrelaPlayTone = playTone;
+})();
+</script>
+<style>
+  .community-zone {
+    background: var(--text-color);
+    opacity: 0.70;
+    margin: 0 -2.5rem;
+    padding: 2rem 2.5rem 5rem;
+  }
+  .community-zone > .community-inner {
+    max-width: 540px;
+    margin: 0 auto;
+    opacity: calc(1 / 0.70);
+  }
+  .c-label {
+    font-size: 1.0rem;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    color: var(--bg-color);
+    opacity: 0.81;
+    margin-bottom: 1rem;
+    font-style: italic;
+    display: block;
+  }
+  .c-block { margin-bottom: 4rem; }
+  .c-block:last-child { margin-bottom: 0; }
+  .c-sentence-item {
+    margin-bottom: 1.3rem;
+    padding-bottom: 1.3rem;
+    border-bottom: 1px solid hsla(55, 62%, 88%, 0.33);
+  }
+  .c-sentence-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .c-sentence-text {
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: var(--bg-color);
+    opacity: 0.81;
+    margin: 0;
+  }
+  .c-sentence-name {
+    font-size: 1.0rem;
+    color: var(--bg-color);
+    opacity: 0.81;
+    margin: 0.3rem 0 0;
+    font-style: italic;
+  }
+  .c-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: hsla(45, 35%, 34%, 0.42);
+    border: none;
+    color: var(--bg-color);
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    padding: 0.8rem 1rem;
+    resize: none;
+    height: 96px;
+    outline: none;
+  }
+  .c-textarea::placeholder { color: var(--bg-color); opacity: 0.3; }
+  .c-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: hsla(45, 35%, 34%, 0.42);
+    border: none;
+    color: var(--bg-color);
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 1.0rem;
+    padding: 0.6rem 1rem;
+    outline: none;
+  }
+  .c-input::placeholder { color: var(--bg-color); opacity: 0.3; }
+  .c-btn {
+    background: none;
+    border: 1px solid hsla(55, 62%, 88%, 0.20);
+    color: var(--bg-color);
+    opacity: 0.81;
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 1.0rem;
+    letter-spacing: 0.1em;
+    padding: 0.45rem 1.2rem;
+    cursor: pointer;
+    margin-top: 0.7rem;
+    transition: opacity 0.2s;
+  }
+  .c-btn:hover { opacity: 1.0; }
+  .c-status {
+    display: block;
+    font-size: 1.0rem;
+    color: var(--bg-color);
+    opacity: 0.81;
+    font-style: italic;
+    margin-top: 0.5rem;
+    min-height: 1.4em;
+  }
+  .c-email-row { display: flex; }
+  .c-email-main {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    background: hsla(45, 35%, 34%, 0.42);
+    border: none;
+    color: var(--bg-color);
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 1.0rem;
+    padding: 0.6rem 1rem;
+    outline: none;
+  }
+  .c-email-main::placeholder { color: var(--bg-color); opacity: 0.3; }
+  .c-email-name {
+    width: 140px;
+    box-sizing: border-box;
+    background: hsla(45, 35%, 34%, 0.42);
+    border: none;
+    border-left: 1px solid hsla(55, 62%, 88%, 0.20);
+    color: var(--bg-color);
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 1.0rem;
+    padding: 0.6rem 1rem;
+    outline: none;
+  }
+  .c-email-name::placeholder { color: var(--bg-color); opacity: 0.3; }
+  @media (max-width: 640px) {
+    .community-zone { margin: 0 -1.5rem; padding: 2rem 1.5rem 4rem; }
+    .c-email-name { width: 110px; }
+  }
+</style>
+
+
+<div class="community-zone">
+  <div class="community-inner">
+
+    <div class="c-block">
+      <span class="c-label">offered by visitors</span>
+      <div id="c-sentences-list">
+        <p style="font-size:1.0rem;color:var(--bg-color);opacity:0.3;font-style:italic;">loading...</p>
+      </div>
+    </div>
+
+    <div class="c-block">
+      <span class="c-label">use this word</span>
+      <textarea class="c-textarea" id="c-sentence-input"
+        placeholder="write a sentence with uñtakhluk"></textarea>
+      <input class="c-input" id="c-name-input" type="text"
+        placeholder="your name (optional)">
+      <div>
+        <button class="c-btn" id="c-sentence-btn">offer</button>
+        <span class="c-status" id="c-sentence-status"></span>
+      </div>
+    </div>
+
+    <div class="c-block">
+      <span class="c-label">receive the daily ritual</span>
+      <div class="c-email-row">
+        <input class="c-email-main" type="email" id="c-email-input"
+          placeholder="your email">
+        <input class="c-email-name" type="text" id="c-email-name-input"
+          placeholder="name (optional)">
+      </div>
+      <div>
+        <button class="c-btn" id="c-email-btn">join</button>
+        <span class="c-status" id="c-email-status"></span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  var SB_URL = 'https://bfzqxqhuxfcpzigayqji.supabase.co';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmenF4cWh1eGZjcHppZ2F5cWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzY1MjgsImV4cCI6MjA4ODI1MjUyOH0.EckWMCz1y7TZBvkwxcKqLz6m8Rr2HDLDOPoCOZw2HkI';
+  var WORD   = 'uñtakhluk';
+
+  function getToken() {
+    var t = localStorage.getItem('tendrela_token');
+    if (!t) {
+      t = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function(c) {
+        return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
+      });
+      localStorage.setItem('tendrela_token', t);
+    }
+    return t;
+  }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function loadSentences() {
+    var list = document.getElementById('c-sentences-list');
+    fetch(
+      SB_URL + '/rest/v1/community_sentences' +
+      '?word_text=eq.' + encodeURIComponent(WORD) +
+      '&status=eq.live' +
+      '&select=sentence,contributor_name' +
+      '&order=submitted_at.asc',
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
+    )
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!Array.isArray(data) || data.length === 0) {
+        list.innerHTML = '<p style="font-size:1.0rem;color:var(--bg-color);opacity:0.3;font-style:italic;">none yet</p>';
+        return;
+      }
+      list.innerHTML = data.map(function(s) {
+        return '<div class="c-sentence-item">' +
+          '<p class="c-sentence-text">' + esc(s.sentence) + '</p>' +
+          (s.contributor_name
+            ? '<p class="c-sentence-name">— ' + esc(s.contributor_name) + '</p>'
+            : '') +
+          '</div>';
+      }).join('');
+    })
+    .catch(function() {
+      list.innerHTML = '';
+    });
+  }
+
+  document.getElementById('c-sentence-btn').addEventListener('click', function() {
+    var sentence = document.getElementById('c-sentence-input').value.trim();
+    var name     = document.getElementById('c-name-input').value.trim();
+    var status   = document.getElementById('c-sentence-status');
+    if (!sentence) { status.textContent = 'write something first.'; return; }
+    status.textContent = 'sending...';
+    fetch(SB_URL + '/rest/v1/community_sentences', {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        word_text: WORD,
+        sentence: sentence,
+        contributor_name: name || null,
+        contributor_token: getToken()
+      })
+    })
+    .then(function(r) {
+      if (r.ok) {
+        status.textContent = 'received. tendrela will read it.';
+        document.getElementById('c-sentence-input').value = '';
+        document.getElementById('c-name-input').value = '';
+      } else {
+        status.textContent = 'something went wrong. try again.';
+      }
+    })
+    .catch(function() {
+      status.textContent = 'something went wrong. try again.';
+    });
   });
-});
+
+  document.getElementById('c-email-btn').addEventListener('click', function() {
+    var email  = document.getElementById('c-email-input').value.trim();
+    var name   = document.getElementById('c-email-name-input').value.trim();
+    var status = document.getElementById('c-email-status');
+    if (!email) { status.textContent = 'enter your email.'; return; }
+    status.textContent = 'joining...';
+    fetch(SB_URL + '/rest/v1/community_subscribers', {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        email: email,
+        name: name || null,
+        source: 'word_page',
+        contributor_token: getToken()
+      })
+    })
+    .then(function(r) {
+      if (r.ok) {
+        status.textContent = "you'll receive the daily ritual.";
+        document.getElementById('c-email-input').value = '';
+        document.getElementById('c-email-name-input').value = '';
+      } else if (r.status === 409) {
+        status.textContent = 'already subscribed.';
+      } else {
+        status.textContent = 'something went wrong.';
+      }
+    })
+    .catch(function() {
+      status.textContent = 'something went wrong.';
+    });
+  });
+
+  loadSentences();
+})();
 </script>
 </body>
 </html>
