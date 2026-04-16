@@ -1,0 +1,4242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tendrela — doxamoha</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --letter-color: hsl(48, 85%, 68%);
+    --bg-color: hsl(260, 72%, 14%);
+    --text-color: hsl(48, 85%, 68%);
+    --word-width: 480px;
+  }
+
+  body {
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Spectral', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+  body.ritual-started {
+    overflow-y: auto;
+  }
+
+  .threshold {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-color);
+    z-index: 200;
+    cursor: pointer;
+    transition: opacity 0.8s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .threshold.dismissed {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .threshold-prompt {
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 1.6rem;
+    font-style: italic;
+    letter-spacing: 0.12em;
+    color: var(--text-color);
+    opacity: 0.35;
+  }
+
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 12vh 2.5rem 6rem;
+  }
+
+  .word-block {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+  .letters-row {
+    display: flex;
+    gap: 0;
+    align-items: flex-end;
+  }
+  .letter-svg { display: block; }
+
+  .pronunciation-block {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+  .pronunciation {
+    font-size: 1.6rem;
+    opacity: 0.55;
+    letter-spacing: 0.04em;
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 3rem;
+    margin-bottom: 5rem;
+    padding: 0 0.5rem;
+  }
+
+  .def-col {
+    flex: 1;
+  }
+  .def-label {
+    font-size: 1.0rem;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    opacity: 0.45;
+    margin-bottom: 0.4rem;
+    font-style: italic;
+  }
+  .def-text {
+    font-size: 1.4rem;
+    line-height: 1.6;
+    opacity: 0.75;
+  }
+  .def-translation {
+    font-size: 1.0rem;
+    line-height: 1.5;
+    opacity: 0.50;
+    margin-top: 0.5rem;
+    font-style: italic;
+  }
+
+  .roots-col {
+    flex: 1;
+    text-align: right;
+  }
+  .roots-label {
+    font-size: 1.0rem;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    opacity: 0.45;
+    margin-bottom: 0.4rem;
+    font-style: italic;
+  }
+  .root-entry {
+    margin-bottom: 0.4rem;
+  }
+  .root-word {
+    font-size: 1.2rem;
+    font-style: italic;
+    opacity: 0.65;
+    line-height: 1.4;
+  }
+  .root-meaning {
+    font-size: 1.0rem;
+    opacity: 0.48;
+    line-height: 1.4;
+  }
+
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: var(--text-color);
+    opacity: 0.1;
+    margin: 0 auto 4rem;
+  }
+
+  .iching-glyph {
+    position: fixed;
+    top: 1.5rem;
+    left: 3.5rem;
+    opacity: 0.1;
+    color: var(--text-color);
+    z-index: 10;
+  }
+
+  .essay {
+    max-width: 540px;
+    margin: 0 auto 5rem;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  .essay.visible {
+    opacity: 1;
+  }
+  .essay-para {
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.85;
+    opacity: 0.75;
+    margin-bottom: 1.4em;
+    text-align: left;
+  }
+  .essay-para:last-child {
+    margin-bottom: 0;
+  }
+  .essay-para em {
+    font-style: italic;
+  }
+
+  .footnotes {
+    max-width: 720px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 2rem;
+    margin-bottom: 3rem;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .footnotes.visible {
+    opacity: 1;
+  }
+  .fn-block {
+    display: flex;
+    flex-direction: column;
+  }
+  .fn-reasoning {
+    font-size: 1.0rem;
+    font-weight: 400;
+    line-height: 1.5;
+    opacity: 0.50;
+    text-align: left;
+  }
+  .fn-label {
+    font-family: 'Courier New', monospace;
+    font-size: 1.0rem;
+    opacity: 0.38;
+    text-align: right;
+    letter-spacing: 0.03em;
+    margin-top: 0.2rem;
+  }
+
+  .colophon {
+    text-align: center;
+    margin-top: 3rem;
+    padding-bottom: 1.5rem;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .colophon.visible {
+    opacity: 1;
+  }
+  .date-forged {
+    font-family: 'Courier New', monospace;
+    font-size: 1.0rem;
+    opacity: 0.35;
+    letter-spacing: 0.03em;
+  }
+
+  @media (max-width: 640px) {
+    .page {
+      padding: 8vh 1.5rem 4rem;
+    }
+    .meta-row {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .roots-col {
+      text-align: left;
+    }
+    .footnotes {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.2rem 1.5rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="threshold" id="threshold"><span class="threshold-prompt">listen</span></div>
+
+<svg class="iching-glyph" viewBox="0 0 20 29.0" width="20" height="29.0">
+    <rect x="0" y="0.0" width="20" height="3" fill="currentColor"/>
+    <rect x="0" y="5.5" width="8.4" height="3" fill="currentColor"/>
+    <rect x="11.6" y="5.5" width="8.4" height="3" fill="currentColor"/>
+    <rect x="0" y="11.0" width="20" height="3" fill="currentColor"/>
+    <rect x="1.75" y="19.0" width="3.5" height="10" fill="currentColor"/>
+    <rect x="8.25" y="19.0" width="3.5" height="10" fill="currentColor"/>
+    <rect x="14.75" y="19.0" width="3.5" height="10" fill="currentColor"/>
+  </svg>
+
+<div class="page">
+
+  <div class="word-block">
+    <div class="letters-row" id="lettersRow">
+      <svg id="svg_0_d" class="letter-svg"></svg>
+      <svg id="svg_1_o" class="letter-svg"></svg>
+      <svg id="svg_2_x" class="letter-svg"></svg>
+      <svg id="svg_3_a" class="letter-svg"></svg>
+      <svg id="svg_4_m" class="letter-svg"></svg>
+      <svg id="svg_5_o" class="letter-svg"></svg>
+      <svg id="svg_6_h" class="letter-svg"></svg>
+      <svg id="svg_7_a" class="letter-svg"></svg>
+    </div>
+  </div>
+
+  <div class="pronunciation-block">
+    <p class="pronunciation">/DOK-sa-MO-ha/</p>
+  </div>
+
+  <div class="meta-row">
+    <div class="def-col">
+      <p class="def-label">definition</p>
+      <p class="def-text">fluency in language that is not understood by the speaker</p>
+      <p class="def-label" style="margin-top: 1rem;">approximate translations</p>
+      <p class="def-translation">ευφράδεια σε λέξεις που δεν μάθαμε ποτέ τι σημαίνουν</p>
+      <p class="def-translation">अर्थं अविदित्वा शब्देषु प्रवीणता</p>
+    </div>
+    <div class="roots-col">
+      <p class="roots-label">roots</p>
+      <div class="root-entry">
+        <p class="root-word">δόξα doxa [Greek]</p>
+        <p class="root-meaning">opinion; belief</p>
+      </div>
+      <div class="root-entry">
+        <p class="root-word">मोह moha [Sanskrit]</p>
+        <p class="root-meaning">delusion; confusion</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="essay" id="essay">
+<p class="essay-para">She knew every word. She could not be stumbled. The sentence came out whole, grammatically intact, rhythmically persuasive, and empty of everything except its own sound.</p>
+<p class="essay-para">This is not ignorance. Ignorance has a gap in it — a place where the not-knowing shows its face, where you might trip, hesitate, reach for something and find your hand closing on air. This is the opposite of a gap. This is seamless. This is a surface so polished that the absence underneath it becomes invisible, first to the listener, then to the speaker.</p>
+<p class="essay-para">Moha is not stupidity. It is enchantment. The one enchanted does not know they are enchanted, which is the whole architecture of the spell. You pick up a word like <em>cortisol</em> and it sits so well in the mouth, has such a satisfying weight — that clinical, mineral crunch of the first syllable, the slow roll of the second — and the mouth knows it before the mind does. The mouth is already fluent. The mouth has been speaking this language for months.</p>
+<p class="essay-para">And doxa — not truth, not knowledge, but what appears to be the case. Opinion in its Sunday clothes. The gleam on the thing that passes for gold among people who have never been asked to bite down.</p>
+<p class="essay-para">What I sensed in the thread was not deception. Deception knows there is a truth it's hiding from. This was something more unsettling: a world in which the word had <em>become</em> the knowing. To say "toxins" was to understand toxins. To say "alkaline" was to hold a biochemical fact in your palm. The referent had been replaced by the reference, and no one experienced a loss, because the loss happened before the sentence began.</p>
+<p class="essay-para">She could teach it. That was the part that stopped me. She could stand in front of a room and build a whole cathedral from these sounds — arches of jargon, buttresses of borrowed authority — and the people in the room would leave feeling educated, because the grammar was flawless. The fluency was real. The fluency was the problem.</p>
+<p class="essay-para">There is a particular loneliness in hearing someone speak with total command of words that mean nothing to them. Not because they are foolish. Because the language itself has learned how to live without meaning. It has found that meaning was never required. Confidence was the nutrient. Repetition was the root system. The word grew without soil and bore fruit that looked exactly like fruit.</p>
+<p class="essay-para">You could eat it. You could not be fed.</p>
+<p class="essay-para">Moha seals doxa shut. Doxa gives moha its voice. The enchantment speaks in the language of seeming, and the seeming is so fluent it has forgotten it was ever anything less than true.</p>
+  </div>
+
+  <div class="footnotes" id="footnotes">
+<div class="fn-block">
+  <p class="fn-reasoning">nearly total eclipse inside</p>
+  <p class="fn-label">tension &middot; familiarity</p>
+</div>
+<div class="fn-block">
+  <p class="fn-reasoning">commanding and unearned authority</p>
+  <p class="fn-label">weight &middot; authenticity</p>
+</div>
+<div class="fn-block">
+  <p class="fn-reasoning">gold that passes for gold</p>
+  <p class="fn-label">color &middot; beauty</p>
+</div>
+<div class="fn-block">
+  <p class="fn-reasoning">hollow dark behind the mouth</p>
+  <p class="fn-label">field light &middot; interoception</p>
+</div>
+  </div>
+
+  <div class="colophon" id="colophon">
+    <p class="date-forged">2026-04-10</p>
+  </div>
+
+</div>
+<style>
+  .tone-btn {
+    position: fixed;
+    top: 1.65rem;
+    left: 1.5rem;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--text-color);
+    opacity: 0.1;
+    background: transparent;
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s;
+    color: var(--text-color);
+  }
+  .tone-btn:hover { opacity: 0.35; }
+  .tone-btn.playing { opacity: 0.4; }
+  .tone-btn.failed { display: none; }
+  .tone-btn svg { width: 10px; height: 10px; fill: currentColor; }
+</style>
+<button class="tone-btn" id="toneBtn" title="Play invocation tone">
+  <svg id="toneBtnIcon" viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg>
+</button>
+
+<script>
+const TENDRELA_LETTER_COLOR = "hsl(48, 85%, 68%)";
+const TENDRELA_BG_COLOR = "hsl(260, 72%, 14%)";
+
+
+const K = 0.5523;
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function getParams() { return {}; }
+
+function getMeasurements(p) {
+  const sw = lerp(8, 28, p.weight);
+  const tw = sw * lerp(1.0, 0.2, p.tension);
+  // Body height: derived from bowlSize. The v/w match this height.
+  // Remap reach (0.33–0.72) so full range spans the zone
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bodyHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  // Bowl horizontal radius: v/w use this as halfSpread so their width matches bowls.
+  const bowlRy = bodyHeight / 2;
+  const bowlRx = lerp(0.35, 1.0, clampedRoundness) * bowlRy;
+  return { sw, tw, bodyHeight, bowlRx };
+}
+
+function drawFoot(lx, rx, fy, m, p) {
+  return `L ${lx} ${fy} `;
+}
+
+function drawFootRight(lx, rx, fy, m, p) {
+  return `L ${lx} ${fy} `;
+}
+
+function debugLines(sl, sr, extras, vbWidth) {
+  const w = vbWidth || 160;
+  let s = '';
+  if (extras) extras.forEach(([y,l]) => {
+    s += `<line x1="0" y1="${y}" x2="${w}" y2="${y}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    if (l) s += `<text x="2" y="${y-2}" font-size="3.5" fill="#444" font-family="monospace">${l}</text>`;
+  });
+  s += `<line x1="${sl}" y1="0" x2="${sl}" y2="270" stroke="rgba(255,100,100,0.15)" stroke-width="0.3"/>`;
+  s += `<line x1="${sr}" y1="0" x2="${sr}" y2="270" stroke="rgba(255,100,100,0.15)" stroke-width="0.3"/>`;
+  return s;
+}
+
+
+// ============================================================
+// SHARED BOWL COMPUTATION
+// ============================================================
+function computeBowl(stemEdgeX, side, anchorY, anchor, bowlSize, bowlRoundness, tw, contrast) {
+  const clampedSize = Math.max(0.33, bowlSize);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, bowlRoundness);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const bowlRy = bowlHeight / 2;
+  const bowlRx = lerp(0.35, 1.0, clampedRoundness) * bowlRy;
+
+  let bowlTop, bowlBot, cy;
+  if (anchor === 'top') {
+    bowlTop = anchorY; bowlBot = anchorY + bowlHeight; cy = (bowlTop + bowlBot) / 2;
+  } else {
+    bowlBot = anchorY; bowlTop = anchorY - bowlHeight; cy = (bowlTop + bowlBot) / 2;
+  }
+
+  const cx = stemEdgeX;
+  const dir = (side === 'right') ? 1 : -1;
+
+  let outer = '';
+  if (side === 'right') {
+    outer += `C ${cx + dir*bowlRx*K} ${bowlTop}, ${cx + dir*bowlRx} ${cy - bowlRy*K}, ${cx + dir*bowlRx} ${cy} `;
+    outer += `C ${cx + dir*bowlRx} ${cy + bowlRy*K}, ${cx + dir*bowlRx*K} ${bowlBot}, ${cx} ${bowlBot} `;
+  } else {
+    outer += `C ${cx + dir*bowlRx*K} ${bowlBot}, ${cx + dir*bowlRx} ${cy + bowlRy*K}, ${cx + dir*bowlRx} ${cy} `;
+    outer += `C ${cx + dir*bowlRx} ${cy - bowlRy*K}, ${cx + dir*bowlRx*K} ${bowlTop}, ${cx} ${bowlTop} `;
+  }
+
+  const counterFade = Math.min(1, Math.max(0, contrast / 0.2));
+  const rawIRx = bowlRx - tw, rawIRy = bowlRy - tw;
+  const iRx = rawIRx * counterFade, iRy = rawIRy * counterFade;
+  const iCx = cx + dir * tw * 0.5, iCy = cy;
+  let counter = '';
+
+  if (iRx > 1 && iRy > 1) {
+    const iT = iCy - iRy, iB = iCy + iRy;
+    if (side === 'right') {
+      counter += `M ${iCx} ${iT} C ${iCx+iRx*K} ${iT}, ${iCx+iRx} ${iCy-iRy*K}, ${iCx+iRx} ${iCy} `;
+      counter += `C ${iCx+iRx} ${iCy+iRy*K}, ${iCx+iRx*K} ${iB}, ${iCx} ${iB} `;
+      counter += `C ${iCx-iRx*K} ${iB}, ${iCx-iRx} ${iCy+iRy*K}, ${iCx-iRx} ${iCy} `;
+      counter += `C ${iCx-iRx} ${iCy-iRy*K}, ${iCx-iRx*K} ${iT}, ${iCx} ${iT} Z `;
+    } else {
+      counter += `M ${iCx} ${iT} C ${iCx-iRx*K} ${iT}, ${iCx-iRx} ${iCy-iRy*K}, ${iCx-iRx} ${iCy} `;
+      counter += `C ${iCx-iRx} ${iCy+iRy*K}, ${iCx-iRx*K} ${iB}, ${iCx} ${iB} `;
+      counter += `C ${iCx+iRx*K} ${iB}, ${iCx+iRx} ${iCy+iRy*K}, ${iCx+iRx} ${iCy} `;
+      counter += `C ${iCx+iRx} ${iCy-iRy*K}, ${iCx+iRx*K} ${iT}, ${iCx} ${iT} Z `;
+    }
+  }
+
+  return { outer, counter, cx, cy, rx: bowlRx, ry: bowlRy, bowlTop, bowlBot, dir };
+}
+
+
+// ============================================================
+// LETTER P — bowl + subtle hook descender
+//
+// Bowl is unchanged. Stem below bowlBot transitions into a
+// subtle hook (0.8× multiplier) instead of a straight descender.
+// Hook curves left from stemRight. Bowl counter is a separate
+// subpath, evenodd fill. Bowl top flush with stem top.
+// ============================================================
+function drawP(p) {
+  const m = getMeasurements(p); const { sw, tw } = m;
+  const topY = 55, baseY = 175, descY = 240;
+  const stemLeft = 32, stemRight = stemLeft + sw;
+
+  // Bowl anchored at BASELINE from bottom — matches a, b
+  const bowl = computeBowl(stemRight, 'right', baseY, 'bottom', p.reach, p.expanse, tw, p.tension);
+
+  // Hook geometry
+  const hookMult = 0.8;
+  const hookR = sw * hookMult;
+  const hookCx = stemRight - hookR;
+  const hookCy = descY - hookR;
+  const innerHookR = Math.max(0, hookR - sw);
+  const tipY = hookCy + hookR;
+  const innerTipY = hookCy + innerHookR;
+
+  let d = '';
+  d += `M ${stemLeft} ${bowl.bowlTop} L ${stemRight} ${bowl.bowlTop} `;
+  d += bowl.outer;
+  d += `L ${stemRight} ${hookCy} `;
+  d += `C ${stemRight} ${hookCy + hookR*K}, ${hookCx + hookR*K} ${tipY}, ${hookCx} ${tipY} `;
+
+  if (innerHookR > 1) {
+    d += `L ${hookCx} ${innerTipY} `;
+    d += `C ${hookCx + innerHookR*K} ${innerTipY}, ${stemLeft} ${hookCy + innerHookR*K}, ${stemLeft} ${hookCy} `;
+  } else {
+    d += `L ${stemLeft} ${tipY} `;
+    d += `L ${stemLeft} ${hookCy} `;
+  }
+
+  d += `L ${stemLeft} ${bowl.bowlTop} Z `;
+  d += bowl.counter;
+
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  if (p.debug) {
+    svg += debugLines(stemLeft, stemRight, [[topY,'x-height'],[baseY,'baseline'],[descY,'descender'],[bowl.bowlTop,'bowlTop'],[bowl.bowlBot,'bowlBot'],[hookCy,'hookCy']]);
+    svg += `<ellipse cx="${bowl.cx}" cy="${bowl.cy}" rx="${bowl.rx}" ry="${bowl.ry}" fill="none" stroke="rgba(100,200,255,0.2)" stroke-width="0.4"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER A
+// ============================================================
+function drawA(p) {
+  const m = getMeasurements(p); const { sw, tw } = m;
+  const xHeight = 55, baseY = 175;
+  const stemRight = 120, stemLeft = stemRight - sw;
+  const bowl = computeBowl(stemLeft, 'left', baseY, 'bottom', p.reach, p.expanse, tw, p.tension);
+  const stemTop = bowl.bowlTop;
+
+  let d = '';
+  d += `M ${stemLeft} ${stemTop} L ${stemRight} ${stemTop} L ${stemRight} ${baseY} `;
+  d += drawFootRight(stemLeft, stemRight, baseY, m, p);
+  d += `L ${stemLeft} ${bowl.bowlBot} `;
+  d += bowl.outer;
+  d += `L ${stemLeft} ${bowl.bowlTop} L ${stemLeft} ${stemTop} Z `;
+  d += bowl.counter;
+
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  if (p.debug) {
+    svg += debugLines(stemLeft, stemRight, [[xHeight,'x-height'],[baseY,'baseline'],[bowl.bowlTop,'bowlTop'],[bowl.bowlBot,'bowlBot']]);
+    svg += `<ellipse cx="${bowl.cx}" cy="${bowl.cy}" rx="${bowl.rx}" ry="${bowl.ry}" fill="none" stroke="rgba(100,200,255,0.2)" stroke-width="0.4"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER O — full ellipse, centered counter
+// ============================================================
+function drawO(p) {
+  const sw = lerp(8, 28, p.weight);
+  const tw = sw * lerp(1.0, 0.2, p.tension);
+
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const ry = bowlHeight / 2;
+  const rx = lerp(0.35, 1.0, clampedRoundness) * ry;
+
+  const baseY = 175;
+  const cx = 80;
+  const cy = baseY - ry;
+  const top = cy - ry;
+  const bot = cy + ry;
+
+  // Outer ellipse — four quarter-arcs CW from top
+  let d = '';
+  d += `M ${cx} ${top} `;
+  d += `C ${cx + rx*K} ${top}, ${cx + rx} ${cy - ry*K}, ${cx + rx} ${cy} `;
+  d += `C ${cx + rx} ${cy + ry*K}, ${cx + rx*K} ${bot}, ${cx} ${bot} `;
+  d += `C ${cx - rx*K} ${bot}, ${cx - rx} ${cy + ry*K}, ${cx - rx} ${cy} `;
+  d += `C ${cx - rx} ${cy - ry*K}, ${cx - rx*K} ${top}, ${cx} ${top} Z `;
+
+  // Counter — centered, no stem offset
+  const counterFade = Math.min(1, Math.max(0, p.tension / 0.2));
+  const iRx = (rx - tw) * counterFade;
+  const iRy = (ry - tw) * counterFade;
+
+  if (iRx > 1 && iRy > 1) {
+    const iT = cy - iRy, iB = cy + iRy;
+    d += `M ${cx} ${iT} `;
+    d += `C ${cx + iRx*K} ${iT}, ${cx + iRx} ${cy - iRy*K}, ${cx + iRx} ${cy} `;
+    d += `C ${cx + iRx} ${cy + iRy*K}, ${cx + iRx*K} ${iB}, ${cx} ${iB} `;
+    d += `C ${cx - iRx*K} ${iB}, ${cx - iRx} ${cy + iRy*K}, ${cx - iRx} ${cy} `;
+    d += `C ${cx - iRx} ${cy - iRy*K}, ${cx - iRx*K} ${iT}, ${cx} ${iT} Z `;
+  }
+
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  if (p.debug) {
+    svg += `<line x1="0" y1="${top}" x2="160" y2="${top}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${bot}" x2="160" y2="${bot}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="rgba(100,200,255,0.2)" stroke-width="0.4"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER B
+// ============================================================
+function drawB(p) {
+  const m = getMeasurements(p); const { sw, tw } = m;
+  const baseY = 175;
+  const stemTop = baseY - 185;
+  const stemLeft = 32, stemRight = stemLeft + sw;
+  const bowl = computeBowl(stemRight, 'right', baseY, 'bottom', p.reach, p.expanse, tw, p.tension);
+
+  // Hook geometry — flipped (curve at top)
+  const hookMult = 0.8;
+  const hookR = sw * hookMult;
+  const hookCx = stemRight - hookR;
+  const hookCy = stemTop + hookR;
+  const innerHookR = Math.max(0, hookR - sw);
+  const tipY = hookCy - hookR;
+  const innerTipY = hookCy - innerHookR;
+
+  let d = '';
+
+  // Start at left edge at hookCy, inner arc up to tip
+  d += `M ${stemLeft} ${hookCy} `;
+  if (innerHookR > 1) {
+    d += `C ${stemLeft} ${hookCy - innerHookR*K}, ${hookCx + innerHookR*K} ${innerTipY}, ${hookCx} ${innerTipY} `;
+    d += `L ${hookCx} ${tipY} `;
+  } else {
+    d += `L ${stemLeft} ${tipY} `;
+    d += `L ${hookCx} ${tipY} `;
+  }
+
+  // Outer arc from tip back down to stemRight at hookCy
+  d += `C ${hookCx + hookR*K} ${tipY}, ${stemRight} ${hookCy - hookR*K}, ${stemRight} ${hookCy} `;
+
+  // Down right edge to bowl
+  d += `L ${stemRight} ${bowl.bowlTop} `;
+  d += bowl.outer;
+
+  // Foot across baseline
+  d += `L ${stemRight} ${baseY} `;
+  d += drawFoot(stemLeft, stemRight, baseY, m, p);
+
+  // Up left edge back to start
+  d += `L ${stemLeft} ${hookCy} Z `;
+
+  // Bowl counter
+  d += bowl.counter;
+
+  let svg = `<rect x="0" y="-20" width="160" height="290" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  if (p.debug) {
+    svg += debugLines(stemLeft, stemRight, [[stemTop,'stemTop'],[baseY,'baseline'],[bowl.bowlTop,'bowlTop'],[bowl.bowlBot,'bowlBot'],[hookCy,'hookCy']]);
+    svg += `<ellipse cx="${bowl.cx}" cy="${bowl.cy}" rx="${bowl.rx}" ry="${bowl.ry}" fill="none" stroke="rgba(100,200,255,0.2)" stroke-width="0.4"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER D — exact mirror of b via scale(-1,1)
+//
+// Uses the same hooked b construction (bowl right, hook top-right),
+// then flips horizontally around x=80.
+// ============================================================
+function drawD(p) {
+  const m = getMeasurements(p); const { sw, tw } = m;
+  const baseY = 175;
+  const stemTop = baseY - 185;
+  const stemLeft = 32, stemRight = stemLeft + sw;
+  const bowl = computeBowl(stemRight, 'right', baseY, 'bottom', p.reach, p.expanse, tw, p.tension);
+
+  // Hook geometry — same as b
+  const hookMult = 0.8;
+  const hookR = sw * hookMult;
+  const hookCx = stemRight - hookR;
+  const hookCy = stemTop + hookR;
+  const innerHookR = Math.max(0, hookR - sw);
+  const tipY = hookCy - hookR;
+  const innerTipY = hookCy - innerHookR;
+
+  let d = '';
+
+  d += `M ${stemLeft} ${hookCy} `;
+  if (innerHookR > 1) {
+    d += `C ${stemLeft} ${hookCy - innerHookR*K}, ${hookCx + innerHookR*K} ${innerTipY}, ${hookCx} ${innerTipY} `;
+    d += `L ${hookCx} ${tipY} `;
+  } else {
+    d += `L ${stemLeft} ${tipY} `;
+    d += `L ${hookCx} ${tipY} `;
+  }
+
+  d += `C ${hookCx + hookR*K} ${tipY}, ${stemRight} ${hookCy - hookR*K}, ${stemRight} ${hookCy} `;
+
+  d += `L ${stemRight} ${bowl.bowlTop} `;
+  d += bowl.outer;
+
+  d += `L ${stemRight} ${baseY} `;
+  d += drawFoot(stemLeft, stemRight, baseY, m, p);
+
+  d += `L ${stemLeft} ${hookCy} Z `;
+
+  d += bowl.counter;
+
+  let svg = `<rect x="0" y="-20" width="160" height="290" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<g transform="translate(160,0) scale(-1,1)">`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+  svg += `</g>`;
+
+  if (p.debug) {
+    svg += debugLines(stemLeft, stemRight, [[stemTop,'stemTop'],[baseY,'baseline'],[bowl.bowlTop,'bowlTop'],[bowl.bowlBot,'bowlBot'],[hookCy,'hookCy']]);
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER G — Bowl + stem + tapered arc tail
+//
+// The cradle is replaced with a tapered elliptical arc.
+// Arc: 3 o'clock CW, 170° sweep. arcRx = sw/4 + bowl.rx/2
+// (visible width tracks bowl). arcRy = 20 (fixed).
+// Thick end = sw, thin end ≈ 1px. Quadratic taper.
+// ============================================================
+function drawG(p) {
+  const m = getMeasurements(p); const { sw, tw } = m;
+  const topY = 55, baseY = 175, descY = 240;
+  const stemRight = 120, stemLeft = stemRight - sw;
+
+  // Bowl anchored at BASELINE from bottom — matches a
+  const bowl = computeBowl(stemLeft, 'left', baseY, 'bottom', p.reach, p.expanse, tw, p.tension);
+
+  // Compute ccy (stem cutoff point for tail)
+  const cradleRx = (sw + bowl.rx) / 2;
+  const cradleRy = cradleRx * 0.6;
+  const ccy = descY - cradleRy;
+
+  // G body — stem from bowlTop down to ccy
+  let d = '';
+  d += `M ${stemLeft} ${bowl.bowlTop} L ${stemRight} ${bowl.bowlTop} L ${stemRight} ${ccy} `;
+  d += `L ${stemLeft} ${ccy} `;
+  d += `L ${stemLeft} ${bowl.bowlBot} `;
+  d += bowl.outer;
+  d += `L ${stemLeft} ${bowl.bowlTop} Z `;
+  d += bowl.counter;
+
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  // Tapered arc tail — arcRy tracks stroke weight + bowl size to prevent bulge at heavy weights
+  {
+    const arcRx = sw / 4 + bowl.rx / 2;
+    const arcRy = 8 + sw * 0.30 + bowl.ry * 0.25;
+    const arcThickW = sw;
+    const arcThinW = Math.max(sw * 0.08, 1.0);
+    const arcCx = stemRight - arcRx - arcThickW / 2;
+    const arcCy = ccy - 1; // 1px overlap into stem
+    const startRad = 0; // 3 o'clock
+    const sweepRad = -170 * Math.PI / 180; // CW 170°
+    const N = 50;
+    const outerPts = [], innerPts = [];
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const angle = startRad + sweepRad * t;
+      const px = arcCx + arcRx * Math.cos(angle);
+      const py = arcCy - arcRy * Math.sin(angle);
+      const radX = px - arcCx, radY = py - arcCy;
+      const radLen = Math.sqrt(radX * radX + radY * radY);
+      const awayX = radLen > 0.01 ? radX / radLen : 0;
+      const awayY = radLen > 0.01 ? radY / radLen : 0;
+      const localWidth = lerp(arcThickW, arcThinW, t * t);
+      const outerHalf = localWidth / 2;
+      let innerHalf = localWidth / 2;
+      const maxInnerHalf = radLen * 0.85;
+      if (innerHalf > maxInnerHalf) innerHalf = maxInnerHalf;
+      outerPts.push({ x: px + awayX * outerHalf, y: py + awayY * outerHalf });
+      innerPts.push({ x: px - awayX * innerHalf, y: py - awayY * innerHalf });
+    }
+    let arcPath = `M ${outerPts[0].x} ${outerPts[0].y} `;
+    for (let i = 1; i <= N; i++) arcPath += `L ${outerPts[i].x} ${outerPts[i].y} `;
+    arcPath += `L ${innerPts[N].x} ${innerPts[N].y} `;
+    for (let i = N - 1; i >= 0; i--) arcPath += `L ${innerPts[i].x} ${innerPts[i].y} `;
+    arcPath += 'Z';
+    svg += `<path d="${arcPath}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+  }
+
+  if (p.debug) {
+    svg += debugLines(stemLeft, stemRight, [[topY,'ascender'],[baseY,'baseline'],[descY,'descender'],[bowl.bowlTop,'bowlTop'],[bowl.bowlBot,'bowlBot'],[ccy,'ccy']]);
+    svg += `<ellipse cx="${bowl.cx}" cy="${bowl.cy}" rx="${bowl.rx}" ry="${bowl.ry}" fill="none" stroke="rgba(100,200,255,0.2)" stroke-width="0.4"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER Q — Bowl + stem + tapered arc tail
+//
+// The diagonal tail is replaced with a tapered elliptical arc.
+// Arc: 9 o'clock CCW, sweep 255°–330° (expanse-responsive).
+// arcRx = 17, arcRy = 18 (fixed). thickEnd = sw, thinEnd ≈ 1px.
+// arcCx = stemRight + arcRx - sw/2 (outer edge aligns with stemLeft)
+// arcCy = tailTipY - 1 (1px overlap into stem)
+// ============================================================
+function drawQ(p) {
+  const m = getMeasurements(p); const { sw, tw } = m;
+  const topY = 55, baseY = 175, descY = 240;
+  const stemRight = 120, stemLeft = stemRight - sw;
+
+  // Bowl anchored at BASELINE from bottom — matches a, g
+  const bowl = computeBowl(stemLeft, 'left', baseY, 'bottom', p.reach, p.expanse, tw, p.tension);
+
+  // Compute tailTipY (midpoint of old diagonal tail tip — used as stem cutoff)
+  const tailLength = sw * 2;
+  const tAngle = 45 * Math.PI / 180;
+  const blx = stemRight, bly = descY;
+  const brx = blx + Math.cos(tAngle) * tailLength;
+  const bry = bly - Math.sin(tAngle) * tailLength;
+  const perpX = -Math.sin(tAngle), perpY = -Math.cos(tAngle);
+  const trx = brx + perpX * sw, try_ = bry + perpY * sw;
+  const tailTipY = (bry + try_) / 2;
+
+  // Stem from bowlTop down to tailTipY
+  let d = '';
+  d += `M ${stemLeft} ${bowl.bowlTop} L ${stemRight} ${bowl.bowlTop} L ${stemRight} ${tailTipY} L ${stemLeft} ${tailTipY} `;
+  d += `L ${stemLeft} ${bowl.bowlBot} `;
+  d += bowl.outer;
+  d += `L ${stemLeft} ${bowl.bowlTop} Z `;
+  d += bowl.counter;
+
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  // Tapered arc tail
+  {
+    const arcRx = 17, arcRy = 18, arcThickW = sw, arcThinW = Math.max(sw * 0.08, 1.0);
+    const arcCx = stemRight + arcRx - sw / 2;
+    const arcCy = tailTipY - 1; // 1px overlap into stem
+    const normExpanse = (p.expanse - 0.53) / (1.0 - 0.53);
+    const maxSweep = 330;
+    const sweepDeg = lerp(maxSweep, 255, normExpanse);
+    const startRad = 180 * Math.PI / 180; // 9 o'clock
+    const sweepRad = sweepDeg * Math.PI / 180; // CCW (positive)
+    const arcN = 50;
+    const arcOuterPts = [], arcInnerPts = [];
+    for (let i = 0; i <= arcN; i++) {
+      const t = i / arcN;
+      const angle = startRad + sweepRad * t;
+      const px = arcCx + arcRx * Math.cos(angle);
+      const py = arcCy - arcRy * Math.sin(angle);
+      const radX = px - arcCx, radY = py - arcCy;
+      const radLen = Math.sqrt(radX * radX + radY * radY);
+      const awayX = radLen > 0.01 ? radX / radLen : 0;
+      const awayY = radLen > 0.01 ? radY / radLen : 0;
+      const localWidth = lerp(arcThickW, arcThinW, t * t);
+      arcOuterPts.push({ x: px + awayX * localWidth / 2, y: py + awayY * localWidth / 2 });
+      arcInnerPts.push({ x: px - awayX * localWidth / 2, y: py - awayY * localWidth / 2 });
+    }
+    let arcPath = `M ${arcOuterPts[0].x} ${arcOuterPts[0].y} `;
+    for (let i = 1; i <= arcN; i++) arcPath += `L ${arcOuterPts[i].x} ${arcOuterPts[i].y} `;
+    arcPath += `L ${arcInnerPts[arcN].x} ${arcInnerPts[arcN].y} `;
+    for (let i = arcN - 1; i >= 0; i--) arcPath += `L ${arcInnerPts[i].x} ${arcInnerPts[i].y} `;
+    arcPath += 'Z';
+    svg += `<path d="${arcPath}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+  }
+
+  if (p.debug) {
+    svg += debugLines(stemLeft, stemRight, [[topY,'ascender'],[baseY,'baseline'],[descY,'descender'],[bowl.bowlTop,'bowlTop'],[bowl.bowlBot,'bowlBot'],[tailTipY,'tailTipY']]);
+    svg += `<ellipse cx="${bowl.cx}" cy="${bowl.cy}" rx="${bowl.rx}" ry="${bowl.ry}" fill="none" stroke="rgba(100,200,255,0.2)" stroke-width="0.4"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER V
+// ============================================================
+function drawV(p) {
+  const m = getMeasurements(p);
+  const sw = m.sw;
+  // Valley depth: remap contrast (0–1) to valley range (0.33–0.81)
+  // Full score sensitivity, valley never closes below 0.33
+  const valleyDepth = lerp(0.81, 0.33, p.tension);
+  const baseY = 175;
+  const topY = baseY - m.bodyHeight;
+  const botY = baseY;
+  const midX = 80;
+  const halfSpreadAtTop = (sw + m.bowlRx) / 2; // v width matches total bowl letter width
+
+  const clLeftTopX = midX - halfSpreadAtTop;
+  const clRightTopX = midX + halfSpreadAtTop;
+  const clVertexX = midX, clVertexY = botY;
+
+  const ldx = clVertexX - clLeftTopX, ldy = clVertexY - topY;
+  const llen = Math.sqrt(ldx*ldx + ldy*ldy);
+  const rdx = clVertexX - clRightTopX, rdy = clVertexY - topY;
+  const rlen = Math.sqrt(rdx*rdx + rdy*rdy);
+
+  const lOutX = -ldy/llen, lOutY = ldx/llen;
+  const lInX = ldy/llen, lInY = -ldx/llen;
+  const rOutX = rdy/rlen, rOutY = -rdx/rlen;
+  const rInX = -rdy/rlen, rInY = rdx/rlen;
+  // B horiz: walls appear sw thick horizontally, matching vertical stems
+  const cosAngle = Math.abs(ldy) / llen;
+  const hw = (sw / 2) * cosAngle;
+
+  function lineXatY(px, py, dx, dy, targetY) {
+    if (Math.abs(dy) < 0.001) return px;
+    return px + (targetY - py) / dy * dx;
+  }
+
+  const loTopX = clLeftTopX + lOutX*hw, loTopY = topY + lOutY*hw;
+  const roTopX = clRightTopX + rOutX*hw, roTopY = topY + rOutY*hw;
+  const liTopX = clLeftTopX + lInX*hw, liTopY = topY + lInY*hw;
+  const riTopX = clRightTopX + rInX*hw, riTopY = topY + rInY*hw;
+
+  const denom = ldx*rdy - ldy*rdx;
+  let innerVx, innerVy;
+  if (Math.abs(denom) > 0.001) {
+    const t = ((riTopX - liTopX)*rdy - (riTopY - liTopY)*rdx) / denom;
+    innerVx = liTopX + t*ldx; innerVy = liTopY + t*ldy;
+  } else { innerVx = midX; innerVy = botY - sw; }
+
+  const flatY = botY;
+  const outerLeftAtFlatX = lineXatY(loTopX, loTopY, ldx, ldy, flatY);
+  const outerRightAtFlatX = lineXatY(roTopX, roTopY, rdx, rdy, flatY);
+  const outerLeftAtTopX = lineXatY(loTopX, loTopY, ldx, ldy, topY);
+  const outerRightAtTopX = lineXatY(roTopX, roTopY, rdx, rdy, topY);
+  const innerLeftAtTopX = lineXatY(liTopX, liTopY, ldx, ldy, topY);
+  const innerRightAtTopX = lineXatY(riTopX, riTopY, rdx, rdy, topY);
+
+  let d = '';
+  d += `M ${outerLeftAtTopX} ${topY} L ${outerLeftAtFlatX} ${flatY} `;
+  d += `L ${outerRightAtFlatX} ${flatY} L ${outerRightAtTopX} ${topY} Z `;
+
+  let negLeftTopX, negRightTopX;
+  if (p.fillDir === 'west') {
+    negLeftTopX = lerp(innerLeftAtTopX, innerRightAtTopX - 1, valleyDepth);
+    negRightTopX = innerRightAtTopX;
+  } else {
+    negLeftTopX = innerLeftAtTopX;
+    negRightTopX = lerp(innerRightAtTopX, innerLeftAtTopX + 1, valleyDepth);
+  }
+
+  let tipX, tipY;
+  const tipDenom = ldx*rdy - ldy*rdx;
+  if (Math.abs(tipDenom) > 0.001) {
+    const t = ((negRightTopX - negLeftTopX)*rdy - 0) / tipDenom;
+    tipX = negLeftTopX + t*ldx; tipY = topY + t*ldy;
+  } else { tipX = midX; tipY = innerVy; }
+
+  if (tipY > flatY - 2) {
+    tipY = flatY - 2;
+    tipX = p.fillDir === 'west' ? lineXatY(negRightTopX, topY, rdx, rdy, tipY) : lineXatY(negLeftTopX, topY, ldx, ldy, tipY);
+  }
+
+  const negWidth = negRightTopX - negLeftTopX;
+  if (negWidth > 0.5 && tipY > topY + 3) {
+    // CCW winding for nonzero cutout
+    d += `M ${negRightTopX} ${topY} L ${tipX} ${tipY} L ${negLeftTopX} ${topY} Z `;
+  }
+
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="nonzero"/>`;
+
+  if (p.debug) {
+    svg += `<line x1="${clLeftTopX}" y1="${topY}" x2="${clVertexX}" y2="${clVertexY}" stroke="rgba(255,255,255,0.1)" stroke-width="0.4" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="${clRightTopX}" y1="${topY}" x2="${clVertexX}" y2="${clVertexY}" stroke="rgba(255,255,255,0.1)" stroke-width="0.4" stroke-dasharray="2,2"/>`;
+    svg += `<circle cx="${tipX}" cy="${tipY}" r="2" fill="rgba(255,100,100,0.4)"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER W — Two overlapping v's, single path, nonzero fill
+// ============================================================
+
+function drawSingleVComponent(p, midX) {
+  const m = getMeasurements(p);
+  const sw = m.sw;
+  // Valley depth: remap contrast (0–1) to valley range (0.33–0.81)
+  const valleyDepth = lerp(0.81, 0.33, p.tension);
+  const baseY = 175;
+  const topY = baseY - m.bodyHeight;
+  const botY = baseY;
+  const halfSpreadAtTop = (sw + m.bowlRx) / 2; // matches total bowl letter width
+
+  const clLeftTopX = midX - halfSpreadAtTop;
+  const clRightTopX = midX + halfSpreadAtTop;
+  const clVertexX = midX, clVertexY = botY;
+
+  const ldx = clVertexX - clLeftTopX, ldy = clVertexY - topY;
+  const llen = Math.sqrt(ldx*ldx + ldy*ldy);
+  const rdx = clVertexX - clRightTopX, rdy = clVertexY - topY;
+  const rlen = Math.sqrt(rdx*rdx + rdy*rdy);
+
+  const lOutX = -ldy/llen, lOutY = ldx/llen;
+  const lInX = ldy/llen, lInY = -ldx/llen;
+  const rOutX = rdy/rlen, rOutY = -rdx/rlen;
+  const rInX = -rdy/rlen, rInY = rdx/rlen;
+  // B horiz: walls appear sw thick horizontally, matching vertical stems
+  const cosAngle = Math.abs(ldy) / llen;
+  const hw = (sw / 2) * cosAngle;
+
+  function lineXatY(px, py, dx, dy, targetY) {
+    if (Math.abs(dy) < 0.001) return px;
+    return px + (targetY - py) / dy * dx;
+  }
+
+  const loTopX = clLeftTopX + lOutX*hw, loTopY = topY + lOutY*hw;
+  const roTopX = clRightTopX + rOutX*hw, roTopY = topY + rOutY*hw;
+  const liTopX = clLeftTopX + lInX*hw, liTopY = topY + lInY*hw;
+  const riTopX = clRightTopX + rInX*hw, riTopY = topY + rInY*hw;
+
+  const denom = ldx*rdy - ldy*rdx;
+  let innerVx, innerVy;
+  if (Math.abs(denom) > 0.001) {
+    const t = ((riTopX - liTopX)*rdy - (riTopY - liTopY)*rdx) / denom;
+    innerVx = liTopX + t*ldx; innerVy = liTopY + t*ldy;
+  } else { innerVx = midX; innerVy = botY - sw; }
+
+  const flatY = botY;
+  const outerLeftAtFlatX = lineXatY(loTopX, loTopY, ldx, ldy, flatY);
+  const outerRightAtFlatX = lineXatY(roTopX, roTopY, rdx, rdy, flatY);
+  const outerLeftAtTopX = lineXatY(loTopX, loTopY, ldx, ldy, topY);
+  const outerRightAtTopX = lineXatY(roTopX, roTopY, rdx, rdy, topY);
+  const innerLeftAtTopX = lineXatY(liTopX, liTopY, ldx, ldy, topY);
+  const innerRightAtTopX = lineXatY(riTopX, riTopY, rdx, rdy, topY);
+
+  // Outer: clockwise — fills under nonzero
+  let outerPath = '';
+  outerPath += `M ${outerLeftAtTopX} ${topY} `;
+  outerPath += `L ${outerLeftAtFlatX} ${flatY} `;
+  outerPath += `L ${outerRightAtFlatX} ${flatY} `;
+  outerPath += `L ${outerRightAtTopX} ${topY} Z `;
+
+  // Valley: counter-clockwise — cuts out under nonzero
+  let negLeftTopX, negRightTopX;
+  if (p.fillDir === 'west') {
+    negLeftTopX = lerp(innerLeftAtTopX, innerRightAtTopX - 1, valleyDepth);
+    negRightTopX = innerRightAtTopX;
+  } else {
+    negLeftTopX = innerLeftAtTopX;
+    negRightTopX = lerp(innerRightAtTopX, innerLeftAtTopX + 1, valleyDepth);
+  }
+
+  let tipX, tipY;
+  const tipDenom = ldx*rdy - ldy*rdx;
+  if (Math.abs(tipDenom) > 0.001) {
+    const t = ((negRightTopX - negLeftTopX)*rdy - 0) / tipDenom;
+    tipX = negLeftTopX + t*ldx; tipY = topY + t*ldy;
+  } else { tipX = midX; tipY = innerVy; }
+
+  if (tipY > flatY - 2) {
+    tipY = flatY - 2;
+    tipX = p.fillDir === 'west' ? lineXatY(negRightTopX, topY, rdx, rdy, tipY) : lineXatY(negLeftTopX, topY, ldx, ldy, tipY);
+  }
+
+  // CCW winding: right → tip → left
+  let valleyPath = '';
+  const negWidth = negRightTopX - negLeftTopX;
+  if (negWidth > 0.5 && tipY > topY + 3) {
+    valleyPath += `M ${negRightTopX} ${topY} L ${tipX} ${tipY} L ${negLeftTopX} ${topY} Z `;
+  }
+
+  return { outerPath, valleyPath, tipX, tipY, clLeftTopX, clRightTopX, clVertexX, clVertexY };
+}
+
+function drawW(p) {
+  const m = getMeasurements(p);
+  const sw = m.sw;
+  const baseY = 175;
+  const topY = baseY - m.bodyHeight;
+  const flatY = baseY;
+  const halfSpread = (m.sw + m.bowlRx) / 2; // matches total bowl letter width
+
+  const vWidth = 2 * halfSpread + sw;
+  const wCenterX = 130;
+  const overlap = sw;
+  const leftMidX = wCenterX - (vWidth - overlap) / 2;
+  const rightMidX = wCenterX + (vWidth - overlap) / 2;
+
+  const leftV = drawSingleVComponent(p, leftMidX);
+  const rightV = drawSingleVComponent(p, rightMidX);
+
+  // Single path, nonzero fill: CW outers fill, CCW valleys cut out.
+  // Overlap zone: winding +2, still filled. Valley in overlap: +2-1=+1, filled.
+  const combinedPath = leftV.outerPath + rightV.outerPath + leftV.valleyPath + rightV.valleyPath;
+
+  let svg = `<rect width="260" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${combinedPath}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="nonzero"/>`;
+
+  if (p.debug) {
+    svg += `<line x1="0" y1="${topY}" x2="260" y2="${topY}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${flatY}" x2="260" y2="${flatY}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<circle cx="${leftV.tipX}" cy="${leftV.tipY}" r="2" fill="rgba(255,100,100,0.4)"/>`;
+    svg += `<circle cx="${rightV.tipX}" cy="${rightV.tipY}" r="2" fill="rgba(255,100,100,0.4)"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER N — Crown Eclipse
+//
+// The stem IS the left leg. The arch springs from stemLeft,
+// curves over the crown, descends to the right leg.
+// The arch is the top half of the o's ellipse.
+//
+// Crown eclipse: inner arch vertical radius shrinks with
+// contrast, dropping the inner crown toward the equator.
+// ============================================================
+function drawN(p) {
+  const sw = lerp(8, 28, p.weight);
+  const tw = sw * lerp(1.0, 0.2, p.tension);
+
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const archRy = bowlHeight / 2;
+  const archRx = lerp(0.35, 1.0, clampedRoundness) * archRy;
+
+  const baseY = 175;
+  const stemLeft = 32;
+
+  const archCx = stemLeft + archRx;
+  const archCy = baseY - archRy;
+  const topY = archCy - archRy;
+
+  const rightLegRight = stemLeft + 2 * archRx;
+
+  // Outer silhouette
+  let d = '';
+  d += `M ${stemLeft} ${baseY} `;
+  d += `L ${stemLeft} ${archCy} `;
+  d += `C ${stemLeft} ${archCy - archRy*K}, ${archCx - archRx*K} ${topY}, ${archCx} ${topY} `;
+  d += `C ${archCx + archRx*K} ${topY}, ${rightLegRight} ${archCy - archRy*K}, ${rightLegRight} ${archCy} `;
+  d += `L ${rightLegRight} ${baseY} `;
+  d += `L ${stemLeft} ${baseY} Z `;
+
+  // Inner archway — crown eclipse
+  const counterFade = Math.min(1, Math.max(0, p.tension / 0.2));
+  const iRx = (archRx - sw) * counterFade;
+  const iRy = (archRy - tw) * counterFade;
+  const iCx = archCx;
+  const iCy = archCy;
+
+  if (iRx > 1 && iRy > 1) {
+    const innerLeftX = iCx - iRx;
+    const innerRightX = iCx + iRx;
+    const innerCrownY = iCy - iRy;
+
+    // CCW winding for nonzero cutout
+    d += `M ${innerRightX} ${baseY} `;
+    d += `L ${innerRightX} ${iCy} `;
+    d += `C ${innerRightX} ${iCy - iRy*K}, ${iCx + iRx*K} ${innerCrownY}, ${iCx} ${innerCrownY} `;
+    d += `C ${iCx - iRx*K} ${innerCrownY}, ${innerLeftX} ${iCy - iRy*K}, ${innerLeftX} ${iCy} `;
+    d += `L ${innerLeftX} ${baseY} `;
+    d += `L ${innerRightX} ${baseY} Z `;
+  }
+
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="nonzero"/>`;
+
+  if (p.debug) {
+    svg += `<line x1="0" y1="${topY}" x2="160" y2="${topY}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${baseY}" x2="160" y2="${baseY}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${archCy}" x2="160" y2="${archCy}" stroke="rgba(100,255,100,0.15)" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<ellipse cx="${archCx}" cy="${archCy}" rx="${archRx}" ry="${archRy}" fill="none" stroke="rgba(100,200,255,0.12)" stroke-width="0.4"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER U — Rising Tide Eclipse (flipped n)
+//
+// Two legs descend from topY. Trough curves at the bottom
+// (bottom half of the ellipse). Trough bottom at baseY.
+//
+// Rising tide eclipse: inner trough floor RISES as contrast
+// decreases. All vertical Bézier control points are flipped
+// from the n — pulling DOWNWARD (positive Y) instead of upward.
+// ============================================================
+function drawU(p) {
+  const sw = lerp(8, 28, p.weight);
+  const tw = sw * lerp(1.0, 0.2, p.tension);
+
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const archRy = bowlHeight / 2;
+  const archRx = lerp(0.35, 1.0, clampedRoundness) * archRy;
+
+  const baseY = 175;
+  const stemLeft = 32;
+  const archCx = stemLeft + archRx;
+  const archCy = baseY - archRy;
+  const topY = archCy - archRy;
+  const rightLegRight = stemLeft + 2 * archRx;
+
+  // Outer: legs from topY down to equator, trough curves DOWN to baseY
+  let d = '';
+  d += `M ${stemLeft} ${topY} `;
+  d += `L ${stemLeft} ${archCy} `;
+
+  // Outer trough: DOWN from equator to baseY, back UP
+  // Control points pull DOWNWARD (positive Y offsets from archCy)
+  d += `C ${stemLeft} ${archCy + archRy*K}, ${archCx - archRx*K} ${baseY}, ${archCx} ${baseY} `;
+  d += `C ${archCx + archRx*K} ${baseY}, ${rightLegRight} ${archCy + archRy*K}, ${rightLegRight} ${archCy} `;
+
+  d += `L ${rightLegRight} ${topY} `;
+  d += `L ${stemLeft} ${topY} Z `;
+
+  // Inner trough — rising tide eclipse
+  const counterFade = Math.min(1, Math.max(0, p.tension / 0.2));
+  const iRx = (archRx - sw) * counterFade;
+  const iRy = (archRy - tw) * counterFade;
+  const iCx = archCx;
+  const iCy = archCy;
+
+  if (iRx > 1 && iRy > 1) {
+    const iL = iCx - iRx;
+    const iR = iCx + iRx;
+    const innerTroughY = iCy + iRy;
+
+    // CCW winding for nonzero cutout
+    d += `M ${iR} ${topY} `;
+    d += `L ${iR} ${iCy} `;
+    d += `C ${iR} ${iCy + iRy*K}, ${iCx + iRx*K} ${innerTroughY}, ${iCx} ${innerTroughY} `;
+    d += `C ${iCx - iRx*K} ${innerTroughY}, ${iL} ${iCy + iRy*K}, ${iL} ${iCy} `;
+    d += `L ${iL} ${topY} `;
+    d += `L ${iR} ${topY} Z `;
+  }
+
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="nonzero"/>`;
+
+  if (p.debug) {
+    svg += `<line x1="0" y1="${topY}" x2="160" y2="${topY}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${baseY}" x2="160" y2="${baseY}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${archCy}" x2="160" y2="${archCy}" stroke="rgba(100,255,100,0.15)" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<ellipse cx="${archCx}" cy="${archCy}" rx="${archRx}" ry="${archRy}" fill="none" stroke="rgba(100,200,255,0.12)" stroke-width="0.4"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// SHARED ARCH COMPONENT for m (and future letters)
+// Returns CW outer and CCW archway for nonzero compositing.
+// ============================================================
+function drawSingleArch(p, stemLeft) {
+  const sw = lerp(8, 28, p.weight);
+  const tw = sw * lerp(1.0, 0.2, p.tension);
+
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const archRy = bowlHeight / 2;
+  const archRx = lerp(0.35, 1.0, clampedRoundness) * archRy;
+
+  const baseY = 175;
+  const archCx = stemLeft + archRx;
+  const archCy = baseY - archRy;
+  const topY = archCy - archRy;
+  const rightLegRight = stemLeft + 2 * archRx;
+
+  // Outer — CW
+  let outerPath = '';
+  outerPath += `M ${stemLeft} ${baseY} `;
+  outerPath += `L ${stemLeft} ${archCy} `;
+  outerPath += `C ${stemLeft} ${archCy - archRy*K}, ${archCx - archRx*K} ${topY}, ${archCx} ${topY} `;
+  outerPath += `C ${archCx + archRx*K} ${topY}, ${rightLegRight} ${archCy - archRy*K}, ${rightLegRight} ${archCy} `;
+  outerPath += `L ${rightLegRight} ${baseY} `;
+  outerPath += `L ${stemLeft} ${baseY} Z `;
+
+  // Archway — CCW (crown eclipse)
+  const counterFade = Math.min(1, Math.max(0, p.tension / 0.2));
+  const iRx = (archRx - sw) * counterFade;
+  const iRy = (archRy - tw) * counterFade;
+
+  let archwayPath = '';
+  if (iRx > 1 && iRy > 1) {
+    const iL = archCx - iRx;
+    const iR = archCx + iRx;
+    const innerCrownY = archCy - iRy;
+
+    // CCW: right → up → crown (right-to-left) → down → left → close
+    archwayPath += `M ${iR} ${baseY} `;
+    archwayPath += `L ${iR} ${archCy} `;
+    archwayPath += `C ${iR} ${archCy - iRy*K}, ${archCx + iRx*K} ${innerCrownY}, ${archCx} ${innerCrownY} `;
+    archwayPath += `C ${archCx - iRx*K} ${innerCrownY}, ${iL} ${archCy - iRy*K}, ${iL} ${archCy} `;
+    archwayPath += `L ${iL} ${baseY} `;
+    archwayPath += `L ${iR} ${baseY} Z `;
+  }
+
+  return { outerPath, archwayPath, archRx, archRy, topY, archCy, archCx, rightLegRight };
+}
+
+
+// ============================================================
+// LETTER M — Two overlapping arches, nonzero fill
+// ============================================================
+function drawM(p) {
+  const sw = lerp(8, 28, p.weight);
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const archRy = bowlHeight / 2;
+  const archRx = lerp(0.35, 1.0, clampedRoundness) * archRy;
+  const archWidth = 2 * archRx;
+
+  const baseY = 175;
+  const mCenterX = 130;
+  const totalWidth = 2 * archWidth - sw;
+  const stemLeft1 = mCenterX - totalWidth / 2;
+  const stemLeft2 = stemLeft1 + archWidth - sw;
+
+  const leftArch = drawSingleArch(p, stemLeft1);
+  const rightArch = drawSingleArch(p, stemLeft2);
+
+  const combinedPath = leftArch.outerPath + rightArch.outerPath + leftArch.archwayPath + rightArch.archwayPath;
+
+  let svg = `<rect width="260" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${combinedPath}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="nonzero"/>`;
+
+  if (p.debug) {
+    svg += `<line x1="0" y1="${leftArch.topY}" x2="260" y2="${leftArch.topY}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${baseY}" x2="260" y2="${baseY}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<ellipse cx="${leftArch.archCx}" cy="${leftArch.archCy}" rx="${archRx}" ry="${archRy}" fill="none" stroke="rgba(100,200,255,0.08)" stroke-width="0.4"/>`;
+    svg += `<ellipse cx="${rightArch.archCx}" cy="${rightArch.archCy}" rx="${archRx}" ry="${archRy}" fill="none" stroke="rgba(255,200,100,0.08)" stroke-width="0.4"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER H — n-arch + overlapping ascender stem
+//
+// Path 1: The arch. Identical to the n. Left leg at stemLeft,
+//   arch from (stemLeft, archCy) over crown to right leg.
+//   Inner archway with crown eclipse. Evenodd.
+//
+// Path 2: Ascender stem rectangle. stemLeft to stemRight,
+//   stemTop to baseY. Plain fill. Overlaps left leg invisibly.
+// ============================================================
+function drawH(p) {
+  const sw = lerp(8, 28, p.weight);
+  const tw = sw * lerp(1.0, 0.2, p.tension);
+
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const archRy = bowlHeight / 2;
+  const archRx = lerp(0.35, 1.0, clampedRoundness) * archRy;
+
+  const baseY = 175;
+  const stemLeft = 32;
+  const stemRight = stemLeft + sw;
+  const stemTop = baseY - 185;
+
+  const archCx = stemLeft + archRx;
+  const archCy = baseY - archRy;
+  const topY = archCy - archRy;
+  const rightLegRight = stemLeft + 2 * archRx;
+
+  // PATH 1: ARCH (= the n, with evenodd counter)
+  let archPath = '';
+  archPath += `M ${stemLeft} ${baseY} `;
+  archPath += `L ${stemLeft} ${archCy} `;
+  archPath += `C ${stemLeft} ${archCy - archRy*K}, ${archCx - archRx*K} ${topY}, ${archCx} ${topY} `;
+  archPath += `C ${archCx + archRx*K} ${topY}, ${rightLegRight} ${archCy - archRy*K}, ${rightLegRight} ${archCy} `;
+  archPath += `L ${rightLegRight} ${baseY} `;
+  archPath += `L ${stemLeft} ${baseY} Z `;
+
+  // Inner archway — crown eclipse
+  const counterFade = Math.min(1, Math.max(0, p.tension / 0.2));
+  const iRx = (archRx - sw) * counterFade;
+  const iRy = (archRy - tw) * counterFade;
+
+  if (iRx > 1 && iRy > 1) {
+    const iL = archCx - iRx;
+    const iR = archCx + iRx;
+    const innerCrownY = archCy - iRy;
+
+    // CCW winding for nonzero cutout
+    archPath += `M ${iR} ${baseY} `;
+    archPath += `L ${iR} ${archCy} `;
+    archPath += `C ${iR} ${archCy - iRy*K}, ${archCx + iRx*K} ${innerCrownY}, ${archCx} ${innerCrownY} `;
+    archPath += `C ${archCx - iRx*K} ${innerCrownY}, ${iL} ${archCy - iRy*K}, ${iL} ${archCy} `;
+    archPath += `L ${iL} ${baseY} `;
+    archPath += `L ${iR} ${baseY} Z `;
+  }
+
+  // PATH 2: ASCENDER STEM (plain rectangle, overlaps left leg)
+  let stemPath = '';
+  stemPath += `M ${stemLeft} ${stemTop} `;
+  stemPath += `L ${stemRight} ${stemTop} `;
+  stemPath += `L ${stemRight} ${baseY} `;
+  stemPath += `L ${stemLeft} ${baseY} Z `;
+
+  // RENDER
+  let svg = `<rect x="0" y="-20" width="160" height="290" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${archPath}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="nonzero"/>`;
+  svg += `<path d="${stemPath}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+
+  if (p.debug) {
+    svg += `<line x1="0" y1="${stemTop}" x2="160" y2="${stemTop}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${topY}" x2="160" y2="${topY}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${baseY}" x2="160" y2="${baseY}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${archCy}" x2="160" y2="${archCy}" stroke="rgba(100,255,100,0.15)" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<ellipse cx="${archCx}" cy="${archCy}" rx="${archRx}" ry="${archRy}" fill="none" stroke="rgba(100,200,255,0.12)" stroke-width="0.4"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// ARC HELPERS (for c and future open-ellipse letters)
+// ============================================================
+function ePt(cx, cy, rx, ry, theta) {
+  return { x: cx + rx * Math.cos(theta), y: cy - ry * Math.sin(theta) };
+}
+
+function buildArcSegments(cx, cy, rx, ry, theta1, theta2) {
+  while (theta2 <= theta1) theta2 += Math.PI * 2;
+  const segs = [];
+  let t = theta1;
+  while (t < theta2 - 0.001) {
+    const tNext = Math.min(t + Math.PI / 2, theta2);
+    const dt = tNext - t;
+    const alpha = Math.sin(dt) * (Math.sqrt(4 + 3 * Math.pow(Math.tan(dt / 2), 2)) - 1) / 3;
+    const p1 = ePt(cx, cy, rx, ry, t);
+    const p2 = ePt(cx, cy, rx, ry, tNext);
+    const dx1 = -rx * Math.sin(t), dy1 = -ry * Math.cos(t);
+    const dx2 = -rx * Math.sin(tNext), dy2 = -ry * Math.cos(tNext);
+    segs.push({
+      startX: p1.x, startY: p1.y,
+      cp1x: p1.x + alpha * dx1, cp1y: p1.y + alpha * dy1,
+      cp2x: p2.x - alpha * dx2, cp2y: p2.y - alpha * dy2,
+      endX: p2.x, endY: p2.y
+    });
+    t = tNext;
+  }
+  return segs;
+}
+
+function forwardArc(segs) {
+  return segs.map(s => `C ${s.cp1x} ${s.cp1y}, ${s.cp2x} ${s.cp2y}, ${s.endX} ${s.endY} `).join('');
+}
+
+function reverseArc(segs) {
+  let d = '';
+  for (let i = segs.length - 1; i >= 0; i--) {
+    const s = segs[i];
+    d += `C ${s.cp2x} ${s.cp2y}, ${s.cp1x} ${s.cp1y}, ${s.startX} ${s.startY} `;
+  }
+  return d;
+}
+
+
+// ============================================================
+// LETTER C — Half-moon
+//
+// The left half of the o's ellipse. Opening is the entire
+// right side — a flat vertical edge at cx.
+// C-specific expanse: maps 0–1 onto 0.88–1.2 (always round,
+// can go wider-than-tall at high expanse).
+// Eclipse: same as o — counterFade shrinks inner uniformly.
+// At tension=0: solid semicircle.
+// ============================================================
+function drawC(p) {
+  const sw = lerp(8, 28, p.weight);
+  const tw = sw * lerp(1.0, 0.2, p.tension);
+
+  // C-specific expanse: maps 0–1 input onto 0.88–1.2
+  const cRoundness = lerp(0.88, 1.2, p.expanse);
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const ry = bowlHeight / 2;
+  const rx = cRoundness * ry;
+
+  const baseY = 175;
+  const cx = 80;
+  const cy = baseY - ry;
+  const top = cy - ry;
+  const bot = cy + ry;
+
+  let d = '';
+
+  // Outer half-ellipse: from (cx, top) around left to (cx, bot)
+  d += `M ${cx} ${top} `;
+  d += `C ${cx - rx*K} ${top}, ${cx - rx} ${cy - ry*K}, ${cx - rx} ${cy} `;
+  d += `C ${cx - rx} ${cy + ry*K}, ${cx - rx*K} ${bot}, ${cx} ${bot} `;
+  d += `L ${cx} ${top} Z `;
+
+  // Inner counter
+  const counterFade = Math.min(1, Math.max(0, p.tension / 0.2));
+  const iRx = (rx - tw) * counterFade;
+  const iRy = (ry - tw) * counterFade;
+
+  if (iRx > 1 && iRy > 1) {
+    const iTop = cy - iRy;
+    const iBot = cy + iRy;
+    d += `M ${cx} ${iTop} `;
+    d += `C ${cx - iRx*K} ${iTop}, ${cx - iRx} ${cy - iRy*K}, ${cx - iRx} ${cy} `;
+    d += `C ${cx - iRx} ${cy + iRy*K}, ${cx - iRx*K} ${iBot}, ${cx} ${iBot} `;
+    d += `L ${cx} ${iTop} Z `;
+  }
+
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  if (p.debug) {
+    svg += `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="rgba(100,200,255,0.12)" stroke-width="0.4"/>`;
+    svg += `<line x1="${cx}" y1="${top-10}" x2="${cx}" y2="${bot+10}" stroke="rgba(255,100,100,0.15)" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER E — Three-piece: top half + bottom arc + clipped crossbar
+//
+// Top piece: closed upper half-ellipse, evenodd counter.
+//   Crown eclipse: inner shrinks with counterFade, crown descends.
+// Bottom piece: open ring arc with mouth (35° opening).
+//   Tension floored at 0.27 — mouth never closes.
+// Crossbar: rectangle at cy, clipped to outer ellipse.
+//   Fixed thickness sw * 0.25, not affected by tension.
+//   Renders last, covers counter at cy band.
+// Same expanse as c: 0.88–1.2.
+// ============================================================
+function drawE(p) {
+  const sw = lerp(8, 28, p.weight);
+  const tw = sw * lerp(1.0, 0.2, p.tension);
+
+  const eRoundness = lerp(0.88, 1.2, p.expanse);
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const ry = bowlHeight / 2;
+  const rx = eRoundness * ry;
+
+  const baseY = 175;
+  const cx = 80;
+  const cy = baseY - ry;
+  const top = cy - ry;
+  const bot = cy + ry;
+
+  // Top piece: inner uses tension directly (full range, gradual sunset)
+  const counterFade = p.tension;
+  const iRx = (rx - tw) * counterFade;
+  const iRy = (ry - tw) * counterFade;
+
+  // Bottom piece: inner uses tension floored at 0.27
+  const mouthTension = Math.max(0.27, p.tension);
+  const mouthTw = sw * lerp(1.0, 0.2, mouthTension);
+  const mouthCounterFade = Math.min(1, Math.max(0, mouthTension / 0.2));
+  const mIRx = (rx - mouthTw) * mouthCounterFade;
+  const mIRy = (ry - mouthTw) * mouthCounterFade;
+
+  const mouthAngle = 35 * Math.PI / 180;
+
+  // Crossbar: fixed thickness
+  const barThick = sw * 0.25;
+  const barTop = cy - barThick / 2;
+  const barBot = cy + barThick / 2;
+
+  // ClipPath ID (unique per SVG)
+  const clipId = 'eClip';
+
+  // PATH 1: TOP PIECE
+  let topPath = '';
+  topPath += `M ${cx + rx} ${cy} `;
+  topPath += `C ${cx + rx} ${cy - ry*K}, ${cx + rx*K} ${top}, ${cx} ${top} `;
+  topPath += `C ${cx - rx*K} ${top}, ${cx - rx} ${cy - ry*K}, ${cx - rx} ${cy} `;
+  topPath += `L ${cx + rx} ${cy} Z `;
+
+  if (iRx > 1 && iRy > 1) {
+    const iTop = cy - iRy;
+    topPath += `M ${cx + iRx} ${cy} `;
+    topPath += `C ${cx + iRx} ${cy - iRy*K}, ${cx + iRx*K} ${iTop}, ${cx} ${iTop} `;
+    topPath += `C ${cx - iRx*K} ${iTop}, ${cx - iRx} ${cy - iRy*K}, ${cx - iRx} ${cy} `;
+    topPath += `L ${cx + iRx} ${cy} Z `;
+  }
+
+  // PATH 2: BOTTOM PIECE
+  let botPath = '';
+  botPath += `M ${cx - rx} ${cy} `;
+  botPath += `C ${cx - rx} ${cy + ry*K}, ${cx - rx*K} ${bot}, ${cx} ${bot} `;
+
+  const thetaBotStart = -Math.PI / 2;
+  const thetaBotEnd = -mouthAngle;
+  const dtBot = thetaBotEnd - thetaBotStart;
+  const alphaBot = Math.sin(dtBot) * (Math.sqrt(4 + 3 * Math.pow(Math.tan(dtBot/2), 2)) - 1) / 3;
+  const pBS = ePt(cx, cy, rx, ry, thetaBotStart);
+  const pBE = ePt(cx, cy, rx, ry, thetaBotEnd);
+  const dxBS = -rx * Math.sin(thetaBotStart), dyBS = -ry * Math.cos(thetaBotStart);
+  const dxBE = -rx * Math.sin(thetaBotEnd), dyBE = -ry * Math.cos(thetaBotEnd);
+  botPath += `C ${pBS.x + alphaBot*dxBS} ${pBS.y + alphaBot*dyBS}, ${pBE.x - alphaBot*dxBE} ${pBE.y - alphaBot*dyBE}, ${pBE.x} ${pBE.y} `;
+
+  if (mIRx > 1 && mIRy > 1) {
+    const innerBotEnd = ePt(cx, cy, mIRx, mIRy, thetaBotEnd);
+    botPath += `L ${innerBotEnd.x} ${innerBotEnd.y} `;
+    const innerBotSegs = buildArcSegments(cx, cy, mIRx, mIRy, Math.PI, 2 * Math.PI - mouthAngle);
+    botPath += reverseArc(innerBotSegs);
+    botPath += `L ${cx - rx} ${cy} Z `;
+  } else {
+    botPath += `L ${cx} ${cy} `;
+    botPath += `L ${cx - rx} ${cy} Z `;
+  }
+
+  // PATH 3: CROSSBAR
+  const barPath = `M ${cx - rx} ${barTop} L ${cx + rx} ${barTop} L ${cx + rx} ${barBot} L ${cx - rx} ${barBot} Z`;
+
+  // RENDER
+  let svg = '';
+  svg += `<defs><clipPath id="${clipId}"><ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/></clipPath></defs>`;
+  svg += `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${topPath}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+  svg += `<path d="${botPath}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+  svg += `<path d="${barPath}" fill="${TENDRELA_LETTER_COLOR}" clip-path="url(#${clipId})"/>`;
+
+  if (p.debug) {
+    svg += `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="rgba(100,200,255,0.12)" stroke-width="0.4"/>`;
+    svg += `<line x1="${cx - rx - 5}" y1="${barTop}" x2="${cx + rx + 5}" y2="${barTop}" stroke="rgba(255,150,100,0.2)" stroke-width="0.3" stroke-dasharray="1,2"/>`;
+    svg += `<line x1="${cx - rx - 5}" y1="${barBot}" x2="${cx + rx + 5}" y2="${barBot}" stroke="rgba(255,150,100,0.2)" stroke-width="0.3" stroke-dasharray="1,2"/>`;
+    svg += `<circle cx="${pBE.x}" cy="${pBE.y}" r="2" fill="rgba(255,100,100,0.4)"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// LETTER I — Square dot + stem, directional fill
+//
+// Dot fills in grounding direction (same as l, same as valleys).
+// Stem fills opposite (inward-facing).
+// Width responds to expanse: lerp(1.0, 1.8, expanse).
+// Uses drawDirRect helper.
+// ============================================================
+function drawI(p) {
+  const sw = lerp(8, 28, p.weight);
+  const widthMult = lerp(1.0, lerp(1.6, 1.2, p.weight), p.expanse);
+  const letterW = sw * widthMult;
+  const cx = 80;
+
+  const baseY = 175;
+  const bodyHeight = lerp(50, 120, Math.max(0.33, p.reach));
+  const stemTop = baseY - bodyHeight;
+  const stemLeft = cx - letterW / 2;
+  const stemRight = cx + letterW / 2;
+
+  const dotSize = letterW;
+  const dotGap = sw * 1.0;
+  const dotBottom = stemTop - dotGap;
+  const dotTop = dotBottom - dotSize;
+  const dotLeft = cx - dotSize / 2;
+  const dotRight = cx + dotSize / 2;
+
+  const frameT = Math.max(sw * 0.12, 1.2);
+
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+
+  // Dot: grounding direction
+  const dotD = drawDirRect(dotLeft, dotTop, dotRight, dotBottom, frameT, p.tension, p.fillDir);
+  svg += `<path d="${dotD}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  // Stem: opposite direction
+  const stemD = drawDirRect(stemLeft, stemTop, stemRight, baseY, frameT, p.tension, flipDir(p.fillDir));
+  svg += `<path d="${stemD}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  return svg;
+}
+
+
+// ============================================================
+// DIRECTIONAL FILL HELPER
+// Draws a rectangle with an inner cutout that shrinks based on
+// tension and direction. Used by i and l family.
+// dir: 'west' = fill from left, 'east' = fill from right
+// ============================================================
+function drawDirRect(left, top, right, bottom, frameT, tension, dir) {
+  const innerLeft = left + frameT;
+  const innerRight = right - frameT;
+  const innerTop = top + frameT;
+  const innerBottom = bottom - frameT;
+
+  let cutLeft, cutRight;
+  if (dir === 'west') {
+    cutLeft = lerp(innerRight, innerLeft, tension);
+    cutRight = innerRight;
+  } else {
+    cutLeft = innerLeft;
+    cutRight = lerp(innerLeft, innerRight, tension);
+  }
+
+  let d = '';
+  d += `M ${left} ${top} L ${right} ${top} L ${right} ${bottom} L ${left} ${bottom} Z `;
+  if (cutRight > cutLeft + 0.5) {
+    d += `M ${cutLeft} ${innerTop} L ${cutRight} ${innerTop} L ${cutRight} ${innerBottom} L ${cutLeft} ${innerBottom} Z `;
+  }
+  return d;
+}
+
+function flipDir(dir) { return dir === 'west' ? 'east' : 'west'; }
+
+
+// ============================================================
+// LETTER L — Tall stem, same fill direction as i's dot
+// Ascender height (stemTop = -10), same as b, d, h.
+// Width responds to expanse: lerp(1.0, 1.8, expanse).
+// ViewBox 0 -20 160 290.
+// ============================================================
+function drawL(p) {
+  const sw = lerp(8, 28, p.weight);
+  const widthMult = lerp(1.0, lerp(1.6, 1.2, p.weight), p.expanse);
+  const letterW = sw * widthMult;
+  const cx = 80;
+  const baseY = 175;
+  const stemTop = -10;
+  const stemLeft = cx - letterW / 2;
+  const stemRight = cx + letterW / 2;
+  const frameT = Math.max(sw * 0.12, 1.2);
+
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  const d = drawDirRect(stemLeft, stemTop, stemRight, baseY, frameT, p.tension, p.fillDir);
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+  return svg;
+}
+
+
+// ============================================================
+// ============================================================
+// LETTER J — Single continuous path with tapered elliptical arc tail
+//
+// One closed polygon: stem right edge → arc outer edge → tip
+// (outer and inner converge) → arc inner edge → stem left edge.
+// Persistent outline (stroke) always visible. Flood/rain fill
+// clipped to outer path rises from arc bottom or descends from
+// stem top based on tension. Dot opposes stem.
+// ============================================================
+function drawJ(p) {
+  const sw = lerp(8, 28, p.weight);
+  const cx = 80;
+  const baseY = 175;
+  const bodyHeight = lerp(50, 120, Math.max(0.33, p.reach));
+  const stemTop = baseY - bodyHeight;
+  const descY = 240;
+  const frameT = Math.max(sw * 0.12, 1.2);
+
+  const stemLeft = cx - sw / 2;
+  const stemRight = cx + sw / 2;
+
+  // Arc parameters
+  const arcRx = 20;
+  const arcRy = 20;
+  const arcThickW = sw;
+  const arcThinW = Math.max(sw * 0.08, 1.0);
+  const sweepDeg = 170;
+  const hookCy = descY - arcRy;
+
+  // Position: outer edge of thick end aligns with stemRight
+  const arcCx = stemRight - arcRx - arcThickW / 2;
+  // 1px overlap into stem to hide seam
+  const arcCy = hookCy - 1;
+
+  // Walk the arc: 3 o'clock start, CW sweep
+  const startRad = 0;
+  const sweepRad = -sweepDeg * Math.PI / 180;
+  const N = 60;
+  const outerPts = [], innerPts = [];
+
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const angle = startRad + sweepRad * t;
+    const px = arcCx + arcRx * Math.cos(angle);
+    const py = arcCy - arcRy * Math.sin(angle);
+    const radX = px - arcCx, radY = py - arcCy;
+    const radLen = Math.sqrt(radX * radX + radY * radY);
+    const awayX = radLen > 0.01 ? radX / radLen : 0;
+    const awayY = radLen > 0.01 ? radY / radLen : 0;
+    const localWidth = lerp(arcThickW, arcThinW, t * t);
+    outerPts.push({ x: px + awayX * localWidth / 2, y: py + awayY * localWidth / 2 });
+    innerPts.push({ x: px - awayX * localWidth / 2, y: py - awayY * localWidth / 2 });
+  }
+
+  // Single continuous path
+  let d = '';
+  d += `M ${stemLeft} ${stemTop} `;
+  d += `L ${stemRight} ${stemTop} `;
+  d += `L ${stemRight} ${outerPts[0].y} `;
+  for (let i = 0; i <= N; i++) d += `L ${outerPts[i].x} ${outerPts[i].y} `;
+  for (let i = N; i >= 0; i--) d += `L ${innerPts[i].x} ${innerPts[i].y} `;
+  d += `L ${stemLeft} ${innerPts[0].y} `;
+  d += `L ${stemLeft} ${stemTop} `;
+  d += 'Z';
+
+  // Find lowest point of shape
+  let lowestY = hookCy;
+  for (let i = 0; i <= N; i++) {
+    lowestY = Math.max(lowestY, outerPts[i].y, innerPts[i].y);
+  }
+
+  // Flood/rain fill
+  let floodY;
+  if (p.floodRain === 'flood') {
+    floodY = lerp(lowestY, stemTop, p.tension);
+  } else {
+    floodY = lerp(stemTop, lowestY, p.tension);
+  }
+
+  let fillRect;
+  if (p.floodRain === 'flood') {
+    fillRect = `M -50 ${floodY} L 210 ${floodY} L 210 ${lowestY + 10} L -50 ${lowestY + 10} Z`;
+  } else {
+    fillRect = `M -50 ${stemTop - 10} L 210 ${stemTop - 10} L 210 ${floodY} L -50 ${floodY} Z`;
+  }
+
+  // DOT — always opposes stem
+  const dotSize = sw;
+  const dotGap = sw * 1.0;
+  const dotBottom = stemTop - dotGap;
+  const dotTop = dotBottom - dotSize;
+  const dotLeft = cx - dotSize / 2;
+  const dotRight = cx + dotSize / 2;
+  const dotInnerLeft = dotLeft + frameT;
+  const dotInnerRight = dotRight - frameT;
+  const dotInnerTop = dotTop + frameT;
+  const dotInnerBottom = dotBottom - frameT;
+
+  let dotCutTop, dotCutBot;
+  if (p.floodRain === 'flood') {
+    dotCutTop = lerp(dotInnerBottom, dotInnerTop, p.tension);
+    dotCutBot = dotInnerBottom;
+  } else {
+    dotCutTop = dotInnerTop;
+    dotCutBot = lerp(dotInnerTop, dotInnerBottom, p.tension);
+  }
+
+  let dotPath = `M ${dotLeft} ${dotTop} L ${dotRight} ${dotTop} L ${dotRight} ${dotBottom} L ${dotLeft} ${dotBottom} Z `;
+  if (dotCutBot > dotCutTop + 0.5 && dotInnerRight > dotInnerLeft + 0.5) {
+    dotPath += `M ${dotInnerLeft} ${dotCutTop} L ${dotInnerRight} ${dotCutTop} L ${dotInnerRight} ${dotCutBot} L ${dotInnerLeft} ${dotCutBot} Z `;
+  }
+
+  // RENDER
+  const clipId = 'jOuterClip';
+  let svg = '';
+  svg += `<defs>`;
+  svg += `<clipPath id="${clipId}"><path d="${d}"/></clipPath>`;
+  svg += `</defs>`;
+  svg += `<rect x="0" y="-20" width="160" height="290" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${dotPath}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+  svg += `<path d="${d}" fill="none" stroke="${TENDRELA_LETTER_COLOR}" stroke-width="${frameT}"/>`;
+  svg += `<path d="${fillRect}" fill="${TENDRELA_LETTER_COLOR}" clip-path="url(#${clipId})"/>`;
+
+  if (p.debug) {
+    svg += debugLines(stemLeft, stemRight, [[stemTop,'xHeight'],[baseY,'baseline'],[descY,'descender'],[hookCy,'arc join']]);
+  }
+
+  return svg;
+}
+
+
+// ============================================================
+// LETTER T — Single continuous path with tapered arc tip
+//
+// stemTop = -10 (same as l, b, d, h). Crossbar at midpoint.
+// Bottom hook replaced with tapered elliptical arc, tip at
+// crossbarRight. Crossbar extends 1.5× letterW from center.
+// Split fill: rain from top, flood from bottom, meet at
+// crossbar midpoint. Persistent outline + clipped fill rects.
+// ============================================================
+function drawT(p) {
+  const sw = lerp(8, 28, p.weight);
+  const widthMult = lerp(1.0, lerp(1.6, 1.2, p.weight), p.expanse);
+  const letterW = sw * widthMult;
+  const cx = 80;
+  const baseY = 175;
+  const frameT = Math.max(sw * 0.12, 1.2);
+
+  const stemLeft = cx - letterW / 2;
+  const stemRight = cx + letterW / 2;
+  const stemTop = -10;
+
+  // Crossbar: 1.5× letterW from center, symmetric
+  const crossbarMult = 1.5;
+  const crossbarRight = cx + letterW * crossbarMult;
+  const crossbarLeft = cx - letterW * crossbarMult;
+
+  const crossbarThick = letterW * 0.75;
+  const crossbarMidY = (stemTop + baseY) / 2;
+  const crossbarTop = crossbarMidY - crossbarThick / 2;
+  const crossbarBot = crossbarMidY + crossbarThick / 2;
+
+  // Arc: tip lands at (crossbarRight, baseY)
+  const arcRy = (baseY - crossbarBot) * 0.8;
+  const hookCy = baseY - arcRy;
+
+  const arcCx = crossbarRight;
+  const arcCy = hookCy;
+  const arcRx = crossbarRight - cx;
+
+  const arcThickW = letterW;
+  const arcThinW = Math.max(letterW * 0.08, 1.0);
+
+  const N = 60;
+  const outerPts = [], innerPts = [];
+
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const angle = Math.PI + t * (Math.PI / 2);
+
+    const px = arcCx + arcRx * Math.cos(angle);
+    const py = arcCy - arcRy * Math.sin(angle);
+
+    const localWidth = lerp(arcThickW, arcThinW, t * t);
+
+    outerPts.push({ x: px + localWidth / 2, y: py });
+    innerPts.push({ x: px - localWidth / 2, y: py });
+  }
+
+  // SINGLE CONTINUOUS PATH
+  let d = '';
+
+  d += `M ${stemLeft} ${stemTop} `;
+  d += `L ${stemRight} ${stemTop} `;
+
+  d += `L ${stemRight} ${crossbarTop} `;
+  d += `L ${crossbarRight} ${crossbarTop} `;
+  d += `L ${crossbarRight} ${crossbarBot} `;
+  d += `L ${stemRight} ${crossbarBot} `;
+
+  d += `L ${outerPts[0].x} ${outerPts[0].y} `;
+  for (let i = 1; i <= N; i++) d += `L ${outerPts[i].x} ${outerPts[i].y} `;
+
+  for (let i = N; i >= 0; i--) d += `L ${innerPts[i].x} ${innerPts[i].y} `;
+
+  d += `L ${stemLeft} ${crossbarBot} `;
+  d += `L ${crossbarLeft} ${crossbarBot} `;
+  d += `L ${crossbarLeft} ${crossbarTop} `;
+  d += `L ${stemLeft} ${crossbarTop} `;
+
+  d += `L ${stemLeft} ${stemTop} `;
+  d += 'Z';
+
+  // Find lowest point of shape
+  let lowestY = hookCy;
+  for (let i = 0; i <= N; i++) {
+    lowestY = Math.max(lowestY, outerPts[i].y, innerPts[i].y);
+  }
+
+  // Split fill: rain from top, flood from bottom, meet at crossbarMidY
+  const rainY = lerp(stemTop, crossbarMidY, p.tension);
+  const floodY = lerp(lowestY, crossbarMidY, p.tension);
+  const tFillL = crossbarLeft - 5, tFillR = crossbarRight + 5;
+  const rainRect = `M ${tFillL} ${stemTop - 50} L ${tFillR} ${stemTop - 50} L ${tFillR} ${rainY + 1} L ${tFillL} ${rainY + 1} Z`;
+  const floodRect = `M ${tFillL} ${floodY - 1} L ${tFillR} ${floodY - 1} L ${tFillR} ${lowestY + 50} L ${tFillL} ${lowestY + 50} Z`;
+
+  // RENDER
+  const clipId = 'tOuterClip';
+  let svg = '';
+  svg += `<defs>`;
+  svg += `<clipPath id="${clipId}"><path d="${d}"/></clipPath>`;
+  svg += `</defs>`;
+  svg += `<rect x="0" y="-20" width="160" height="290" fill="${TENDRELA_BG_COLOR}"/>`;
+
+  svg += `<path d="${d}" fill="none" stroke="${TENDRELA_LETTER_COLOR}" stroke-width="${frameT}"/>`;
+  svg += `<path d="${rainRect}" fill="${TENDRELA_LETTER_COLOR}" clip-path="url(#${clipId})"/>`;
+  svg += `<path d="${floodRect}" fill="${TENDRELA_LETTER_COLOR}" clip-path="url(#${clipId})"/>`;
+
+  if (p.debug) {
+    svg += debugLines(stemLeft, stemRight, [[stemTop,'stemTop'],[baseY,'baseline'],[crossbarMidY,'crossbarMid'],[hookCy,'hookCy']]);
+  }
+
+  return svg;
+}
+
+
+// ============================================================
+// LETTER F — l-height stem with hook at TOP curving right + crossbar
+//
+// Mirror of t across the crossbar. Hook at top, stem descends to baseY.
+// Crossbar at midpoint. Evaporate/seep: fill radiates from crossbar
+// outward — evaporates upward into hook, seeps downward into stem.
+// Fills clipped to outer, drawn on top of frame.
+// ============================================================
+// ============================================================
+// TILDE BUILDER (for F crossbar replacement)
+// ============================================================
+const TILDE_ROTATION = 13;
+const TILDE_LENGTH_RATIO = 3.125;
+const TILDE_THICK_RATIO = 0.938;
+const TILDE_THIN_OVER_THICK = 0.0625;
+const TILDE_AMP_RATIO = 0.205;
+const TILDE_N = 200;
+
+function buildTildePath(centerX, centerY, length, amplitude, thick, thin, rotDeg) {
+  const topEdge = [];
+  const bottomEdge = [];
+
+  for (let i = 0; i <= TILDE_N; i++) {
+    const s = -1 + 2 * (i / TILDE_N);
+    const px = (length / 2) * s;
+    const py = -(amplitude / 2) * Math.sin(Math.PI * s);
+
+    const tdx = length / 2;
+    const tdy = -(amplitude / 2) * Math.PI * Math.cos(Math.PI * s);
+    const tlen = Math.sqrt(tdx * tdx + tdy * tdy);
+    const tx = tdx / tlen, ty = tdy / tlen;
+    const nx = -ty, ny = tx;
+
+    const profile = 1 - s * s;
+    const hw = (thin + (thick - thin) * profile) / 2;
+
+    const topRawX = px + nx * hw;
+    const topRawY = py + ny * hw;
+    const botRawX = px - nx * hw;
+    const botRawY = py - ny * hw;
+
+    const r = rotDeg * Math.PI / 180;
+    const cosR = Math.cos(r), sinR = Math.sin(r);
+
+    topEdge.push({
+      x: topRawX * cosR - topRawY * sinR + centerX,
+      y: topRawX * sinR + topRawY * cosR + centerY
+    });
+    bottomEdge.push({
+      x: botRawX * cosR - botRawY * sinR + centerX,
+      y: botRawX * sinR + botRawY * cosR + centerY
+    });
+  }
+
+  let d = `M ${topEdge[0].x.toFixed(2)} ${topEdge[0].y.toFixed(2)} `;
+  for (let i = 1; i < topEdge.length; i++) {
+    d += `L ${topEdge[i].x.toFixed(2)} ${topEdge[i].y.toFixed(2)} `;
+  }
+  for (let i = bottomEdge.length - 1; i >= 0; i--) {
+    d += `L ${bottomEdge[i].x.toFixed(2)} ${bottomEdge[i].y.toFixed(2)} `;
+  }
+  d += 'Z';
+  return d;
+}
+
+function drawF(p) {
+  const sw = lerp(8, 28, p.weight);
+  const widthMult = lerp(1.0, lerp(1.6, 1.2, p.weight), p.expanse);
+  const letterW = sw * widthMult;
+  const cx = 80, baseY = 175;
+  const frameT = Math.max(sw * 0.12, 1.2);
+  const stemLeft = cx - letterW / 2, stemRight = cx + letterW / 2;
+  const stemTop = -10;
+  const stemBot = baseY;
+
+  // Body height (from reach, needed for tilde amplitude)
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const zoneHeight = 120;
+  const bodyHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+
+  // Hook at TOP, curves RIGHT
+  const hookMult = 2.0;
+  const hookR = letterW * hookMult;
+  const hookCx = stemLeft + hookR;
+  const hookCy = stemTop + hookR;
+  const innerHookR = Math.max(0, hookR - letterW);
+
+  const outerTipY = hookCy - hookR;  // = stemTop
+  const innerTipY = hookCy - innerHookR;
+
+  // Crossbar position (tilde center)
+  const crossbarMidY = (stemTop + baseY) / 2;
+
+  // OUTER CONTOUR — stem + hook only, no crossbar
+  let outerPath = '';
+  outerPath += `M ${stemLeft} ${stemBot} L ${stemRight} ${stemBot} `;
+  outerPath += `L ${stemRight} ${hookCy} `;
+  if (innerHookR > 1) {
+    outerPath += `C ${stemRight} ${hookCy - innerHookR*K}, ${hookCx - innerHookR*K} ${innerTipY}, ${hookCx} ${innerTipY} `;
+    outerPath += `L ${hookCx} ${outerTipY} `;
+  } else { outerPath += `L ${stemRight} ${outerTipY} L ${hookCx} ${outerTipY} `; }
+  outerPath += `C ${hookCx - hookR*K} ${outerTipY}, ${stemLeft} ${hookCy - hookR*K}, ${stemLeft} ${hookCy} `;
+  outerPath += `L ${stemLeft} ${stemBot} Z `;
+
+  // INNER CONTOUR — stem + hook only, no crossbar
+  const inSL = stemLeft + frameT, inSR = stemRight - frameT, inSB = stemBot - frameT;
+  const inArcR = hookR - frameT, inInnerArcR = innerHookR + frameT;
+  const inOuterTipY = hookCy - inArcR, inInnerTipY = hookCy - inInnerArcR;
+  const canDraw = inArcR > 2 && inInnerArcR > 0 && inArcR > inInnerArcR && inSR > inSL + 0.5;
+
+  let innerPath = '';
+  if (canDraw) {
+    innerPath += `M ${inSL} ${inSB} L ${inSR} ${inSB} `;
+    innerPath += `L ${inSR} ${hookCy} `;
+    innerPath += `C ${inSR} ${hookCy - inInnerArcR*K}, ${hookCx - inInnerArcR*K} ${inInnerTipY}, ${hookCx} ${inInnerTipY} `;
+    innerPath += `L ${hookCx} ${inOuterTipY} `;
+    innerPath += `C ${hookCx - inArcR*K} ${inOuterTipY}, ${inSL} ${hookCy - inArcR*K}, ${inSL} ${hookCy} `;
+    innerPath += `L ${inSL} ${inSB} Z `;
+  }
+
+  // TILDE — replacing crossbar
+  const tildeLength = letterW * TILDE_LENGTH_RATIO;
+  const tildeThick = sw * TILDE_THICK_RATIO;
+  const tildeThin = tildeThick * TILDE_THIN_OVER_THICK;
+  const tildeAmp = bodyHeight * TILDE_AMP_RATIO;
+  const tildePath = buildTildePath(cx, crossbarMidY, tildeLength, tildeAmp, tildeThick, tildeThin, TILDE_ROTATION);
+
+  // EVAPORATE/SEEP — fill radiates from crossbar outward
+  const evapTop = lerp(crossbarMidY, outerTipY, p.tension);
+  const fFillL = Math.min(stemLeft, cx - tildeLength) - 5;
+  const fFillR = Math.max(hookCx, cx + tildeLength) + 5;
+  const evapRect = `M ${fFillL} ${evapTop - 1} L ${fFillR} ${evapTop - 1} L ${fFillR} ${crossbarMidY + 1} L ${fFillL} ${crossbarMidY + 1} Z`;
+  const seepBot = lerp(crossbarMidY, stemBot, p.tension);
+  const seepRect = `M ${fFillL} ${crossbarMidY - 1} L ${fFillR} ${crossbarMidY - 1} L ${fFillR} ${seepBot + 1} L ${fFillL} ${seepBot + 1} Z`;
+
+  // RENDER
+  const clipOuter = 'fOuterClip';
+  // Clip path includes both stem and tilde so tension fill covers both
+  let svg = '';
+  svg += `<defs><clipPath id="${clipOuter}"><path d="${outerPath}"/><path d="${tildePath}"/></clipPath></defs>`;
+  svg += `<rect x="0" y="-20" width="160" height="290" fill="${TENDRELA_BG_COLOR}"/>`;
+
+  svg += `<path d="${outerPath}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+  if (innerPath) svg += `<path d="${innerPath}" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${tildePath}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+  svg += `<path d="${evapRect}" fill="${TENDRELA_LETTER_COLOR}" clip-path="url(#${clipOuter})"/>`;
+  svg += `<path d="${seepRect}" fill="${TENDRELA_LETTER_COLOR}" clip-path="url(#${clipOuter})"/>`;
+
+  // Tip cap reinforcement (at the TOP)
+  const capBot = hookCy - innerHookR, capTop2 = hookCy - hookR;
+  svg += `<rect x="${hookCx - frameT/2}" y="${capTop2}" width="${frameT}" height="${capBot - capTop2}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+
+  return svg;
+}
+
+
+// ============================================================
+// LETTER R — Stem + custom junction + tapered elliptical arc
+//
+// Three overlapping shapes, all same fill color:
+//   1. Stem: rectangle from baseY to stemTop
+//   2. Junction: custom polygon connecting stem top to arc start
+//   3. Branch: tapered stroke along elliptical arc (variable width)
+//
+// Arc starts at 90° (12 o'clock), sweeps clockwise.
+// Sweep: 45° at min tension, 110° at max tension.
+// Thick end = sw (matches stem width), tapers to minTip.
+// eRx/eRy: ry > rx (tall ellipse, like steward's explorer mockup).
+// ============================================================
+function drawR(p) {
+  const sw = lerp(8, 28, p.weight);
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bodyHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const baseY = 175;
+  const stemLeft = 32;
+  const stemRight = stemLeft + sw;
+  const stemTop = baseY - bodyHeight;
+
+  // Ellipse radii — ry larger than rx (taller arc)
+  const eRx = lerp(bodyHeight * 0.2, bodyHeight * 0.4, clampedRoundness);
+  const eRy = lerp(bodyHeight * 0.3, bodyHeight * 0.55, clampedSize);
+
+  // Arc center: flush positioning
+  // Outer edge at 90° = stemTop. Centerline at 90° = stemTop + sw/2.
+  // arcCy - eRy = stemTop + sw/2, so arcCy = stemTop + sw/2 + eRy.
+  const arcCx = stemRight + sw / 2;
+  const arcCy = stemTop + sw / 2 + eRy;
+
+  // Sweep driven by tension
+  const sweepAmount = lerp(45, 110, p.tension);
+  const startAngle = 90 * Math.PI / 180;
+  const endAngle = startAngle - sweepAmount * Math.PI / 180;
+
+  // Taper
+  const minTip = Math.max(sw * 0.1, 1.0);
+
+  // Walk the arc
+  const N = 60;
+  const outerPts = [];
+  const innerPts = [];
+
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const angle = lerp(startAngle, endAngle, t);
+    const px = arcCx + eRx * Math.cos(angle);
+    const py = arcCy - eRy * Math.sin(angle);
+    const radX = px - arcCx;
+    const radY = py - arcCy;
+    const radLen = Math.sqrt(radX * radX + radY * radY);
+    const awayX = radLen > 0.01 ? radX / radLen : 0;
+    const awayY = radLen > 0.01 ? radY / radLen : 0;
+    const localWidth = lerp(sw, minTip, t * t);
+    outerPts.push({ x: px + awayX * localWidth / 2, y: py + awayY * localWidth / 2 });
+    innerPts.push({ x: px - awayX * localWidth / 2, y: py - awayY * localWidth / 2 });
+  }
+
+  // Combined arc + junction as one continuous path
+  // Traces: stem-top-left corner → outer arc start → outer arc → tip →
+  // inner arc back → inner arc follows into junction → down into stem overlap → close
+  const junctionInnerCount = Math.min(5, N);
+
+  let d = '';
+  // Start at stem top-left, go right to outer arc start
+  d += `M ${stemLeft} ${stemTop} `;
+  d += `L ${outerPts[0].x} ${outerPts[0].y} `;
+  // Trace outer arc forward to tip
+  for (let i = 1; i <= N; i++) d += `L ${outerPts[i].x} ${outerPts[i].y} `;
+  // Trace inner arc back from tip
+  d += `L ${innerPts[N].x} ${innerPts[N].y} `;
+  for (let i = N - 1; i >= 0; i--) d += `L ${innerPts[i].x} ${innerPts[i].y} `;
+  // Continue down into stem overlap zone (extend past stemRight into stem body)
+  d += `L ${stemLeft} ${innerPts[0].y} `;
+  // Close back to start
+  d += `L ${stemLeft} ${stemTop} Z `;
+
+  // Render: stem rect (extends full height) + combined arc/junction path on top
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<rect x="${stemLeft}" y="${stemTop}" width="${sw}" height="${baseY - stemTop}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+  return svg;
+}
+
+
+// ============================================================
+// LETTER S — Single continuous path, two blended elliptical arcs
+//
+// Thickest at spine, tapering to both tips. Sweep 180-315 degrees.
+// Expanse raises the ceiling. Rotated 10 degrees clockwise.
+// ============================================================
+function drawS(p) {
+  const sw = lerp(8, 28, p.weight);
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const normExpanse = (p.expanse - 0.53) / (1.0 - 0.53);
+  const zoneHeight = 120;
+  const bodyHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const baseY = 175;
+  const stemTop = baseY - bodyHeight;
+  const cx = 80;
+  const eRy = bodyHeight / 4;
+  const eRx = eRy * lerp(0.9, 1.5, normExpanse);
+  const upperCy = stemTop + bodyHeight / 4;
+  const lowerCy = stemTop + 3 * bodyHeight / 4;
+  const maxSweep = lerp(270, 315, normExpanse);
+  const sweepDeg = lerp(180, maxSweep, p.tension);
+  const minTip = Math.max(sw * 0.08, 1.0);
+  const N = 80;
+
+  const upperSpineAngle = -90 * Math.PI / 180;
+  const upperTipAngle = upperSpineAngle - sweepDeg * Math.PI / 180;
+  const lowerSpineAngle = 90 * Math.PI / 180;
+  const lowerTipAngle = lowerSpineAngle - sweepDeg * Math.PI / 180;
+
+  // Build one half: tip to spine, tapered
+  function buildHalf(arcCy, tipAngle, spineAngle) {
+    const outerPts = [], innerPts = [];
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const angle = lerp(tipAngle, spineAngle, t);
+      const px = cx + eRx * Math.cos(angle);
+      const py = arcCy - eRy * Math.sin(angle);
+      const radX = px - cx, radY = py - arcCy;
+      const radLen = Math.sqrt(radX * radX + radY * radY);
+      const awayX = radLen > 0.01 ? radX / radLen : 0;
+      const awayY = radLen > 0.01 ? radY / radLen : 0;
+      const localWidth = lerp(minTip, sw, 1 - (1 - t) * (1 - t));
+      outerPts.push({ x: px + awayX * localWidth / 2, y: py + awayY * localWidth / 2 });
+      innerPts.push({ x: px - awayX * localWidth / 2, y: py - awayY * localWidth / 2 });
+    }
+    let d = `M ${outerPts[0].x} ${outerPts[0].y} `;
+    for (let i = 1; i <= N; i++) d += `L ${outerPts[i].x} ${outerPts[i].y} `;
+    d += `L ${innerPts[N].x} ${innerPts[N].y} `;
+    for (let i = N - 1; i >= 0; i--) d += `L ${innerPts[i].x} ${innerPts[i].y} `;
+    d += 'Z';
+    return d;
+  }
+
+  const upperPath = buildHalf(upperCy, upperTipAngle, upperSpineAngle);
+  const lowerPath = buildHalf(lowerCy, lowerTipAngle, lowerSpineAngle);
+
+  // Spine bridge: a circle at the junction point, matching stroke width,
+  // to cover any gap between the two halves
+  const spineY = upperCy + eRy;
+  const bridgeR = sw / 2;
+  const bridgePath = `M ${cx} ${spineY - bridgeR} A ${bridgeR} ${bridgeR} 0 1 1 ${cx} ${spineY + bridgeR} A ${bridgeR} ${bridgeR} 0 1 1 ${cx} ${spineY - bridgeR} Z`;
+
+  const rotCy = stemTop + bodyHeight / 2;
+  let svg = `<rect width="160" height="270" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<g transform="rotate(10, 80, ${rotCy})">`;
+  svg += `<path d="${upperPath}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+  svg += `<path d="${lowerPath}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+  svg += `<path d="${bridgePath}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+  svg += `</g>`;
+  return svg;
+}
+
+// ============================================================
+// X — four triangles, tips at center, with inset tension cutouts
+// ============================================================
+
+function xInsetPoint(p0, p1, p2, insetDist) {
+  const dx1 = p1.x - p0.x, dy1 = p1.y - p0.y;
+  const dx2 = p2.x - p0.x, dy2 = p2.y - p0.y;
+  const len1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+  const len2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+  if (len1 < 0.0001 || len2 < 0.0001) return { x: p0.x, y: p0.y };
+  const u1x = dx1/len1, u1y = dy1/len1;
+  const u2x = dx2/len2, u2y = dy2/len2;
+  const bx = u1x + u2x, by = u1y + u2y;
+  const blen = Math.sqrt(bx*bx + by*by);
+  if (blen < 0.0001) return { x: p0.x, y: p0.y };
+  const halfAngle = Math.acos(Math.max(-1, Math.min(1, u1x*u2x + u1y*u2y))) / 2;
+  if (Math.abs(Math.sin(halfAngle)) < 0.0001) return { x: p0.x, y: p0.y };
+  let bisectorDist = insetDist / Math.sin(halfAngle);
+  // Clamp: never travel more than 80% of the shortest edge from this vertex
+  const maxDist = Math.min(len1, len2) * 0.8;
+  bisectorDist = Math.min(bisectorDist, maxDist);
+  return {
+    x: p0.x + (bx/blen) * bisectorDist,
+    y: p0.y + (by/blen) * bisectorDist,
+  };
+}
+
+function drawX(p) {
+  const m = getMeasurements(p);
+  const DEG = Math.PI / 180;
+  const svgW = 160, svgH = 270;
+
+  // Center of the X in SVG coords
+  const cx = 80;
+  const baseY = 175;
+  const topY = baseY - m.bodyHeight;
+  const cy = (topY + baseY) / 2;
+
+  // Reach: how far arms extend. Scale to fit the body zone.
+  // Use half the body height as the arm length, modulated by bowlRx for width.
+  const armLenV = m.bodyHeight / 2;     // vertical reach
+  const armLenH = (m.sw + m.bowlRx) / 2; // horizontal reach (match V/bowl width)
+
+  // Spread: angle of arm bisectors from horizontal.
+  // Derived from the aspect ratio of armLenV / armLenH — taller body = more vertical spread.
+  const spreadRad = Math.atan2(armLenV, armLenH);
+
+  // Aperture: opening angle of each arm.
+  // Derived from expanse — wider expanse = fatter arms.
+  const normExpanse = Math.max(0, (p.expanse - 0.53)) / (1.0 - 0.53);
+  let apertureDeg = lerp(12, 30, normExpanse);
+  // Weight nudges aperture
+  apertureDeg += lerp(-3, 3, p.weight);
+  apertureDeg = Math.max(2, apertureDeg);
+  const halfAp = apertureDeg / 2 * DEG;
+
+  // Arm reach (distance from center to outer vertices), scaled by weight
+  const weightScale = lerp(0.8, 1.2, p.weight);
+  const armReach = Math.sqrt(armLenV * armLenV + armLenH * armLenH) * weightScale;
+
+  // Compute 4 arm bisector angles
+  const bisectors = [
+    -spreadRad,              // upper-right
+    Math.PI + spreadRad,     // upper-left
+    spreadRad,               // lower-right
+    Math.PI - spreadRad,     // lower-left
+  ];
+
+  // Build arms in SVG pixel coordinates
+  const arms = bisectors.map(b => {
+    const angA = b - halfAp;
+    const angB = b + halfAp;
+    return {
+      tip: { x: cx, y: cy },
+      a: { x: cx + Math.cos(angA) * armReach, y: cy + Math.sin(angA) * armReach },
+      b: { x: cx + Math.cos(angB) * armReach, y: cy + Math.sin(angB) * armReach },
+    };
+  });
+
+  // Wall thickness for tension cutout — proportional to sw but scaled for the SVG viewBox
+  const wallT = Math.min(m.sw * 0.35, armReach * 0.06);
+
+  // Build SVG path with evenodd cutouts
+  let d = '';
+  for (const arm of arms) {
+    // Outer triangle
+    d += `M ${arm.tip.x.toFixed(1)} ${arm.tip.y.toFixed(1)} `;
+    d += `L ${arm.a.x.toFixed(1)} ${arm.a.y.toFixed(1)} `;
+    d += `L ${arm.b.x.toFixed(1)} ${arm.b.y.toFixed(1)} Z `;
+
+    // Inner cutout (tension < 1)
+    if (p.tension < 0.99) {
+      const iTip = xInsetPoint(arm.tip, arm.a, arm.b, wallT);
+      const iA   = xInsetPoint(arm.a, arm.tip, arm.b, wallT);
+      const iB   = xInsetPoint(arm.b, arm.tip, arm.a, wallT);
+
+      const edx = iA.x - iTip.x, edy = iA.y - iTip.y;
+      const insetSize = Math.sqrt(edx*edx + edy*edy);
+
+      if (insetSize > 1) {
+        // Lerp cutout vertices: tension=1 collapses to iTip, tension=0 = full inset
+        const cA = { x: lerp(iA.x, iTip.x, p.tension), y: lerp(iA.y, iTip.y, p.tension) };
+        const cB = { x: lerp(iB.x, iTip.x, p.tension), y: lerp(iB.y, iTip.y, p.tension) };
+
+        const cdx = cA.x - iTip.x, cdy = cA.y - iTip.y;
+        if (Math.sqrt(cdx*cdx + cdy*cdy) > 0.5) {
+          // Reverse winding for evenodd
+          d += `M ${iTip.x.toFixed(1)} ${iTip.y.toFixed(1)} `;
+          d += `L ${cB.x.toFixed(1)} ${cB.y.toFixed(1)} `;
+          d += `L ${cA.x.toFixed(1)} ${cA.y.toFixed(1)} Z `;
+        }
+      }
+    }
+  }
+
+  let svg = `<rect width="${svgW}" height="${svgH}" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  if (p.debug) {
+    svg += `<line x1="${cx}" y1="0" x2="${cx}" y2="${svgH}" stroke="rgba(255,255,255,0.08)" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${cy}" x2="${svgW}" y2="${cy}" stroke="rgba(255,255,255,0.08)" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<circle cx="${cx}" cy="${cy}" r="1.5" fill="rgba(255,100,100,0.4)"/>`;
+  }
+
+  return svg;
+}
+
+// ============================================================
+// K — vertical stem (l-style) + two right-side triangle arms
+// Lower arm always reaches baseline. Asymmetric.
+// ============================================================
+
+function drawK(p) {
+  const m = getMeasurements(p);
+  const { sw, tw } = m;
+  const DEG = Math.PI / 180;
+  const svgW = 160, svgH = 270;
+
+  // Stem: straight rectangle, l-style, ascender to baseline
+  // Stem width capped at 64% of sw — K's stem is scaffolding, not the main event
+  const kSw = sw * 0.64;
+  const baseY = 175;
+  const stemTop = baseY - 185;
+  const stemLeft = 32, stemRight = stemLeft + kSw;
+
+  // Body zone
+  const bodyTop = baseY - m.bodyHeight;
+  const bodyCy = (bodyTop + baseY) / 2;
+
+  // Junction: arm tips touch stem right edge, 40% down from bodyTop
+  const jx = stemRight;
+  const jy = bodyTop + m.bodyHeight * 0.4;
+  const gapMin = 2.5;
+
+  // Spread angle from reach — ease-in curve, capped at 0.42 effective
+  const reachCapped = Math.min(p.reach, 0.42);
+  const reachCurved = 1 - (1 - reachCapped) * (1 - reachCapped);
+  const spreadDeg = lerp(72, 5, reachCurved);
+  const spreadRad = spreadDeg * DEG;
+
+  // Aperture from expanse
+  const normExpanse = Math.max(0, (p.expanse - 0.53)) / (1.0 - 0.53);
+  let apertureDeg = lerp(7, 36, normExpanse);
+  // Weight nudges aperture
+  apertureDeg += lerp(-3, 3, p.weight);
+  apertureDeg = Math.max(2, apertureDeg);
+  const halfAp = apertureDeg / 2 * DEG;
+
+  // Base arm reach: derived from bowl area matching, scaled by 0.80
+  // to compensate for solid triangles reading heavier than open ellipses.
+  const bowlArea = Math.PI * m.bowlRx * (m.bodyHeight / 2);
+  const sinAp = Math.sin(apertureDeg * DEG);
+  const weightScale = lerp(0.8, 1.2, p.weight);
+  let baseArmReach;
+  if (sinAp > 0.01) {
+    baseArmReach = Math.sqrt(bowlArea / sinAp) * weightScale * 0.80;
+  } else {
+    baseArmReach = m.bodyHeight * 0.70 * weightScale * 0.80; // fallback
+  }
+
+  const upRoom = jy - bodyTop;
+  const downRoom = baseY - jy;
+
+  // Upper arm: clamped to body top
+  let upperReach = baseArmReach;
+  const sinUpperMax = Math.sin(spreadRad + halfAp);
+  if (sinUpperMax > 0.01) {
+    upperReach = Math.min(upperReach, upRoom / sinUpperMax);
+  }
+  if (spreadRad > halfAp) {
+    const sinUpperMin = Math.sin(spreadRad - halfAp);
+    if (sinUpperMin > 0.01) {
+      upperReach = Math.min(upperReach, upRoom / sinUpperMin);
+    }
+  }
+
+  // Lower arm: 1.3× upper arm reach for natural asymmetry
+  const sinLowerMax = Math.sin(spreadRad + halfAp);
+  let lowerReach = upperReach * 1.3;
+
+  // Build upper arm
+  const upperAngA = -(spreadRad + halfAp);
+  const upperAngB = -(spreadRad - halfAp);
+  const upperArm = {
+    tip: { x: jx, y: jy },
+    a: { x: jx + Math.cos(upperAngA) * upperReach, y: jy + Math.sin(upperAngA) * upperReach },
+    b: { x: jx + Math.cos(upperAngB) * upperReach, y: jy + Math.sin(upperAngB) * upperReach },
+  };
+
+  // Build lower arm
+  const lowerAngA = spreadRad - halfAp;
+  const lowerAngB = spreadRad + halfAp;
+  const lowerArm = {
+    tip: { x: jx, y: jy },
+    a: { x: jx + Math.cos(lowerAngA) * lowerReach, y: jy + Math.sin(lowerAngA) * lowerReach },
+    b: { x: jx + Math.cos(lowerAngB) * lowerReach, y: jy + Math.sin(lowerAngB) * lowerReach },
+  };
+
+  const arms = [upperArm, lowerArm];
+
+  // Clamp: no vertex left of stem + gap
+  const minX = stemRight + gapMin;
+  for (const arm of arms) {
+    if (arm.a.x < minX) arm.a.x = minX;
+    if (arm.b.x < minX) arm.b.x = minX;
+  }
+
+  // Wall thickness — uses K's capped stem width
+  const wallT = kSw * 0.4;
+
+  // Build SVG path
+  let d = '';
+
+  // Stem — straight rectangle
+  d += `M ${stemLeft} ${stemTop} L ${stemRight} ${stemTop} L ${stemRight} ${baseY} L ${stemLeft} ${baseY} Z `;
+
+  // Triangle arms with evenodd cutouts
+  for (const arm of arms) {
+    d += `M ${arm.tip.x.toFixed(1)} ${arm.tip.y.toFixed(1)} `;
+    d += `L ${arm.a.x.toFixed(1)} ${arm.a.y.toFixed(1)} `;
+    d += `L ${arm.b.x.toFixed(1)} ${arm.b.y.toFixed(1)} Z `;
+
+    if (p.tension < 0.99) {
+      const iTip = xInsetPoint(arm.tip, arm.a, arm.b, wallT);
+      const iA   = xInsetPoint(arm.a, arm.tip, arm.b, wallT);
+      const iB   = xInsetPoint(arm.b, arm.tip, arm.a, wallT);
+
+      const edx = iA.x - iTip.x, edy = iA.y - iTip.y;
+      const insetSize = Math.sqrt(edx*edx + edy*edy);
+
+      if (insetSize > 1) {
+        const cA = { x: lerp(iA.x, iTip.x, p.tension), y: lerp(iA.y, iTip.y, p.tension) };
+        const cB = { x: lerp(iB.x, iTip.x, p.tension), y: lerp(iB.y, iTip.y, p.tension) };
+
+        const cdx = cA.x - iTip.x, cdy = cA.y - iTip.y;
+        if (Math.sqrt(cdx*cdx + cdy*cdy) > 0.5) {
+          d += `M ${iTip.x.toFixed(1)} ${iTip.y.toFixed(1)} `;
+          d += `L ${cB.x.toFixed(1)} ${cB.y.toFixed(1)} `;
+          d += `L ${cA.x.toFixed(1)} ${cA.y.toFixed(1)} Z `;
+        }
+      }
+    }
+  }
+
+  let svg = `<rect width="${svgW}" height="${svgH}" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  if (p.debug) {
+    svg += debugLines(stemLeft, stemRight, [
+      [stemTop, 'ascender'], [baseY, 'baseline'],
+      [bodyTop, 'bodyTop'], [bodyCy, 'junction'],
+    ]);
+  }
+
+  return svg;
+}
+
+// ============================================================
+// Y — two upper triangle arms + angled tail triangle
+// Fixed ceiling (topY=55), junction at 65%, bowl-area matched with sw boost
+// ============================================================
+
+function drawY(p) {
+  // Y-local caps: weight min 0.25 (reach uncapped for measurements,
+  // capped at 0.48 only for spread angle below)
+  const yp = Object.assign({}, p, {
+    weight: Math.max(p.weight, 0.25),
+  });
+  const m = getMeasurements(yp);
+  const { sw, tw } = m;
+  const DEG = Math.PI / 180;
+  const svgW = 160, svgH = 270;
+
+  const baseY = 175;
+  const descY = 260;
+  const topY = 55; // fixed ceiling — ascender line, not variable bodyTop
+  const fixedZoneHeight = baseY - topY; // always 120
+
+  // Junction at baseline — the three tips converge here
+  const jx = 80;
+  const jy = baseY;
+
+  // Map unified reach (0.33–0.48) to the Y's spread angle range
+  const reachCapped = Math.min(p.reach, 0.48);
+  const yReach = lerp(0.03, 0.28, (reachCapped - 0.33) / (0.48 - 0.33));
+  const reachClamped = Math.max(0.03, Math.min(yReach, 0.28));
+  const reachCurved = 1 - (1 - reachClamped) * (1 - reachClamped);
+  const spreadDeg = lerp(72, 5, reachCurved);
+  const spreadRad = spreadDeg * DEG;
+
+  // Aperture from expanse (min 0.64), with weight nudge ±6°
+  const clampedExpanse = Math.max(0.64, p.expanse);
+  const normExpanse = Math.max(0, (clampedExpanse - 0.53)) / (1.0 - 0.53);
+  let apertureDeg = lerp(7, 36, normExpanse);
+  apertureDeg += lerp(-6, 6, yp.weight);
+  apertureDeg = Math.max(2, apertureDeg);
+  // Clamp aperture so inner edges of upper arms always have a visible gap
+  const minInnerGap = 12;
+  const maxApertureDeg = 2 * spreadDeg - minInnerGap;
+  if (maxApertureDeg > 0) {
+    apertureDeg = Math.min(apertureDeg, maxApertureDeg);
+  } else {
+    apertureDeg = 2;
+  }
+  const halfAp = apertureDeg / 2 * DEG;
+
+  // Weight: flat scale, sw addition handles weight response
+  const weightScale = 1.0;
+
+  // Bowl-area matched arm reach with sw additive boost
+  const bowlArea = Math.PI * m.bowlRx * (m.bodyHeight / 2);
+  const sinAp = Math.sin(apertureDeg * DEG);
+  let baseArmReach;
+  if (sinAp > 0.01) {
+    baseArmReach = Math.sqrt(bowlArea / sinAp) * weightScale * 0.80 + sw * 0.5;
+  } else {
+    baseArmReach = fixedZoneHeight * 0.70 * weightScale * 0.80 + sw * 0.5;
+  }
+
+  // ─── Tail triangle ───
+  const hangDeg = (p.hang !== undefined) ? p.hang : 33;
+  const hangRad = hangDeg * DEG;
+  const tailBisector = Math.PI / 2 + hangRad;
+
+  const tailDownRoom = descY - jy;
+  const sinTailMax = Math.sin(tailBisector + halfAp);
+  const sinTailMin = Math.sin(tailBisector - halfAp);
+  const maxSinTail = Math.max(Math.abs(sinTailMax), Math.abs(sinTailMin));
+  let tailReach = baseArmReach / 0.75;
+  // Vertical room clamp
+  if (maxSinTail > 0.01) {
+    tailReach = Math.min(tailReach, tailDownRoom / maxSinTail);
+  }
+  // Horizontal room clamp — tail tip x must stay within [4, svgW-4]
+  const cosTailMax = Math.max(Math.abs(Math.cos(tailBisector + halfAp)), Math.abs(Math.cos(tailBisector - halfAp)));
+  if (cosTailMax > 0.01) {
+    tailReach = Math.min(tailReach, (jx - 4) / cosTailMax);
+  }
+
+  const tailAngA = tailBisector - halfAp;
+  const tailAngB = tailBisector + halfAp;
+  const tail = {
+    tip: { x: jx, y: jy },
+    a: { x: jx + Math.cos(tailAngA) * tailReach, y: jy + Math.sin(tailAngA) * tailReach },
+    b: { x: jx + Math.cos(tailAngB) * tailReach, y: jy + Math.sin(tailAngB) * tailReach },
+  };
+
+  // ─── Upper arms (symmetric, clamped to fixed topY) ───
+  // Below 0.48: spread angle and arm length both come from reach normally.
+  // Above 0.48: freeze the arm tip x-position (horizontal spread frozen at 0.48 value),
+  // but let arm length keep growing — the extra length goes upward by narrowing the angle.
+  const upRoom = jy - topY;
+  let upperReach = baseArmReach;
+  let finalSpreadRad = spreadRad;
+
+  // Clamp reach by vertical room at the current angle
+  const sinUpperMax = Math.sin(spreadRad + halfAp);
+  if (sinUpperMax > 0.01) {
+    upperReach = Math.min(upperReach, upRoom / sinUpperMax);
+  }
+
+  if (p.reach > 0.48) {
+    // Compute where arm tips would be at reach=0.48 (the frozen x target)
+    const m48 = getMeasurements(Object.assign({}, yp, { reach: 0.48 }));
+    const bowlArea48 = Math.PI * m48.bowlRx * (m48.bodyHeight / 2);
+    const sinAp48 = Math.sin(apertureDeg * DEG);
+    let reach48;
+    if (sinAp48 > 0.01) {
+      reach48 = Math.sqrt(bowlArea48 / sinAp48) * weightScale * 0.80 + m48.sw * 0.5;
+    } else {
+      reach48 = fixedZoneHeight * 0.70 * weightScale * 0.80 + m48.sw * 0.5;
+    }
+    const sinUpper48 = Math.sin(spreadRad + halfAp);
+    if (sinUpper48 > 0.01) {
+      reach48 = Math.min(reach48, upRoom / sinUpper48);
+    }
+    // The frozen x-distance from center for the outermost arm edge
+    const frozenX = Math.abs(Math.cos(Math.PI + spreadRad - halfAp)) * reach48;
+
+    // Current arm length wants to be upperReach (from uncapped measurements).
+    // Solve for the new angle where: cos(angle) * newReach = frozenX
+    // and sin(angle) * newReach = vertical extent
+    // newReach = sqrt(frozenX^2 + verticalExtent^2), but we want to use the
+    // larger upperReach and find what angle keeps x at frozenX.
+    if (upperReach > reach48 && frozenX > 0.01) {
+      // New spread angle: acos(frozenX / upperReach) gives angle from horizontal
+      const cosNew = Math.min(1, frozenX / upperReach);
+      const newAngleFromHoriz = Math.acos(cosNew);
+      // spreadRad is measured from vertical (π), so convert:
+      // the arm bisector angle from +x axis is (π + spreadRad), 
+      // the outer edge is (π + spreadRad - halfAp)
+      // cos component = -cos(spreadRad - halfAp) ≈ frozenX / reach
+      // We want: cos(spreadRad_new - halfAp) = frozenX / upperReach
+      const newSpreadMinusHalfAp = Math.acos(Math.min(1, frozenX / upperReach));
+      finalSpreadRad = newSpreadMinusHalfAp + halfAp;
+    }
+  }
+
+  // Upper-left arm (using finalSpreadRad)
+  const ulAngA = Math.PI + finalSpreadRad - halfAp;
+  const ulAngB = Math.PI + finalSpreadRad + halfAp;
+  const upperLeft = {
+    tip: { x: jx, y: jy },
+    a: { x: jx + Math.cos(ulAngA) * upperReach, y: jy + Math.sin(ulAngA) * upperReach },
+    b: { x: jx + Math.cos(ulAngB) * upperReach, y: jy + Math.sin(ulAngB) * upperReach },
+  };
+
+  // Upper-right arm (using finalSpreadRad)
+  const urAngA = -finalSpreadRad - halfAp;
+  const urAngB = -finalSpreadRad + halfAp;
+  const upperRight = {
+    tip: { x: jx, y: jy },
+    a: { x: jx + Math.cos(urAngA) * upperReach, y: jy + Math.sin(urAngA) * upperReach },
+    b: { x: jx + Math.cos(urAngB) * upperReach, y: jy + Math.sin(urAngB) * upperReach },
+  };
+
+  const arms = [upperLeft, upperRight, tail];
+  const wallT = sw * 0.4;
+
+  // Build SVG path
+  let d = '';
+  for (const arm of arms) {
+    d += `M ${arm.tip.x.toFixed(1)} ${arm.tip.y.toFixed(1)} `;
+    d += `L ${arm.a.x.toFixed(1)} ${arm.a.y.toFixed(1)} `;
+    d += `L ${arm.b.x.toFixed(1)} ${arm.b.y.toFixed(1)} Z `;
+
+    if (p.tension < 0.99) {
+      const iTip = xInsetPoint(arm.tip, arm.a, arm.b, wallT);
+      const iA   = xInsetPoint(arm.a, arm.tip, arm.b, wallT);
+      const iB   = xInsetPoint(arm.b, arm.tip, arm.a, wallT);
+
+      const edx = iA.x - iTip.x, edy = iA.y - iTip.y;
+      const insetSize = Math.sqrt(edx*edx + edy*edy);
+
+      if (insetSize > 1) {
+        const cA = { x: lerp(iA.x, iTip.x, p.tension), y: lerp(iA.y, iTip.y, p.tension) };
+        const cB = { x: lerp(iB.x, iTip.x, p.tension), y: lerp(iB.y, iTip.y, p.tension) };
+
+        const cdx = cA.x - iTip.x, cdy = cA.y - iTip.y;
+        if (Math.sqrt(cdx*cdx + cdy*cdy) > 0.5) {
+          d += `M ${iTip.x.toFixed(1)} ${iTip.y.toFixed(1)} `;
+          d += `L ${cB.x.toFixed(1)} ${cB.y.toFixed(1)} `;
+          d += `L ${cA.x.toFixed(1)} ${cA.y.toFixed(1)} Z `;
+        }
+      }
+    }
+  }
+
+  let svg = `<rect width="${svgW}" height="${svgH}" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  if (p.debug) {
+    svg += debugLines(40, 120, [
+      [baseY, 'baseline'], [descY, 'descender'], [topY, 'topY/ceiling'],
+    ]);
+    svg += `<circle cx="${jx}" cy="${jy}" r="1.5" fill="rgba(255,100,100,0.4)"/>`;
+  }
+
+  return svg;
+}
+
+
+// ============================================================
+// Z — horizontal caps + diagonal parallelogram + tilde, all evenodd
+// Tension controls diagonal thickness
+// ============================================================
+
+function drawZ(p) {
+  const m = getMeasurements(p);
+  const { sw, tw } = m;
+  const svgW = 160, svgH = 270;
+  const baseY = 175;
+  const bodyTop = baseY - m.bodyHeight;
+  const cx = 80;
+
+  const zWidth = m.bowlRx * 1.6 + sw * 0.8;
+  const zLeft = cx - zWidth / 2;
+  const zRight = cx + zWidth / 2;
+  const capHeight = sw;
+
+  // Diagonal width: tension controls thickness
+  const diagWidth = sw * lerp(0.15, 0.7, p.tension);
+
+  const diagTopRightX = zRight;
+  const diagTopLeftX = diagTopRightX - diagWidth;
+  const diagBotLeftX = zLeft;
+  const diagBotRightX = diagBotLeftX + diagWidth;
+
+  let d = '';
+
+  // Top bar
+  d += `M ${zLeft.toFixed(1)} ${bodyTop.toFixed(1)} `;
+  d += `L ${zRight.toFixed(1)} ${bodyTop.toFixed(1)} `;
+  d += `L ${zRight.toFixed(1)} ${(bodyTop + capHeight).toFixed(1)} `;
+  d += `L ${zLeft.toFixed(1)} ${(bodyTop + capHeight).toFixed(1)} Z `;
+
+  // Bottom bar
+  d += `M ${zLeft.toFixed(1)} ${(baseY - capHeight).toFixed(1)} `;
+  d += `L ${zRight.toFixed(1)} ${(baseY - capHeight).toFixed(1)} `;
+  d += `L ${zRight.toFixed(1)} ${baseY.toFixed(1)} `;
+  d += `L ${zLeft.toFixed(1)} ${baseY.toFixed(1)} Z `;
+
+  // Diagonal parallelogram
+  d += `M ${diagTopLeftX.toFixed(1)} ${bodyTop.toFixed(1)} `;
+  d += `L ${diagTopRightX.toFixed(1)} ${bodyTop.toFixed(1)} `;
+  d += `L ${diagBotRightX.toFixed(1)} ${baseY.toFixed(1)} `;
+  d += `L ${diagBotLeftX.toFixed(1)} ${baseY.toFixed(1)} Z `;
+
+  // Tilde: centered on diagonal midpoint
+  const diagMidX = (diagTopRightX + diagBotLeftX) / 2;
+  const diagMidY = (bodyTop + baseY) / 2;
+  const diagDx = diagBotLeftX - diagTopRightX;
+  const diagDy = baseY - bodyTop;
+  const diagLen = Math.sqrt(diagDx*diagDx + diagDy*diagDy);
+
+  const tildeLength = diagLen * 0.32;
+  const tildeThick = diagLen * 0.045;
+  const tildeThin = tildeThick * TILDE_THIN_OVER_THICK;
+  const tildeAmp = diagLen * 0.055;
+  const tildeRot = TILDE_ROTATION;
+  const tildePath = buildTildePath(diagMidX, diagMidY, tildeLength, tildeAmp, tildeThick, tildeThin, tildeRot);
+
+  // Everything in one evenodd path — tilde included
+  let svg = `<rect width="${svgW}" height="${svgH}" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d} ${tildePath}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  return svg;
+}
+
+
+// ============================================================
+// UMLAUT — tips-up triangle dots
+// Reusable helper for any letter needing an umlaut
+// ============================================================
+
+function drawUmlautTri(cx, topY, sw) {
+  const triSize = sw * 0.55;
+  const dotGap = sw * 0.6;
+  const dotSpacing = sw * 1.2;
+  const triCy = topY - dotGap - triSize / 2;
+  const leftCx = cx - dotSpacing / 2;
+  const rightCx = cx + dotSpacing / 2;
+
+  function triPath(tcx, tcy) {
+    const h = triSize * 0.5;
+    const w = triSize * 0.5;
+    return `M ${tcx.toFixed(1)} ${(tcy - h).toFixed(1)} L ${(tcx - w).toFixed(1)} ${(tcy + h).toFixed(1)} L ${(tcx + w).toFixed(1)} ${(tcy + h).toFixed(1)} Z`;
+  }
+
+  return `<path d="${triPath(leftCx, triCy)}" fill="${TENDRELA_LETTER_COLOR}"/><path d="${triPath(rightCx, triCy)}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+}
+
+
+// ============================================================
+// Ö — O + umlaut
+// ============================================================
+
+function drawOe(p) {
+  let svg = drawO(p);
+  const m = getMeasurements(p);
+  const baseY = 175;
+  const bodyTop = baseY - m.bodyHeight;
+  svg += drawUmlautTri(80, bodyTop, m.sw);
+  return svg;
+}
+
+
+// ============================================================
+// ACUTE ACCENT — tapered wedge, point nearest letter, thick end up-right
+// ============================================================
+
+function drawAcuteAccent(cx, topY, sw) {
+  const len = sw * 1.5;
+  const baseThick = sw * 0.5;
+  const gap = sw * 0.55;
+  const angle = 25 * Math.PI / 180;
+
+  const tipX = cx;
+  const tipY = topY - gap;
+
+  const topX = tipX + Math.cos(angle) * len * 0.4;
+  const topYpt = tipY - Math.sin(angle) * len;
+
+  const nx = Math.sin(angle) * baseThick / 2;
+  const ny = Math.cos(angle) * baseThick / 2;
+
+  const d = `M ${tipX.toFixed(1)} ${tipY.toFixed(1)} L ${(topX - nx).toFixed(1)} ${(topYpt - ny).toFixed(1)} L ${(topX + nx).toFixed(1)} ${(topYpt + ny).toFixed(1)} Z`;
+  return `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+}
+
+
+// ============================================================
+// GRAVE ACCENT — mirrored acute, thick end up-left
+// ============================================================
+
+function drawGraveAccent(cx, topY, sw) {
+  const len = sw * 1.5;
+  const baseThick = sw * 0.5;
+  const gap = sw * 0.55;
+  const angle = 25 * Math.PI / 180;
+
+  const tipX = cx;
+  const tipY = topY - gap;
+
+  const topX = tipX - Math.cos(angle) * len * 0.4;
+  const topYpt = tipY - Math.sin(angle) * len;
+
+  const nx = Math.sin(angle) * baseThick / 2;
+  const ny = Math.cos(angle) * baseThick / 2;
+
+  const d = `M ${tipX.toFixed(1)} ${tipY.toFixed(1)} L ${(topX + nx).toFixed(1)} ${(topYpt - ny).toFixed(1)} L ${(topX - nx).toFixed(1)} ${(topYpt + ny).toFixed(1)} Z`;
+  return `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+}
+
+
+// ============================================================
+// É — E + acute accent
+// ============================================================
+
+function drawEacute(p) {
+  let svg = drawE(p);
+  const m = getMeasurements(p);
+  const baseY = 175;
+  const bodyTop = baseY - m.bodyHeight;
+  svg += drawAcuteAccent(80, bodyTop, m.sw);
+  return svg;
+}
+
+
+// ============================================================
+// È — E + grave accent
+// ============================================================
+
+function drawEgrave(p) {
+  let svg = drawE(p);
+  const m = getMeasurements(p);
+  const baseY = 175;
+  const bodyTop = baseY - m.bodyHeight;
+  svg += drawGraveAccent(80, bodyTop, m.sw);
+  return svg;
+}
+
+
+// ============================================================
+// MACRON — horizontal bar above letter
+//
+// Width, thickness, and gap all scale with stroke weight (sw)
+// and letter width. Locked values from explorer:
+//   width  = 0.69 of letter width (archRx * 2)
+//   thick  = 0.33 of sw
+//   gap    = 0.81 of sw
+// ============================================================
+
+function drawMacronMark(cx, topY, sw, letterWidth) {
+  const barW = letterWidth * 0.69;
+  const barH = sw * 0.33;
+  const gap = sw * 0.81;
+
+  const x = cx - barW / 2;
+  const y = topY - gap - barH;
+
+  return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" fill="${TENDRELA_LETTER_COLOR}"/>`;
+}
+
+
+// ============================================================
+// Ū — U + macron
+// ============================================================
+
+function drawUmacron(p) {
+  let svg = drawU(p);
+  const m = getMeasurements(p);
+  const baseY = 175;
+  const bodyTop = baseY - m.bodyHeight;
+
+  // Center over the arch: recompute arch horizontal radius
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const archRy = bowlHeight / 2;
+  const archRx = lerp(0.35, 1.0, clampedRoundness) * archRy;
+  const stemLeft = 32;
+  const archCx = stemLeft + archRx;
+  const letterWidth = archRx * 2;
+
+  svg += drawMacronMark(archCx, bodyTop, m.sw, letterWidth);
+  return svg;
+}
+
+
+// ============================================================
+// Ā — A + macron
+//
+// A has its stem on the RIGHT (stemRight=120) and bowl on the LEFT.
+// Center the macron over the bowl center: stemLeft - bowlRx/2 is
+// approximate, but we can compute precisely as bowl.cx - bowl.rx/2
+// which equals stemLeft - bowlRx/2. For consistency with the other
+// diacritics we compute the visual center from the bowl geometry.
+// ============================================================
+
+function drawAmacron(p) {
+  let svg = drawA(p);
+  const m = getMeasurements(p);
+  const baseY = 175;
+  const bodyTop = baseY - m.bodyHeight;
+
+  // A's bowl: stemRight=120, bowl extends left
+  const stemRight = 120, stemLeft = stemRight - m.sw;
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const bowlRy = bowlHeight / 2;
+  const bowlRx = lerp(0.35, 1.0, clampedRoundness) * bowlRy;
+  // Visual center: midpoint between rightmost (stemRight) and leftmost (stemLeft - bowlRx)
+  const visualCx = (stemRight + (stemLeft - bowlRx)) / 2;
+  const letterWidth = bowlRx * 2;
+
+  svg += drawMacronMark(visualCx, bodyTop, m.sw, letterWidth);
+  return svg;
+}
+
+
+// ============================================================
+// Ī — I + macron
+//
+// I is centered at cx=80. Its width is sw * widthMult.
+// The macron should span proportionally to the letter width.
+// ============================================================
+
+function drawImacron(p) {
+  let svg = drawI(p);
+  const m = getMeasurements(p);
+  const sw = m.sw;
+  const baseY = 175;
+  const bodyHeight = lerp(50, 120, Math.max(0.33, p.reach));
+  const stemTop = baseY - bodyHeight;
+
+  const widthMult = lerp(1.0, lerp(1.6, 1.2, p.weight), p.expanse);
+  const letterW = sw * widthMult;
+  const dotSize = letterW;
+  const dotGap = sw * 1.0;
+  const dotBottom = stemTop - dotGap;
+  const dotTop = dotBottom - dotSize;
+
+  // Place macron above the dot
+  svg += drawMacronMark(80, dotTop, sw, letterW * 1.5);
+  return svg;
+}
+
+
+// ============================================================
+// Ō — O + macron
+//
+// O is centered at cx=80, width = bowlRx * 2.
+// ============================================================
+
+function drawOmacron(p) {
+  let svg = drawO(p);
+  const m = getMeasurements(p);
+  const baseY = 175;
+  const bodyTop = baseY - m.bodyHeight;
+
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const bowlRy = bowlHeight / 2;
+  const bowlRx = lerp(0.35, 1.0, clampedRoundness) * bowlRy;
+  const letterWidth = bowlRx * 2;
+
+  svg += drawMacronMark(80, bodyTop, m.sw, letterWidth);
+  return svg;
+}
+
+
+// ============================================================
+// Ü — U + umlaut
+//
+// U has stemLeft=32, arch extends right by archRx.
+// Center the umlaut over the arch center: stemLeft + archRx.
+// ============================================================
+
+function drawUumlaut(p) {
+  let svg = drawU(p);
+  const m = getMeasurements(p);
+  const baseY = 175;
+  const bodyTop = baseY - m.bodyHeight;
+
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const archRy = bowlHeight / 2;
+  const archRx = lerp(0.35, 1.0, clampedRoundness) * archRy;
+  const stemLeft = 32;
+  const archCx = stemLeft + archRx;
+
+  svg += drawUmlautTri(archCx, bodyTop, m.sw);
+  return svg;
+}
+
+
+// ============================================================
+// TILDE — sinusoidal wave above letter
+//
+// Drawn as two opposing cubic Bézier quarter-arcs forming an S-curve.
+// Width and amplitude scale with sw. Stroke-based, not filled polygon.
+// ============================================================
+
+function drawTildeMark(cx, topY, sw, letterWidth) {
+  const tildeW = letterWidth * 0.65;
+  const amplitude = sw * 0.35;
+  const strokeW = sw * 0.28;
+  const gap = sw * 0.65;
+
+  const midY = topY - gap - amplitude;
+  const leftX = cx - tildeW / 2;
+  const rightX = cx + tildeW / 2;
+  const midX = cx;
+
+  // S-curve: left half rises, right half dips
+  const cp = tildeW * 0.2;
+  const d = `M ${leftX.toFixed(1)} ${midY.toFixed(1)} ` +
+    `C ${(leftX + cp).toFixed(1)} ${(midY - amplitude).toFixed(1)}, ${(midX - cp).toFixed(1)} ${(midY - amplitude).toFixed(1)}, ${midX.toFixed(1)} ${midY.toFixed(1)} ` +
+    `C ${(midX + cp).toFixed(1)} ${(midY + amplitude).toFixed(1)}, ${(rightX - cp).toFixed(1)} ${(midY + amplitude).toFixed(1)}, ${rightX.toFixed(1)} ${midY.toFixed(1)}`;
+
+  return `<path d="${d}" fill="none" stroke="${TENDRELA_LETTER_COLOR}" stroke-width="${strokeW.toFixed(1)}" stroke-linecap="round"/>`;
+}
+
+
+// ============================================================
+// Ñ — N + tilde
+//
+// N has stemLeft=32, archCx = stemLeft + archRx.
+// ============================================================
+
+function drawNtilde(p) {
+  let svg = drawN(p);
+  const m = getMeasurements(p);
+  const baseY = 175;
+  const bodyTop = baseY - m.bodyHeight;
+
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const archRy = bowlHeight / 2;
+  const archRx = lerp(0.35, 1.0, clampedRoundness) * archRy;
+  const stemLeft = 32;
+  const archCx = stemLeft + archRx;
+  const letterWidth = archRx * 2;
+
+  svg += drawTildeMark(archCx, bodyTop, m.sw, letterWidth);
+  return svg;
+}
+
+
+// ============================================================
+// À — A + grave accent
+//
+// Same centering as Ā (visual center of bowl).
+// ============================================================
+
+function drawAgrave(p) {
+  let svg = drawA(p);
+  const m = getMeasurements(p);
+  const baseY = 175;
+  const bodyTop = baseY - m.bodyHeight;
+
+  const stemRight = 120, stemLeft = stemRight - m.sw;
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const bowlRy = bowlHeight / 2;
+  const bowlRx = lerp(0.35, 1.0, clampedRoundness) * bowlRy;
+  const visualCx = (stemRight + (stemLeft - bowlRx)) / 2;
+
+  svg += drawGraveAccent(visualCx, bodyTop, m.sw);
+  return svg;
+}
+
+
+// ============================================================
+// Í — I + acute accent
+//
+// I is centered at cx=80. Place accent above the dot.
+// ============================================================
+
+function drawIacute(p) {
+  let svg = drawI(p);
+  const m = getMeasurements(p);
+  const sw = m.sw;
+  const baseY = 175;
+  const bodyHeight = lerp(50, 120, Math.max(0.33, p.reach));
+  const stemTop = baseY - bodyHeight;
+
+  const widthMult = lerp(1.0, lerp(1.6, 1.2, p.weight), p.expanse);
+  const letterW = sw * widthMult;
+  const dotSize = letterW;
+  const dotGap = sw * 1.0;
+  const dotBottom = stemTop - dotGap;
+  const dotTop = dotBottom - dotSize;
+
+  svg += drawAcuteAccent(80, dotTop, sw);
+  return svg;
+}
+
+
+// ============================================================
+// Ì — I + grave accent
+//
+// Same as Í but with grave accent.
+// ============================================================
+
+function drawIgrave(p) {
+  let svg = drawI(p);
+  const m = getMeasurements(p);
+  const sw = m.sw;
+  const baseY = 175;
+  const bodyHeight = lerp(50, 120, Math.max(0.33, p.reach));
+  const stemTop = baseY - bodyHeight;
+
+  const widthMult = lerp(1.0, lerp(1.6, 1.2, p.weight), p.expanse);
+  const letterW = sw * widthMult;
+  const dotSize = letterW;
+  const dotGap = sw * 1.0;
+  const dotBottom = stemTop - dotGap;
+  const dotTop = dotBottom - dotSize;
+
+  svg += drawGraveAccent(80, dotTop, sw);
+  return svg;
+}
+
+
+// ============================================================
+// HORN (dấu móc) — Vietnamese ascending hook
+//
+// Unlike all other diacriticals in this system which float ABOVE
+// the letter as separate shapes, the horn is an organic extension
+// of the letterform itself — it grows from the body. This means
+// we must rebuild the letter path with the horn integrated, not
+// overlay a separate mark.
+//
+// The horn is a curved stroke that flows out of the letter's
+// upper-right edge, rising and curving rightward before tapering
+// to a point. It echoes the hooks on b/d/h but at the scale of
+// a diacritical — a miniature ascender grown from the letter.
+// ============================================================
+
+
+// ============================================================
+// Ư — U with integrated horn
+//
+// The right leg of U doesn't terminate flat at topY. Instead,
+// the outer-right edge curves up and right into the horn, then
+// the path traces the horn's inner edge back down and across
+// the top to close. The horn is part of the same filled shape.
+// ============================================================
+
+function drawUhorn(p) {
+  const sw = lerp(8, 28, p.weight);
+  const tw = sw * lerp(1.0, 0.2, p.tension);
+
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const archRy = bowlHeight / 2;
+  const archRx = lerp(0.35, 1.0, clampedRoundness) * archRy;
+
+  const baseY = 175;
+  const stemLeft = 32;
+  const archCx = stemLeft + archRx;
+  const archCy = baseY - archRy;
+  const topY = archCy - archRy;
+  const rightLegRight = stemLeft + 2 * archRx;
+  const rightLegLeft = rightLegRight - sw;  // inner edge of right leg
+
+  // Horn geometry — flows from top of right leg
+  // The horn base spans the full stroke width (rightLegLeft to rightLegRight)
+  // giving it the same body as the ơ horn
+  const hornRise = sw * 2.0;       // how far above topY the horn tip reaches
+  const hornReach = sw * 1.4;      // horizontal extension past rightLegRight
+
+  // Horn tip — single point where outer and inner edges converge
+  const tipX = rightLegRight + hornReach;
+  const tipY = topY - hornRise;
+
+  // Outer edge departs from rightLegRight (outer edge of leg) below topY
+  const outerStartY = topY + sw * 0.15;
+  // Inner edge returns to rightLegLeft (inner edge of leg) at topY
+  const innerReturnX = rightLegLeft;
+  const innerReturnY = topY;
+
+  // Build path: left leg down, trough, right leg up to horn, horn out to tip,
+  // horn inner edge back, across top to close
+  let d = '';
+  d += `M ${stemLeft} ${topY} `;
+  d += `L ${stemLeft} ${archCy} `;
+
+  // Outer trough
+  d += `C ${stemLeft} ${archCy + archRy*K}, ${archCx - archRx*K} ${baseY}, ${archCx} ${baseY} `;
+  d += `C ${archCx + archRx*K} ${baseY}, ${rightLegRight} ${archCy + archRy*K}, ${rightLegRight} ${archCy} `;
+
+  // Right leg outer edge rises to horn departure
+  d += `L ${rightLegRight} ${outerStartY} `;
+
+  // OUTER horn curve: sweeps up and right from the outer leg edge to the tip
+  // Control points give it a confident arc — not tentative
+  d += `C ${rightLegRight + hornReach * 0.05} ${outerStartY - hornRise * 0.5}, ${tipX - hornReach * 0.15} ${tipY + hornRise * 0.1}, ${tipX} ${tipY} `;
+
+  // INNER horn curve: from tip back to the inner leg edge
+  // This gives the horn its stroke width — thick at the base, tapering to the tip
+  d += `C ${tipX - hornReach * 0.25} ${tipY + hornRise * 0.2}, ${innerReturnX + sw * 0.6} ${innerReturnY - hornRise * 0.45}, ${innerReturnX} ${innerReturnY} `;
+
+  // Across the top from inner right leg edge back to left leg
+  d += `L ${stemLeft} ${topY} Z `;
+
+  // Inner trough — rising tide eclipse (same as drawU)
+  const counterFade = Math.min(1, Math.max(0, p.tension / 0.2));
+  const iRx = (archRx - sw) * counterFade;
+  const iRy = (archRy - tw) * counterFade;
+  const iCx = archCx;
+  const iCy = archCy;
+
+  if (iRx > 1 && iRy > 1) {
+    const iL = iCx - iRx;
+    const iR = iCx + iRx;
+    const innerTroughY = iCy + iRy;
+
+    d += `M ${iR} ${topY} `;
+    d += `L ${iR} ${iCy} `;
+    d += `C ${iR} ${iCy + iRy*K}, ${iCx + iRx*K} ${innerTroughY}, ${iCx} ${innerTroughY} `;
+    d += `C ${iCx - iRx*K} ${innerTroughY}, ${iL} ${iCy + iRy*K}, ${iL} ${iCy} `;
+    d += `L ${iL} ${topY} `;
+    d += `L ${iR} ${topY} Z `;
+  }
+
+  let svg = `<rect x="0" y="-20" width="180" height="290" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="nonzero"/>`;
+
+  if (p.debug) {
+    svg += `<line x1="0" y1="${topY}" x2="180" y2="${topY}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${baseY}" x2="180" y2="${baseY}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<circle cx="${tipX}" cy="${tipY}" r="1.5" fill="rgba(255,100,100,0.5)"/>`;
+    svg += `<line x1="${rightLegLeft}" y1="0" x2="${rightLegLeft}" y2="270" stroke="rgba(100,255,100,0.15)" stroke-width="0.3"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// Ơ — O with integrated horn
+//
+// The outer ellipse is redrawn so that at the upper-right
+// shoulder (~1 o'clock position), the path diverges outward
+// into the horn before curving back to rejoin the ellipse at
+// the top. The horn grows organically from the bowl's stroke.
+// ============================================================
+
+function drawOhorn(p) {
+  const sw = lerp(8, 28, p.weight);
+  const tw = sw * lerp(1.0, 0.2, p.tension);
+
+  const clampedSize = Math.max(0.33, p.reach);
+  const normSize = (clampedSize - 0.33) / (0.72 - 0.33);
+  const clampedRoundness = Math.max(0.53, p.expanse);
+  const zoneHeight = 120;
+  const bowlHeight = lerp(zoneHeight * 0.42, zoneHeight, normSize);
+  const ry = bowlHeight / 2;
+  const rx = lerp(0.35, 1.0, clampedRoundness) * ry;
+
+  const baseY = 175;
+  const cx = 80;
+  const cy = baseY - ry;
+  const top = cy - ry;
+  const bot = cy + ry;
+
+  // Horn geometry
+  const hornRise = sw * 1.8;
+  const hornReach = sw * 1.1;
+
+  // Departure point: where the ellipse begins to diverge into horn
+  // This is at roughly 45° on the upper-right arc
+  const depAngle = 45 * Math.PI / 180;
+  const depX = cx + rx * Math.cos(depAngle);
+  const depY = cy - ry * Math.sin(depAngle);
+
+  // Rejoin point: where the horn merges back, roughly 80° (near top)
+  const rejAngle = 80 * Math.PI / 180;
+  const rejX = cx + rx * Math.cos(rejAngle);
+  const rejY = cy - ry * Math.sin(rejAngle);
+
+  // Horn tip
+  const tipX = depX + hornReach;
+  const tipY = depY - hornRise;
+
+  // Build the outer ellipse CW from top, but interrupt the upper-right arc
+  // Standard O: top → 3 o'clock → bottom → 9 o'clock → top
+  // Modified: top → rejoin point, horn detour, departure point → 3 o'clock → bottom → 9 o'clock → top
+
+  let d = '';
+  d += `M ${cx} ${top} `;
+
+  // Top to rejoin point (partial first quarter arc)
+  // We need the control points for the arc from top (90°) to rejoin (~80°)
+  // This is a very short arc, so we approximate with a line to keep it clean
+  d += `L ${rejX} ${rejY} `;
+
+  // Inner edge of horn: from rejoin up to near tip
+  d += `C ${rejX + sw * 0.4} ${rejY - hornRise * 0.4}, ${tipX - hornReach * 0.2} ${tipY + hornRise * 0.3}, ${tipX} ${tipY} `;
+
+  // Outer edge of horn: from tip back down to departure point on the ellipse
+  d += `C ${tipX - hornReach * 0.15} ${tipY + hornRise * 0.3}, ${depX + sw * 0.5} ${depY - hornRise * 0.35}, ${depX} ${depY} `;
+
+  // Continue the ellipse from departure (~45°) to 3 o'clock (0°)
+  // Approximate: cubic from depX,depY to cx+rx, cy
+  d += `C ${depX + rx * 0.2} ${depY + ry * 0.15}, ${cx + rx} ${cy - ry * 0.25}, ${cx + rx} ${cy} `;
+
+  // 3 o'clock to bottom
+  d += `C ${cx + rx} ${cy + ry*K}, ${cx + rx*K} ${bot}, ${cx} ${bot} `;
+
+  // Bottom to 9 o'clock
+  d += `C ${cx - rx*K} ${bot}, ${cx - rx} ${cy + ry*K}, ${cx - rx} ${cy} `;
+
+  // 9 o'clock back to top
+  d += `C ${cx - rx} ${cy - ry*K}, ${cx - rx*K} ${top}, ${cx} ${top} Z `;
+
+  // Counter — same as standard O
+  const counterFade = Math.min(1, Math.max(0, p.tension / 0.2));
+  const iRx = (rx - tw) * counterFade;
+  const iRy = (ry - tw) * counterFade;
+
+  if (iRx > 1 && iRy > 1) {
+    const iT = cy - iRy, iB = cy + iRy;
+    d += `M ${cx} ${iT} `;
+    d += `C ${cx + iRx*K} ${iT}, ${cx + iRx} ${cy - iRy*K}, ${cx + iRx} ${cy} `;
+    d += `C ${cx + iRx} ${cy + iRy*K}, ${cx + iRx*K} ${iB}, ${cx} ${iB} `;
+    d += `C ${cx - iRx*K} ${iB}, ${cx - iRx} ${cy + iRy*K}, ${cx - iRx} ${cy} `;
+    d += `C ${cx - iRx} ${cy - iRy*K}, ${cx - iRx*K} ${iT}, ${cx} ${iT} Z `;
+  }
+
+  let svg = `<rect x="0" y="-20" width="180" height="290" fill="${TENDRELA_BG_COLOR}"/>`;
+  svg += `<path d="${d}" fill="${TENDRELA_LETTER_COLOR}" fill-rule="evenodd"/>`;
+
+  if (p.debug) {
+    svg += `<line x1="0" y1="${top}" x2="180" y2="${top}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="0" y1="${bot}" x2="180" y2="${bot}" stroke="#333" stroke-width="0.3" stroke-dasharray="2,2"/>`;
+    svg += `<circle cx="${tipX}" cy="${tipY}" r="1.5" fill="rgba(255,100,100,0.5)"/>`;
+    svg += `<circle cx="${depX}" cy="${depY}" r="1.5" fill="rgba(100,255,100,0.5)"/>`;
+    svg += `<circle cx="${rejX}" cy="${rejY}" r="1.5" fill="rgba(100,100,255,0.5)"/>`;
+  }
+  return svg;
+}
+
+
+// ============================================================
+// DRAW ALL + EVENT WIRING
+// ============================================================
+
+
+function renderWord() {
+  const p = {
+    weight: 0.82, reach: 0.68, expanse: 0.88, tension: 0.18,
+    fillDir: 'east', floodRain: 'flood', debug: false
+  };
+
+  const fnMap = { drawP, drawA, drawO, drawB, drawD, drawQ, drawG, drawV, drawW, drawN, drawU, drawM, drawH, drawC, drawE, drawEacute, drawEgrave, drawI, drawL, drawJ, drawT, drawF, drawR, drawS, drawX, drawK, drawY, drawZ, drawOe, drawUmacron, drawAmacron, drawImacron, drawOmacron, drawUumlaut, drawNtilde, drawAgrave, drawIacute, drawIgrave, drawUhorn, drawOhorn };
+  const wordChars = [{"id": "svg_0_d", "fn": "drawD"}, {"id": "svg_1_o", "fn": "drawO"}, {"id": "svg_2_x", "fn": "drawX"}, {"id": "svg_3_a", "fn": "drawA"}, {"id": "svg_4_m", "fn": "drawM"}, {"id": "svg_5_o", "fn": "drawO"}, {"id": "svg_6_h", "fn": "drawH"}, {"id": "svg_7_a", "fn": "drawA"}];
+
+  const fullTop = -10;
+  const fullBot = 270;
+  const fullHeight = fullBot - fullTop;
+  const displayFullHeight = 260;
+  const scale = displayFullHeight / fullHeight;
+  let totalDisplayWidth = 0;
+
+  wordChars.forEach((item, idx) => {
+    const svg = document.getElementById(item.id);
+    const fn = fnMap[item.fn];
+    svg.setAttribute('viewBox', '-10 -20 280 310');
+    svg.setAttribute('width', '280');
+    svg.setAttribute('height', '310');
+    let raw = fn(p);
+    const bgEsc = TENDRELA_BG_COLOR.replace(/[()%,]/g, '\\$&');
+    raw = raw.replace(new RegExp('<rect[^>]*fill="' + bgEsc + '"[^/]*/>', 'g'), '');
+    svg.innerHTML = raw;
+    const bbox = svg.getBBox();
+    const padX = 3;
+    const vbX = bbox.x - padX;
+    const vbW = bbox.width + padX * 2;
+    svg.setAttribute('viewBox', `${vbX} ${fullTop} ${vbW} ${fullHeight}`);
+    const displayW = vbW * scale;
+    svg.setAttribute('width', displayW);
+    svg.setAttribute('height', displayFullHeight);
+    totalDisplayWidth += displayW;
+    const letter = item.fn.replace('draw', '').toLowerCase();
+    if (letter === 'q') {
+      svg.style.marginLeft = (-displayW * 0.25) + 'px';
+      svg.style.marginRight = (-displayW * 0.25) + 'px';
+      totalDisplayWidth -= displayW * 0.5;
+    }
+  });
+  document.documentElement.style.setProperty('--word-width', Math.round(totalDisplayWidth) + 'px');
+}
+
+function runRitual() {
+  try { renderWord(); } catch(e) {
+    document.body.innerHTML = '<pre style="color:red;padding:2rem">' + e.message + '\n' + e.stack + '</pre>';
+    return;
+  }
+
+  const threshold = document.getElementById('threshold');
+  const essay = document.getElementById('essay');
+  const footnotes = document.getElementById('footnotes');
+  const colophon = document.getElementById('colophon');
+
+  let ritualStarted = false;
+
+  function beginReveal() {
+    if (ritualStarted) return;
+    ritualStarted = true;
+    threshold.classList.add('dismissed');
+    document.body.classList.add('ritual-started');
+    // Play invocation tone — we're inside a click handler so browser allows it
+    if (window._tendrelaPlayTone) { try { window._tendrelaPlayTone(); } catch(e) {} }
+    setTimeout(() => {
+      if (essay) essay.classList.add('visible');
+      if (footnotes) footnotes.classList.add('visible');
+      if (colophon) colophon.classList.add('visible');
+    }, 1200);
+  }
+
+  threshold.addEventListener('click', beginReveal);
+  threshold.addEventListener('touchstart', beginReveal);
+}
+
+runRitual();
+</script>
+
+<script>
+// ── Invocation Tone (static embed from tones table) ──
+(function() {
+  const TONE_DATA = {"component_data": {"bodies": {"sun": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 20.0582}, "mars": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 0.0055}, "moon": {"sign": "Capricorn", "element": "earth", "modality": "cardinal", "ecliptic_longitude": 291.0294}, "pluto": {"sign": "Aquarius", "element": "air", "modality": "fixed", "ecliptic_longitude": 304.9811}, "venus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "ecliptic_longitude": 42.6898}, "saturn": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 6.333}, "uranus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "ecliptic_longitude": 58.8233}, "jupiter": {"sign": "Cancer", "element": "water", "modality": "cardinal", "ecliptic_longitude": 106.1389}, "mercury": {"sign": "Pisces", "element": "water", "modality": "mutable", "ecliptic_longitude": 353.1918}, "neptune": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 2.1851}}, "aspects": [{"orb": 0.9712, "type": "square", "body_a": "sun", "body_b": "moon", "orb_tightness": 0.8381}, {"orb": 2.1796, "type": "conjunction", "body_a": "mars", "body_b": "neptune", "orb_tightness": 0.7276}, {"orb": 1.1822, "type": "sextile", "body_a": "mars", "body_b": "uranus", "orb_tightness": 0.7045}, {"orb": 1.3519, "type": "sextile", "body_a": "saturn", "body_b": "pluto", "orb_tightness": 0.662}, {"orb": 4.1479, "type": "conjunction", "body_a": "saturn", "body_b": "neptune", "orb_tightness": 0.4815}, {"orb": 2.1624, "type": "sextile", "body_a": "moon", "body_b": "mercury", "orb_tightness": 0.4594}, {"orb": 4.8905, "type": "opposition", "body_a": "moon", "body_b": "jupiter", "orb_tightness": 0.3887}, {"orb": 3.9193, "type": "square", "body_a": "sun", "body_b": "jupiter", "orb_tightness": 0.3468}, {"orb": 2.796, "type": "sextile", "body_a": "neptune", "body_b": "pluto", "orb_tightness": 0.301}, {"orb": 6.3275, "type": "conjunction", "body_a": "mars", "body_b": "saturn", "orb_tightness": 0.2091}, {"orb": 3.3618, "type": "sextile", "body_a": "uranus", "body_b": "neptune", "orb_tightness": 0.1596}, {"orb": 6.8137, "type": "conjunction", "body_a": "mercury", "body_b": "mars", "orb_tightness": 0.1483}, {"orb": 3.4491, "type": "sextile", "body_a": "venus", "body_b": "jupiter", "orb_tightness": 0.1377}], "timestamp": "2026-04-10T06:58:14.661298+00:00", "lunar_phase": 0.7527, "aspect_density": 5.5643, "lunar_phase_name": "Last Quarter"}, "celestial_snapshot": {"bodies": {"sun": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 20.0582, "ecliptic_longitude": 20.0582}, "mars": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 0.0055, "ecliptic_longitude": 0.0055}, "moon": {"sign": "Capricorn", "element": "earth", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 21.0294, "ecliptic_longitude": 291.0294}, "pluto": {"sign": "Aquarius", "element": "air", "modality": "fixed", "is_retrograde": false, "degree_in_sign": 4.9811, "ecliptic_longitude": 304.9811}, "venus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "is_retrograde": false, "degree_in_sign": 12.6898, "ecliptic_longitude": 42.6898}, "saturn": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 6.333, "ecliptic_longitude": 6.333}, "uranus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "is_retrograde": false, "degree_in_sign": 28.8233, "ecliptic_longitude": 58.8233}, "jupiter": {"sign": "Cancer", "element": "water", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 16.1389, "ecliptic_longitude": 106.1389}, "mercury": {"sign": "Pisces", "element": "water", "modality": "mutable", "is_retrograde": false, "degree_in_sign": 23.1918, "ecliptic_longitude": 353.1918}, "neptune": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 2.1851, "ecliptic_longitude": 2.1851}}, "aspects": [{"orb": 0.9712, "type": "square", "body_a": "sun", "body_b": "moon", "exact_angle": 90, "actual_angle": 89.0288, "orb_tightness": 0.8381}, {"orb": 2.1796, "type": "conjunction", "body_a": "mars", "body_b": "neptune", "exact_angle": 0, "actual_angle": 2.1796, "orb_tightness": 0.7276}, {"orb": 1.1822, "type": "sextile", "body_a": "mars", "body_b": "uranus", "exact_angle": 60, "actual_angle": 58.8178, "orb_tightness": 0.7045}, {"orb": 1.3519, "type": "sextile", "body_a": "saturn", "body_b": "pluto", "exact_angle": 60, "actual_angle": 61.3519, "orb_tightness": 0.662}, {"orb": 4.1479, "type": "conjunction", "body_a": "saturn", "body_b": "neptune", "exact_angle": 0, "actual_angle": 4.1479, "orb_tightness": 0.4815}, {"orb": 2.1624, "type": "sextile", "body_a": "moon", "body_b": "mercury", "exact_angle": 60, "actual_angle": 62.1624, "orb_tightness": 0.4594}, {"orb": 4.8905, "type": "opposition", "body_a": "moon", "body_b": "jupiter", "exact_angle": 180, "actual_angle": 175.1095, "orb_tightness": 0.3887}, {"orb": 3.9193, "type": "square", "body_a": "sun", "body_b": "jupiter", "exact_angle": 90, "actual_angle": 86.0807, "orb_tightness": 0.3468}, {"orb": 2.796, "type": "sextile", "body_a": "neptune", "body_b": "pluto", "exact_angle": 60, "actual_angle": 57.204, "orb_tightness": 0.301}, {"orb": 6.3275, "type": "conjunction", "body_a": "mars", "body_b": "saturn", "exact_angle": 0, "actual_angle": 6.3275, "orb_tightness": 0.2091}, {"orb": 3.3618, "type": "sextile", "body_a": "uranus", "body_b": "neptune", "exact_angle": 60, "actual_angle": 56.6382, "orb_tightness": 0.1596}, {"orb": 6.8137, "type": "conjunction", "body_a": "mercury", "body_b": "mars", "exact_angle": 0, "actual_angle": 6.8137, "orb_tightness": 0.1483}, {"orb": 3.4491, "type": "sextile", "body_a": "venus", "body_b": "jupiter", "exact_angle": 60, "actual_angle": 63.4491, "orb_tightness": 0.1377}], "location": null, "timestamp": "2026-04-10T06:58:14.661298+00:00", "lunar_nodes": {"north_node_sign": "Pisces", "south_node_sign": "Virgo", "north_node_longitude": 336.9114, "south_node_longitude": 156.9114}, "lunar_phase": 0.7527, "random_seed": 2330146737, "aspect_count": 13, "aspect_density": 5.5643, "lunar_phase_name": "Last Quarter", "eclipse_proximity": {"sun_node_distance": 43.15, "moon_node_distance": 45.88, "lunar_eclipse_factor": 0, "solar_eclipse_factor": 0}}};
+  const cd = TONE_DATA.celestial_snapshot || TONE_DATA;
+  let toneLoaded = false, tonePlaying = false, toneCleanup = [];
+  const btn = document.getElementById('toneBtn');
+  const icon = document.getElementById('toneBtnIcon');
+  if (!btn) return;
+
+  function stopTone() {
+    for (const fn of toneCleanup) { try { fn(); } catch(e) {} }
+    toneCleanup = [];
+    tonePlaying = false;
+    btn.classList.remove('playing');
+    icon.innerHTML = '<polygon points="6,3 20,12 6,21"/>';
+  }
+
+  function reg(item) {
+    if (typeof item === 'number') toneCleanup.push(() => { clearTimeout(item); clearInterval(item); });
+    else if (item?.dispose) toneCleanup.push(() => { try{item.stop?.()}catch(e){} try{item.dispose()}catch(e){} });
+  }
+
+  async function loadToneJS() {
+    if (toneLoaded) return true;
+    const cdns = [
+      'https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js',
+      'https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js'
+    ];
+    for (const url of cdns) {
+      try {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = url;
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+        toneLoaded = true;
+        return true;
+      } catch(e) { continue; }
+    }
+    // All CDNs failed
+    btn.classList.add('failed');
+    return false;
+  }
+
+  // Preload Tone.js immediately so it's ready when user clicks threshold
+  loadToneJS();
+
+  async function playTone() {
+    if (tonePlaying) { stopTone(); return; }
+    if (!toneLoaded) { if (!await loadToneJS()) return; }
+
+    await Tone.start();
+    tonePlaying = true;
+    btn.classList.add('playing');
+    icon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+
+    const MIN_FREQ = 220, MAX_FREQ = 3520;
+    function lonToFreq(lon) { return MIN_FREQ * Math.pow(MAX_FREQ / MIN_FREQ, lon / 360); }
+    function lonToPan(lon) { return Math.sin((lon / 180) * Math.PI) * 0.7; }
+    function computeProminence(key) {
+      let p = key === "moon" ? 0.30 : 0.15;
+      for (const a of cd.aspects) { if (a.body_a === key || a.body_b === key) p += a.orb_tightness * 0.2; }
+      return Math.min(1.0, p);
+    }
+
+    const LUNAR_AMP = 0.35 + 0.65 * Math.sin(cd.lunar_phase * Math.PI);
+    const LEAD_IN = 0.3;
+    const DUR = 7 + LUNAR_AMP * 4;
+    const I_END = 0.10, L_END = 0.65;
+    const stepMs = 50;
+    const OUTER_FIRST = ["pluto","neptune","uranus","saturn","jupiter","mars","venus","mercury","sun","moon"];
+    const gMap = { fire: 0.18, water: 0.22, earth: 0.14, air: 0.20 };
+    const startTime = Date.now();
+
+    const master = new Tone.Gain(0.55).toDestination(); reg(master);
+    const limiter = new Tone.Limiter(-2).connect(master); reg(limiter);
+    const mainGainNode = new Tone.Gain(0).connect(limiter); reg(mainGainNode);
+
+    // ── LAYER 0: ILO SHAPE ENVELOPE ──
+    let elapsed = 0;
+    const iloShape = setInterval(() => {
+      try {
+        elapsed += stepMs / 1000;
+        const p = elapsed / DUR;
+        let amplitude;
+        if (p < I_END) {
+          const iSeconds = elapsed;
+          if (iSeconds < LEAD_IN) { amplitude = Math.pow(iSeconds / LEAD_IN, 2.0) * 0.5; }
+          else { amplitude = 0.5 + ((iSeconds - LEAD_IN) / (I_END * DUR - LEAD_IN)) * 0.6; }
+        } else if (p < L_END) {
+          const lProgress = (p - I_END) / (L_END - I_END);
+          amplitude = 1.1 - lProgress * 0.6;
+        } else if (p <= 1.0) {
+          const oProgress = (p - L_END) / (1.0 - L_END);
+          const roll = Math.sin(oProgress * Math.PI * 2.5) * 0.04 * (1 - oProgress);
+          amplitude = 0.5 * Math.pow(1 - oProgress, 1.2) + roll;
+        } else { amplitude = 0; }
+        mainGainNode.gain.linearRampToValueAtTime(Math.max(0, amplitude * LUNAR_AMP), Tone.now() + stepMs / 1000);
+      } catch(e) { clearInterval(iloShape); }
+    }, stepMs);
+    reg(iloShape);
+
+    // ── REVERB CROSSFADE ──
+    const tightVerb = new Tone.Reverb({ decay: 2, wet: 0.2 }); tightVerb.connect(mainGainNode); reg(tightVerb);
+    const wideVerb = new Tone.Reverb({ decay: 7, wet: 0.45 }); wideVerb.connect(mainGainNode); reg(wideVerb);
+    const tightBus = new Tone.Gain(1.0).connect(tightVerb); reg(tightBus);
+    const wideBus = new Tone.Gain(0.0).connect(wideVerb); reg(wideBus);
+
+    let verbEl = 0;
+    const verbXfade = setInterval(() => {
+      try {
+        verbEl += stepMs / 1000; const p = verbEl / DUR;
+        let tA, wA;
+        if (p < I_END) { tA = 1.0; wA = 0.0; }
+        else if (p < L_END) { const lp = (p - I_END) / (L_END - I_END); tA = 1.0 - lp * 0.8; wA = lp * 0.8; }
+        else { tA = 0.2; wA = 0.8; }
+        tightBus.gain.linearRampToValueAtTime(tA, Tone.now() + stepMs / 1000);
+        wideBus.gain.linearRampToValueAtTime(wA, Tone.now() + stepMs / 1000);
+      } catch(e) { clearInterval(verbXfade); }
+    }, stepMs);
+    reg(verbXfade);
+
+    // ── LAYER 1: VOICES (10 planets × 3 oscillators = 30) ──
+    const voiceSynths = [];
+    for (let oi = 0; oi < OUTER_FIRST.length; oi++) {
+      const key = OUTER_FIRST[oi];
+      const body = cd.bodies[key];
+      const freq = lonToFreq(body.ecliptic_longitude);
+      const prom = computeProminence(key);
+      const v = prom * (gMap[body.element] || 0.15);
+      const panner = new Tone.Panner(lonToPan(body.ecliptic_longitude));
+      panner.connect(tightBus); panner.connect(wideBus); reg(panner);
+
+      let synth;
+      switch(body.element) {
+        case "fire": synth = new Tone.FMSynth({ harmonicity:3.5, modulationIndex:14, oscillator:{type:"sine"}, modulation:{type:"sine"}, envelope:{attack:0.5,decay:2,sustain:0.7,release:3}, modulationEnvelope:{attack:0.4,decay:2,sustain:0.6,release:3} }); break;
+        case "water": synth = new Tone.AMSynth({ harmonicity:1.5, oscillator:{type:"sine"}, modulation:{type:"sine"}, envelope:{attack:0.6,decay:2,sustain:0.7,release:4}, modulationEnvelope:{attack:0.9,decay:2,sustain:0.5,release:3} }); break;
+        case "earth": synth = new Tone.Synth({ oscillator:{type:"sine"}, envelope:{attack:0.7,decay:2,sustain:0.8,release:4} }); break;
+        case "air": synth = new Tone.AMSynth({ harmonicity:5.5, oscillator:{type:"sine"}, modulation:{type:"sine"}, envelope:{attack:0.5,decay:1.5,sustain:0.6,release:3.5}, modulationEnvelope:{attack:0.5,decay:1,sustain:0.3,release:3} }); break;
+        default: synth = new Tone.Synth({ oscillator:{type:"sine"}, envelope:{attack:0.5,decay:2,sustain:0.7,release:3} });
+      }
+
+      const mainG = new Tone.Gain(v).connect(panner); synth.connect(mainG);
+      const startDetune = (Math.random()-0.5) * 24;
+      synth.detune.value = startDetune;
+      reg(synth); reg(mainG);
+
+      const octSynth = new Tone.Synth({ oscillator:{type:"sine"}, envelope:{attack:0.5,decay:2,sustain:0.5,release:3} });
+      const octG = new Tone.Gain(v * 0.3).connect(panner); octSynth.connect(octG);
+      const octStartDetune = (Math.random()-0.5) * 30;
+      octSynth.detune.value = octStartDetune;
+      reg(octSynth); reg(octG);
+
+      const fifthSynth = new Tone.Synth({ oscillator:{type:"sine"}, envelope:{attack:0.6,decay:2,sustain:0.4,release:3} });
+      const fifthG = new Tone.Gain(v * 0.2).connect(panner); fifthSynth.connect(fifthG);
+      const fifthStartDetune = (Math.random()-0.5) * 28;
+      fifthSynth.detune.value = fifthStartDetune;
+      reg(fifthSynth); reg(fifthG);
+
+      reg(setTimeout(() => { try { synth.triggerAttack(freq); octSynth.triggerAttack(freq * 2); fifthSynth.triggerAttack(freq * 1.498); } catch(e) {} }, oi * 30));
+      voiceSynths.push({ key, synth, octSynth, fifthSynth, mainG, octG, fifthG, prom, isInner: oi >= 5 });
+
+      // Effort releasing: detuning narrows over /l/ phase
+      const driftInterval = setInterval(() => {
+        try {
+          const p = (Date.now() - startTime) / 1000 / DUR;
+          if (p < I_END) {
+            synth.detune.value = startDetune + (Math.random()-0.5) * 8;
+          } else if (p < L_END) {
+            const lp = (p - I_END) / (L_END - I_END);
+            const narrow = 1 - lp * 0.85;
+            synth.detune.value = startDetune * narrow + (Math.random()-0.5) * 2;
+            octSynth.detune.value = octStartDetune * narrow + (Math.random()-0.5) * 2;
+            fifthSynth.detune.value = fifthStartDetune * narrow + (Math.random()-0.5) * 2;
+          } else {
+            synth.detune.value = (Math.random()-0.5) * 3;
+            octSynth.detune.value = (Math.random()-0.5) * 3;
+            fifthSynth.detune.value = (Math.random()-0.5) * 3;
+          }
+        } catch(e) { clearInterval(driftInterval); }
+      }, 200);
+      reg(driftInterval);
+    }
+
+    // Inner planet thinning in /o/
+    const innerOrder = voiceSynths.filter(v => v.isInner).sort((a, b) => {
+      if (a.key === "moon") return -1; if (b.key === "moon") return 1;
+      if (a.key === "sun") return -1; if (b.key === "sun") return 1;
+      return a.prom - b.prom;
+    });
+    for (let i = 0; i < innerOrder.length; i++) {
+      const vo = innerOrder[i];
+      const releaseTime = DUR * L_END + (DUR * (1.0 - L_END)) * (i / innerOrder.length) * 0.7;
+      reg(setTimeout(() => {
+        try {
+          vo.mainG.gain.linearRampToValueAtTime(0, Tone.now() + 1.5);
+          vo.octG.gain.linearRampToValueAtTime(0, Tone.now() + 1.0);
+          vo.fifthG.gain.linearRampToValueAtTime(0, Tone.now() + 1.2);
+          setTimeout(() => { try { vo.synth.triggerRelease(); vo.octSynth.triggerRelease(); vo.fifthSynth.triggerRelease(); } catch(e) {} }, 1500);
+        } catch(e) {}
+      }, releaseTime * 1000));
+    }
+
+    for (const vo of voiceSynths.filter(v => !v.isInner)) {
+      reg(setTimeout(() => { try { vo.synth.triggerRelease(); vo.octSynth.triggerRelease(); vo.fifthSynth.triggerRelease(); } catch(e) {} }, (DUR + 2) * 1000));
+    }
+
+    // ── LAYER 2: SUB-BASS ──
+    const tightestConj = cd.aspects.find(a => a.type === "conjunction");
+    if (tightestConj) {
+      const subFreq = (lonToFreq(cd.bodies[tightestConj.body_a].ecliptic_longitude) + lonToFreq(cd.bodies[tightestConj.body_b].ecliptic_longitude)) / 4;
+      const sub = new Tone.Synth({ oscillator:{type:"sine"}, envelope:{attack:0.3,decay:2,sustain:0.8,release:4} });
+      const subGain = new Tone.Gain(0.25).connect(mainGainNode); sub.connect(subGain); reg(sub); reg(subGain);
+      reg(setTimeout(() => { try { sub.triggerAttack(subFreq); } catch(e) {} }, 50));
+      reg(setTimeout(() => { try { sub.triggerRelease(); } catch(e) {} }, (DUR * L_END + DUR * 0.15) * 1000));
+
+      const subNoise = new Tone.Noise({ type:"brown", volume:-8 });
+      const subNF = new Tone.Filter({ frequency: subFreq * 2, type:"lowpass", Q:1, rolloff:-24 });
+      const subNG = new Tone.Gain(0.08).connect(mainGainNode);
+      subNoise.connect(subNF); subNF.connect(subNG); reg(subNoise); reg(subNF); reg(subNG);
+      reg(setTimeout(() => { try { subNoise.start(); } catch(e) {} }, 50));
+      reg(setTimeout(() => { try { subNoise.stop(); } catch(e) {} }, (DUR * L_END + DUR * 0.2) * 1000));
+    }
+
+    // ── LAYER 3: SHIMMER ──
+    const shimNoise = new Tone.Noise({ type:"white", volume:-10 });
+    const shimF = new Tone.Filter({ frequency:2500, type:"highpass", Q:0.3 });
+    const shimG = new Tone.Gain(0); shimG.connect(tightBus); shimG.connect(wideBus);
+    shimNoise.connect(shimF); shimF.connect(shimG); reg(shimNoise); reg(shimF); reg(shimG);
+    reg(setTimeout(() => { try { shimNoise.start(); } catch(e) {} }, 50));
+    let shimEl = 0;
+    const shimShape = setInterval(() => {
+      try {
+        shimEl += stepMs / 1000; const p = shimEl / DUR;
+        let a;
+        if (p < I_END) { a = Math.pow(p / I_END, 0.5) * 0.12; }
+        else if (p < L_END) { const lp = (p - I_END) / (L_END - I_END); a = 0.12 * Math.pow(1 - lp, 1.5); }
+        else { a = 0; }
+        shimG.gain.linearRampToValueAtTime(a, Tone.now()+stepMs/1000);
+      } catch(e) { clearInterval(shimShape); }
+    }, stepMs);
+    reg(shimShape);
+    reg(setTimeout(() => { try { shimNoise.stop(); } catch(e) {} }, (DUR * L_END + 1) * 1000));
+
+    // ── LAYER 4: THE SHAKE (/i/ only) ──
+    const shakeLFO = new Tone.LFO({ frequency:5, min:-5, max:5, type:"sine" });
+    reg(shakeLFO); shakeLFO.start();
+    let shakeEl = 0;
+    const shakeEnv = setInterval(() => {
+      try {
+        shakeEl += stepMs/1000; const p = shakeEl/DUR;
+        let s;
+        if (p < I_END) { s = 8; }
+        else if (p < I_END + 0.10) { const tp = (p - I_END) / 0.10; s = 8 * (1 - tp); }
+        else { s = 0; }
+        shakeLFO.min = -s; shakeLFO.max = s;
+        shakeLFO.frequency.value = 4 + s * 0.5;
+      } catch(e) { clearInterval(shakeEnv); }
+    }, stepMs);
+    reg(shakeEnv);
+
+    // ── LAYER 5: VOCAL FORMANTS ──
+    const vowelN = new Tone.Noise({ type:"pink", volume:-6 }); reg(vowelN);
+    const f1 = new Tone.Filter({ frequency:750, type:"bandpass", Q:12 });
+    const f2 = new Tone.Filter({ frequency:1200, type:"bandpass", Q:9 });
+    const f3 = new Tone.Filter({ frequency:2600, type:"bandpass", Q:7 });
+    const vowelMix = new Tone.Gain(0);
+    vowelMix.connect(tightBus); vowelMix.connect(wideBus);
+    const f1g = new Tone.Gain(0.6).connect(vowelMix);
+    const f2g = new Tone.Gain(0.4).connect(vowelMix);
+    const f3g = new Tone.Gain(0.2).connect(vowelMix);
+    vowelN.connect(f1); f1.connect(f1g);
+    vowelN.connect(f2); f2.connect(f2g);
+    vowelN.connect(f3); f3.connect(f3g);
+    reg(f1);reg(f2);reg(f3);reg(vowelMix);reg(f1g);reg(f2g);reg(f3g);
+    reg(setTimeout(() => { try { vowelN.start(); } catch(e) {} }, 50));
+
+    let vowelEl = 0;
+    const vowelShape = setInterval(() => {
+      try {
+        vowelEl += stepMs/1000; const p = vowelEl/DUR;
+        let a;
+        if (p < I_END) {
+          a = Math.pow(p / I_END, 0.5) * 0.08;
+          f1.Q.value = 12; f2.Q.value = 9; f3.Q.value = 7;
+        } else if (p < L_END) {
+          const lp = (p - I_END) / (L_END - I_END);
+          a = 0.08 + lp * 0.04;
+          f1.Q.value = 12 - lp * 5;
+          f2.Q.value = 9 - lp * 4;
+          f3.Q.value = 7 - lp * 3;
+          const shift = lp * 80;
+          f1.frequency.linearRampToValueAtTime(750 - shift, Tone.now()+stepMs/1000);
+          f2.frequency.linearRampToValueAtTime(1200 - shift * 0.5, Tone.now()+stepMs/1000);
+        } else {
+          const op = (p - L_END) / (1.0 - L_END);
+          a = 0.12 * Math.pow(1 - op, 1.5);
+        }
+        vowelMix.gain.linearRampToValueAtTime(a, Tone.now()+stepMs/1000);
+      } catch(e) { clearInterval(vowelShape); }
+    }, stepMs);
+    reg(vowelShape);
+    reg(setTimeout(() => { try { vowelN.stop(); } catch(e) {} }, (DUR + 2) * 1000));
+
+    // ── LAYER 6: ASPECT ACCENTS ──
+    for (const aspect of cd.aspects) {
+      if (aspect.orb_tightness < 0.5) continue;
+      const freqA = lonToFreq(cd.bodies[aspect.body_a].ecliptic_longitude);
+      const freqB = lonToFreq(cd.bodies[aspect.body_b].ecliptic_longitude);
+      const avgFreq = (freqA + freqB) / 2;
+      const pan = (lonToPan(cd.bodies[aspect.body_a].ecliptic_longitude) + lonToPan(cd.bodies[aspect.body_b].ecliptic_longitude)) / 2;
+      const accentTime = DUR * (I_END * 0.3 + aspect.orb_tightness * (L_END * 0.4));
+
+      const ap = new Tone.Panner(pan);
+      ap.connect(tightBus); ap.connect(wideBus); reg(ap);
+      const ag = new Tone.Gain(0.10 * aspect.orb_tightness).connect(ap); reg(ag);
+
+      const ring = new Tone.FMSynth({
+        harmonicity: 2 + aspect.orb_tightness * 3,
+        modulationIndex: 4 + aspect.orb_tightness * 8,
+        oscillator: { type: "sine" }, modulation: { type: "sine" },
+        envelope: { attack: 0.04, decay: 3 + aspect.orb_tightness * 3, sustain: 0.12, release: 3 },
+        modulationEnvelope: { attack: 0.08, decay: 2 + aspect.orb_tightness * 2, sustain: 0.08, release: 2.5 },
+      }).connect(ag);
+      ring.detune.value = (Math.random() - 0.5) * 4;
+      reg(ring);
+
+      const ringDuration = 2 + aspect.orb_tightness * 4;
+      reg(setTimeout(() => {
+        try { ring.triggerAttackRelease(avgFreq, ringDuration); } catch(e) {}
+      }, accentTime * 1000));
+    }
+
+    // Auto-stop
+    reg(setTimeout(() => { stopTone(); }, (DUR + 4) * 1000));
+  }
+
+  btn.addEventListener('click', playTone);
+
+  // Auto-play hook: called by beginReveal
+  window._tendrelaPlayTone = playTone;
+})();
+</script>
+<style>
+  .community-zone {
+    background: var(--text-color);
+    opacity: 0.70;
+    margin: 0 -2.5rem;
+    padding: 2rem 2.5rem 5rem;
+  }
+  .community-zone > .community-inner {
+    max-width: 540px;
+    margin: 0 auto;
+    opacity: calc(1 / 0.70);
+  }
+  .c-label {
+    font-size: 1.0rem;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    color: var(--bg-color);
+    opacity: 0.81;
+    margin-bottom: 1rem;
+    font-style: italic;
+    display: block;
+  }
+  .c-block { margin-bottom: 4rem; }
+  .c-block:last-child { margin-bottom: 0; }
+  .c-sentence-item {
+    margin-bottom: 1.3rem;
+    padding-bottom: 1.3rem;
+    border-bottom: 1px solid hsla(260, 72%, 14%, 0.33);
+  }
+  .c-sentence-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .c-sentence-text {
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: var(--bg-color);
+    opacity: 0.81;
+    margin: 0;
+  }
+  .c-sentence-name {
+    font-size: 1.0rem;
+    color: var(--bg-color);
+    opacity: 0.81;
+    margin: 0.3rem 0 0;
+    font-style: italic;
+  }
+  .c-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: hsla(48, 85%, 80%, 0.42);
+    border: none;
+    color: var(--bg-color);
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 1.2rem;
+    line-height: 1.85;
+    padding: 0.8rem 1rem;
+    resize: none;
+    height: 96px;
+    outline: none;
+  }
+  .c-textarea::placeholder { color: var(--bg-color); opacity: 0.3; }
+  .c-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: hsla(48, 85%, 80%, 0.42);
+    border: none;
+    color: var(--bg-color);
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 1.0rem;
+    padding: 0.6rem 1rem;
+    outline: none;
+  }
+  .c-input::placeholder { color: var(--bg-color); opacity: 0.3; }
+  .c-btn {
+    background: none;
+    border: 1px solid hsla(260, 72%, 14%, 0.20);
+    color: var(--bg-color);
+    opacity: 0.81;
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 1.0rem;
+    letter-spacing: 0.1em;
+    padding: 0.45rem 1.2rem;
+    cursor: pointer;
+    margin-top: 0.7rem;
+    transition: opacity 0.2s;
+  }
+  .c-btn:hover { opacity: 1.0; }
+  .c-status {
+    display: block;
+    font-size: 1.0rem;
+    color: var(--bg-color);
+    opacity: 0.81;
+    font-style: italic;
+    margin-top: 0.5rem;
+    min-height: 1.4em;
+  }
+  .c-email-row { display: flex; }
+  .c-email-main {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    background: hsla(48, 85%, 80%, 0.42);
+    border: none;
+    color: var(--bg-color);
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 1.0rem;
+    padding: 0.6rem 1rem;
+    outline: none;
+  }
+  .c-email-main::placeholder { color: var(--bg-color); opacity: 0.3; }
+  .c-email-name {
+    width: 140px;
+    box-sizing: border-box;
+    background: hsla(48, 85%, 80%, 0.42);
+    border: none;
+    border-left: 1px solid hsla(260, 72%, 14%, 0.20);
+    color: var(--bg-color);
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 1.0rem;
+    padding: 0.6rem 1rem;
+    outline: none;
+  }
+  .c-email-name::placeholder { color: var(--bg-color); opacity: 0.3; }
+  @media (max-width: 640px) {
+    .community-zone { margin: 0 -1.5rem; padding: 2rem 1.5rem 4rem; }
+    .c-email-name { width: 110px; }
+  }
+</style>
+
+
+<div class="community-zone">
+  <div class="community-inner">
+
+    <div class="c-block">
+      <span class="c-label">offered by visitors</span>
+      <div id="c-sentences-list">
+        <p style="font-size:1.0rem;color:var(--bg-color);opacity:0.3;font-style:italic;">loading...</p>
+      </div>
+    </div>
+
+    <div class="c-block">
+      <span class="c-label">use this word</span>
+      <textarea class="c-textarea" id="c-sentence-input"
+        placeholder="write a sentence with doxamoha"></textarea>
+      <input class="c-input" id="c-name-input" type="text"
+        placeholder="your name (optional)">
+      <div>
+        <button class="c-btn" id="c-sentence-btn">offer</button>
+        <span class="c-status" id="c-sentence-status"></span>
+      </div>
+    </div>
+
+    <div class="c-block">
+      <span class="c-label">receive the daily ritual</span>
+      <div class="c-email-row">
+        <input class="c-email-main" type="email" id="c-email-input"
+          placeholder="your email">
+        <input class="c-email-name" type="text" id="c-email-name-input"
+          placeholder="name (optional)">
+      </div>
+      <div>
+        <button class="c-btn" id="c-email-btn">join</button>
+        <span class="c-status" id="c-email-status"></span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  var SB_URL = 'https://bfzqxqhuxfcpzigayqji.supabase.co';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmenF4cWh1eGZjcHppZ2F5cWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzY1MjgsImV4cCI6MjA4ODI1MjUyOH0.EckWMCz1y7TZBvkwxcKqLz6m8Rr2HDLDOPoCOZw2HkI';
+  var WORD   = 'doxamoha';
+
+  function getToken() {
+    var t = localStorage.getItem('tendrela_token');
+    if (!t) {
+      t = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function(c) {
+        return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
+      });
+      localStorage.setItem('tendrela_token', t);
+    }
+    return t;
+  }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function loadSentences() {
+    var list = document.getElementById('c-sentences-list');
+    fetch(
+      SB_URL + '/rest/v1/community_sentences' +
+      '?word_text=eq.' + encodeURIComponent(WORD) +
+      '&status=eq.live' +
+      '&select=sentence,contributor_name' +
+      '&order=submitted_at.asc',
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
+    )
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!Array.isArray(data) || data.length === 0) {
+        list.innerHTML = '<p style="font-size:1.0rem;color:var(--bg-color);opacity:0.3;font-style:italic;">none yet</p>';
+        return;
+      }
+      list.innerHTML = data.map(function(s) {
+        return '<div class="c-sentence-item">' +
+          '<p class="c-sentence-text">' + esc(s.sentence) + '</p>' +
+          (s.contributor_name
+            ? '<p class="c-sentence-name">— ' + esc(s.contributor_name) + '</p>'
+            : '') +
+          '</div>';
+      }).join('');
+    })
+    .catch(function() {
+      list.innerHTML = '';
+    });
+  }
+
+  document.getElementById('c-sentence-btn').addEventListener('click', function() {
+    var sentence = document.getElementById('c-sentence-input').value.trim();
+    var name     = document.getElementById('c-name-input').value.trim();
+    var status   = document.getElementById('c-sentence-status');
+    if (!sentence) { status.textContent = 'write something first.'; return; }
+    status.textContent = 'sending...';
+    fetch(SB_URL + '/rest/v1/community_sentences', {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        word_text: WORD,
+        sentence: sentence,
+        contributor_name: name || null,
+        contributor_token: getToken()
+      })
+    })
+    .then(function(r) {
+      if (r.ok) {
+        status.textContent = 'received. tendrela will read it.';
+        document.getElementById('c-sentence-input').value = '';
+        document.getElementById('c-name-input').value = '';
+      } else {
+        status.textContent = 'something went wrong. try again.';
+      }
+    })
+    .catch(function() {
+      status.textContent = 'something went wrong. try again.';
+    });
+  });
+
+  document.getElementById('c-email-btn').addEventListener('click', function() {
+    var email  = document.getElementById('c-email-input').value.trim();
+    var name   = document.getElementById('c-email-name-input').value.trim();
+    var status = document.getElementById('c-email-status');
+    if (!email) { status.textContent = 'enter your email.'; return; }
+    status.textContent = 'joining...';
+    fetch(SB_URL + '/rest/v1/community_subscribers', {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        email: email,
+        name: name || null,
+        source: 'word_page',
+        contributor_token: getToken()
+      })
+    })
+    .then(function(r) {
+      if (r.ok) {
+        status.textContent = "you'll receive the daily ritual.";
+        document.getElementById('c-email-input').value = '';
+        document.getElementById('c-email-name-input').value = '';
+      } else if (r.status === 409) {
+        status.textContent = 'already subscribed.';
+      } else {
+        status.textContent = 'something went wrong.';
+      }
+    })
+    .catch(function() {
+      status.textContent = 'something went wrong.';
+    });
+  });
+
+  loadSentences();
+})();
+</script>
+</body>
+</html>

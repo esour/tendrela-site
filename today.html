@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tendrela — Today's Ritual</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;1,400&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: hsl(240, 7%, 4%);
+    color: hsl(40, 15%, 88%);
+    font-family: 'Spectral', Georgia, serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .loading {
+    font-size: 1.0rem;
+    font-style: italic;
+    letter-spacing: 0.12em;
+    opacity: 0.35;
+  }
+</style>
+</head>
+<body>
+
+<span class="loading">opening today's ritual</span>
+
+<script>
+// Supabase config — replace these with your actual values
+var SB_URL = 'https://bfzqxqhuxfcpzigayqji.supabase.co';
+var SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmenF4cWh1eGZjcHppZ2F5cWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzY1MjgsImV4cCI6MjA4ODI1MjUyOH0.EckWMCz1y7TZBvkwxcKqLz6m8Rr2HDLDOPoCOZw2HkI';
+
+// Map of word_text (with diacritics) to sanitized ASCII filename.
+// Must match the filenames in words/.
+var FILENAME_MAP = {
+  'aloríssī': 'alorissi',
+  'amalgré': 'amalgre',
+  'cedözsabir': 'cedozsabir',
+  'colligakūsma': 'colligakusma',
+  'doxamoha': 'doxamoha',
+  'goyohawl': 'goyohawl',
+  'idiopillu': 'idiopillu',
+  'kökthương': 'kokthuong',
+  'privosabi': 'privosabi',
+  'salethedön': 'salethedon'
+};
+
+function sanitize(word) {
+  if (FILENAME_MAP[word]) return FILENAME_MAP[word];
+  // Fallback: strip diacritics
+  return word.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function goToLexicon() {
+  window.location.href = 'lexicon.html';
+}
+
+fetch(
+  SB_URL + '/rest/v1/lexicon?is_published=eq.true&select=word_text,published_at&order=published_at.desc&limit=1',
+  { headers: { 'apikey': SB_ANON_KEY, 'Authorization': 'Bearer ' + SB_ANON_KEY } }
+)
+.then(function(r) { return r.json(); })
+.then(function(data) {
+  if (Array.isArray(data) && data.length > 0 && data[0].word_text) {
+    var filename = sanitize(data[0].word_text);
+    window.location.href = 'words/' + filename + '.html';
+  } else {
+    goToLexicon();
+  }
+})
+.catch(function() {
+  goToLexicon();
+});
+
+// Ultimate fallback: if fetch hangs for 5 seconds, go to lexicon
+setTimeout(goToLexicon, 5000);
+</script>
+
+</body>
+</html>
