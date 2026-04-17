@@ -28,8 +28,8 @@
   .name-block {
     display: flex;
     justify-content: center;
-    overflow: hidden;
     width: 100%;
+    min-width: 0;
   }
   .letters-row {
     display: flex;
@@ -37,7 +37,7 @@
     align-items: flex-end;
     transform-origin: center top;
   }
-  .letter-svg { display: block; }
+  .letter-svg { display: block; flex-shrink: 0; }
 
   /* ── Today's ritual ── */
   .today-link {
@@ -137,12 +137,14 @@
     flex-direction: column;
     align-items: center;
     margin-bottom: 3rem;
+    width: 100%;
+    min-width: 0;
   }
   .name-block {
     display: flex;
     justify-content: center;
     width: 100%;
-    overflow: hidden;
+    min-width: 0;
   }
   .footnotes {
     display: grid;
@@ -3187,10 +3189,10 @@ function renderWord() {
   const fnMap = { drawP, drawA, drawO, drawB, drawD, drawQ, drawG, drawV, drawW, drawN, drawU, drawM, drawH, drawC, drawE, drawEacute, drawEgrave, drawI, drawL, drawJ, drawT, drawF, drawR, drawS, drawX, drawK, drawY, drawZ, drawOe, drawUmacron, drawAmacron, drawImacron, drawOmacron, drawUumlaut, drawNtilde, drawAgrave, drawIacute, drawIgrave };
   const wordChars = [{"id": "svg_0_t", "fn": "drawT"}, {"id": "svg_1_e", "fn": "drawE"}, {"id": "svg_2_n", "fn": "drawN"}, {"id": "svg_3_d", "fn": "drawD"}, {"id": "svg_4_r", "fn": "drawR"}, {"id": "svg_5_e", "fn": "drawE"}, {"id": "svg_6_l", "fn": "drawL"}, {"id": "svg_7_a", "fn": "drawA"}];
 
-  const fullTop = -10;
+  const fullTop = -65;
   const fullBot = 270;
   const fullHeight = fullBot - fullTop;
-  const displayFullHeight = 260;
+  const displayFullHeight = 311;
   const scale = displayFullHeight / fullHeight;
   let totalDisplayWidth = 0;
 
@@ -3222,16 +3224,18 @@ function renderWord() {
     }
   });
 
-  // Mobile only: if word is wider than viewport, scale it down
-  if (window.innerWidth < 480) {
-    var availW = window.innerWidth - 32;
-    if (totalDisplayWidth > availW) {
-      var s = availW / totalDisplayWidth;
-      var row = document.getElementById('lettersRow');
-      row.style.transform = 'scale(' + s + ')';
-      row.style.transformOrigin = 'left top';
-      row.parentElement.style.height = Math.round(260 * s) + 'px';
-    }
+  // Scale word down if wider than parent container (any narrow window)
+  // Setting width/height alongside transform makes the layout box match the
+  // visual box, so the parent's flex centering works correctly.
+  var row = document.getElementById('lettersRow');
+  var parentW = row.parentElement.getBoundingClientRect().width;
+  var availW = parentW - 32;
+  if (totalDisplayWidth > availW) {
+    var s = availW / totalDisplayWidth;
+    row.style.transform = 'scale(' + s + ')';
+    row.style.transformOrigin = 'top left';
+    row.style.width = (totalDisplayWidth * s) + 'px';
+    row.style.height = (displayFullHeight * s) + 'px';
   }
 }
 
