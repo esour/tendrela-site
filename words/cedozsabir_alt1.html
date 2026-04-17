@@ -9,9 +9,9 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --letter-color: hsl(15, 42%, 32%);
-    --bg-color: hsl(55, 68%, 88%);
-    --text-color: hsl(15, 42%, 32%);
+    --letter-color: hsl(170, 78%, 82%);
+    --bg-color: hsl(5, 68%, 16%);
+    --text-color: hsl(170, 78%, 82%);
     --word-width: 480px;
   }
 
@@ -255,14 +255,14 @@
 <div class="threshold" id="threshold"><span class="threshold-prompt">listen</span></div>
 
 <svg class="iching-glyph" viewBox="0 0 20 29.0" width="20" height="29.0">
-    <rect x="0" y="0.0" width="8.4" height="3" fill="currentColor"/>
-    <rect x="11.6" y="0.0" width="8.4" height="3" fill="currentColor"/>
-    <rect x="0" y="5.5" width="20" height="3" fill="currentColor"/>
-    <rect x="0" y="11.0" width="8.4" height="3" fill="currentColor"/>
-    <rect x="11.6" y="11.0" width="8.4" height="3" fill="currentColor"/>
-    <rect x="1.75" y="19.0" width="3.5" height="10" fill="currentColor"/>
-    <rect x="8.25" y="19.0" width="3.5" height="10" fill="currentColor"/>
-    <rect x="14.75" y="19.0" width="3.5" height="10" fill="currentColor"/>
+    <rect x="1.75" y="0" width="3.5" height="10" fill="currentColor"/>
+    <rect x="8.25" y="0" width="3.5" height="10" fill="currentColor"/>
+    <rect x="14.75" y="0" width="3.5" height="10" fill="currentColor"/>
+    <rect x="0" y="15.0" width="8.4" height="3" fill="currentColor"/>
+    <rect x="11.6" y="15.0" width="8.4" height="3" fill="currentColor"/>
+    <rect x="0" y="20.5" width="20" height="3" fill="currentColor"/>
+    <rect x="0" y="26.0" width="8.4" height="3" fill="currentColor"/>
+    <rect x="11.6" y="26.0" width="8.4" height="3" fill="currentColor"/>
   </svg>
 
 <div class="page">
@@ -329,20 +329,16 @@
 
   <div class="footnotes" id="footnotes">
 <div class="fn-block">
-  <p class="fn-reasoning">almost nothing left to hold</p>
-  <p class="fn-label">weight &middot; mortality / finitude</p>
+  <p class="fn-reasoning">cool breath after thinning</p>
+  <p class="fn-label">color &middot; interoception</p>
 </div>
 <div class="fn-block">
-  <p class="fn-reasoning">body forgets its own warmth</p>
-  <p class="fn-label">tension &middot; interoception</p>
+  <p class="fn-reasoning">slow bruise beneath patience</p>
+  <p class="fn-label">field color &middot; nociception</p>
 </div>
 <div class="fn-block">
-  <p class="fn-reasoning">light that wore you thin</p>
-  <p class="fn-label">field light &middot; beauty</p>
-</div>
-<div class="fn-block">
-  <p class="fn-reasoning">yielding rises from below</p>
-  <p class="fn-label">water &middot; trust</p>
+  <p class="fn-reasoning">still luminous while dissolving</p>
+  <p class="fn-label">light &middot; presence</p>
 </div>
   </div>
 
@@ -380,8 +376,8 @@
 </button>
 
 <script>
-const TENDRELA_LETTER_COLOR = "hsl(15, 42%, 32%)";
-const TENDRELA_BG_COLOR = "hsl(55, 68%, 88%)";
+const TENDRELA_LETTER_COLOR = "hsl(170, 78%, 82%)";
+const TENDRELA_BG_COLOR = "hsl(5, 68%, 16%)";
 
 
 const K = 0.5523;
@@ -3527,8 +3523,8 @@ function drawOhorn(p) {
 
 function renderWord() {
   const p = {
-    weight: 0.08, reach: 0.68, expanse: 0.58, tension: 0.15,
-    fillDir: 'west', floodRain: 'flood', debug: false
+    weight: 0.38, reach: 0.52, expanse: 0.78, tension: 0.62,
+    fillDir: 'west', floodRain: 'rain', debug: false
   };
 
   const fnMap = { drawP, drawA, drawO, drawB, drawD, drawQ, drawG, drawV, drawW, drawN, drawU, drawM, drawH, drawC, drawE, drawEacute, drawEgrave, drawI, drawL, drawJ, drawT, drawF, drawR, drawS, drawX, drawK, drawY, drawZ, drawOe, drawUmacron, drawAmacron, drawImacron, drawOmacron, drawUumlaut, drawNtilde, drawAgrave, drawIacute, drawIgrave, drawUhorn, drawOhorn };
@@ -4004,7 +4000,7 @@ runRitual();
   .c-sentence-item {
     margin-bottom: 1.3rem;
     padding-bottom: 1.3rem;
-    border-bottom: 1px solid hsla(55, 68%, 88%, 0.33);
+    border-bottom: 1px solid hsla(5, 68%, 16%, 0.33);
   }
   .c-sentence-item:last-child {
     border-bottom: none;
@@ -4028,7 +4024,7 @@ runRitual();
   .c-textarea {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(15, 42%, 44%, 0.42);
+    background: hsla(170, 78%, 94%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4043,7 +4039,7 @@ runRitual();
   .c-input {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(15, 42%, 44%, 0.42);
+    background: hsla(170, 78%, 94%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4054,7 +4050,7 @@ runRitual();
   .c-input::placeholder { color: var(--bg-color); opacity: 0.3; }
   .c-btn {
     background: none;
-    border: 1px solid hsla(55, 68%, 88%, 0.20);
+    border: 1px solid hsla(5, 68%, 16%, 0.20);
     color: var(--bg-color);
     opacity: 0.81;
     font-family: 'Spectral', Georgia, serif;
@@ -4080,7 +4076,7 @@ runRitual();
     flex: 1;
     min-width: 0;
     box-sizing: border-box;
-    background: hsla(15, 42%, 44%, 0.42);
+    background: hsla(170, 78%, 94%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4092,9 +4088,9 @@ runRitual();
   .c-email-name {
     width: 140px;
     box-sizing: border-box;
-    background: hsla(15, 42%, 44%, 0.42);
+    background: hsla(170, 78%, 94%, 0.42);
     border: none;
-    border-left: 1px solid hsla(55, 68%, 88%, 0.20);
+    border-left: 1px solid hsla(5, 68%, 16%, 0.20);
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
     font-size: 1.0rem;

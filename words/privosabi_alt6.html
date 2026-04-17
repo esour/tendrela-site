@@ -9,9 +9,9 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --letter-color: hsl(30, 65%, 72%);
-    --bg-color: hsl(260, 45%, 18%);
-    --text-color: hsl(30, 65%, 72%);
+    --letter-color: hsl(45, 28%, 82%);
+    --bg-color: hsl(220, 32%, 14%);
+    --text-color: hsl(45, 28%, 82%);
     --word-width: 480px;
   }
 
@@ -320,7 +320,22 @@
   </div>
 
   <div class="footnotes" id="footnotes">
-
+<div class="fn-block">
+  <p class="fn-reasoning">almost not there, still there</p>
+  <p class="fn-label">weight &middot; presence</p>
+</div>
+<div class="fn-block">
+  <p class="fn-reasoning">mostly eclipse, light leaking</p>
+  <p class="fn-label">tension &middot; mortality / finitude</p>
+</div>
+<div class="fn-block">
+  <p class="fn-reasoning">unperformed, unenhanced color</p>
+  <p class="fn-label">vibrancy &middot; authenticity</p>
+</div>
+<div class="fn-block">
+  <p class="fn-reasoning">held close to the body</p>
+  <p class="fn-label">reach &middot; interoception</p>
+</div>
   </div>
 
   <div class="colophon" id="colophon">
@@ -357,8 +372,8 @@
 </button>
 
 <script>
-const TENDRELA_LETTER_COLOR = "hsl(30, 65%, 72%)";
-const TENDRELA_BG_COLOR = "hsl(260, 45%, 18%)";
+const TENDRELA_LETTER_COLOR = "hsl(45, 28%, 82%)";
+const TENDRELA_BG_COLOR = "hsl(220, 32%, 14%)";
 
 
 const K = 0.5523;
@@ -3504,7 +3519,7 @@ function drawOhorn(p) {
 
 function renderWord() {
   const p = {
-    weight: 0.42, reach: 0.52, expanse: 0.78, tension: 0.38,
+    weight: 0.08, reach: 0.36, expanse: 0.62, tension: 0.15,
     fillDir: 'west', floodRain: 'rain', debug: false
   };
 
@@ -3981,7 +3996,7 @@ runRitual();
   .c-sentence-item {
     margin-bottom: 1.3rem;
     padding-bottom: 1.3rem;
-    border-bottom: 1px solid hsla(260, 45%, 18%, 0.33);
+    border-bottom: 1px solid hsla(220, 32%, 14%, 0.33);
   }
   .c-sentence-item:last-child {
     border-bottom: none;
@@ -4005,7 +4020,7 @@ runRitual();
   .c-textarea {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(30, 65%, 84%, 0.42);
+    background: hsla(45, 28%, 94%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4020,7 +4035,7 @@ runRitual();
   .c-input {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(30, 65%, 84%, 0.42);
+    background: hsla(45, 28%, 94%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4031,7 +4046,7 @@ runRitual();
   .c-input::placeholder { color: var(--bg-color); opacity: 0.3; }
   .c-btn {
     background: none;
-    border: 1px solid hsla(260, 45%, 18%, 0.20);
+    border: 1px solid hsla(220, 32%, 14%, 0.20);
     color: var(--bg-color);
     opacity: 0.81;
     font-family: 'Spectral', Georgia, serif;
@@ -4057,7 +4072,7 @@ runRitual();
     flex: 1;
     min-width: 0;
     box-sizing: border-box;
-    background: hsla(30, 65%, 84%, 0.42);
+    background: hsla(45, 28%, 94%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4069,9 +4084,9 @@ runRitual();
   .c-email-name {
     width: 140px;
     box-sizing: border-box;
-    background: hsla(30, 65%, 84%, 0.42);
+    background: hsla(45, 28%, 94%, 0.42);
     border: none;
-    border-left: 1px solid hsla(260, 45%, 18%, 0.20);
+    border-left: 1px solid hsla(220, 32%, 14%, 0.20);
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
     font-size: 1.0rem;
