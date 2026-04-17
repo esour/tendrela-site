@@ -61,15 +61,15 @@
     display: flex;
     justify-content: center;
     margin-bottom: 2rem;
-    overflow: hidden;
+    width: 100%;
+    min-width: 0;
   }
   .letters-row {
     display: flex;
     gap: 0;
     align-items: flex-end;
-    transform-origin: center center;
   }
-  .letter-svg { display: block; }
+  .letter-svg { display: block; flex-shrink: 0; }
 
   .pronunciation-block {
     text-align: center;
@@ -232,6 +232,34 @@
     letter-spacing: 0.03em;
   }
 
+  .page-nav {
+    text-align: center;
+    margin-top: 4rem;
+    padding-bottom: 2rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .page-nav.visible {
+    opacity: 1;
+  }
+  .page-nav a {
+    font-size: 0.9rem;
+    letter-spacing: 0.16em;
+    text-transform: lowercase;
+    text-decoration: none;
+    color: var(--text-color);
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+  .page-nav a:hover {
+    opacity: 0.8;
+  }
+
   @media (max-width: 640px) {
     .page {
       padding: 8vh 1.5rem 4rem;
@@ -348,6 +376,12 @@
 
   <div class="colophon" id="colophon">
     <p class="date-forged">2026-03-07</p>
+  </div>
+
+  <div class="page-nav" id="pageNav">
+    <a href="../index.html">home</a>
+    <a href="../lexicon.html">the liminal lexicon</a>
+    <a href="../about.html">who</a>
   </div>
 
 </div>
@@ -3539,10 +3573,10 @@ function renderWord() {
   const fnMap = { drawP, drawA, drawO, drawB, drawD, drawQ, drawG, drawV, drawW, drawN, drawU, drawM, drawH, drawC, drawE, drawEacute, drawEgrave, drawI, drawL, drawJ, drawT, drawF, drawR, drawS, drawX, drawK, drawY, drawZ, drawOe, drawUmacron, drawAmacron, drawImacron, drawOmacron, drawUumlaut, drawNtilde, drawAgrave, drawIacute, drawIgrave, drawUhorn, drawOhorn };
   const wordChars = [{"id": "svg_0_c", "fn": "drawC"}, {"id": "svg_1_e", "fn": "drawE"}, {"id": "svg_2_d", "fn": "drawD"}, {"id": "svg_3_\u00f6", "fn": "drawOe"}, {"id": "svg_4_z", "fn": "drawZ"}, {"id": "svg_5_s", "fn": "drawS"}, {"id": "svg_6_a", "fn": "drawA"}, {"id": "svg_7_b", "fn": "drawB"}, {"id": "svg_8_i", "fn": "drawI"}, {"id": "svg_9_r", "fn": "drawR"}];
 
-  const fullTop = -30;
+  const fullTop = -65;
   const fullBot = 270;
   const fullHeight = fullBot - fullTop;
-  const displayFullHeight = 260;
+  const displayFullHeight = 311;
   const scale = displayFullHeight / fullHeight;
   let totalDisplayWidth = 0;
 
@@ -3582,6 +3616,24 @@ function renderWord() {
     }
   });
   document.documentElement.style.setProperty('--word-width', Math.round(totalDisplayWidth) + 'px');
+  // Scale word down if wider than parent container by resizing SVGs directly.
+  // Avoids transform-based layout/visual mismatch.
+  var row = document.getElementById('lettersRow');
+  var availW = row.parentElement.getBoundingClientRect().width;
+  if (totalDisplayWidth > availW) {
+    var s = availW / totalDisplayWidth;
+    for (var i = 0; i < row.children.length; i++) {
+      var svg = row.children[i];
+      var w = parseFloat(svg.getAttribute('width'));
+      var h = parseFloat(svg.getAttribute('height'));
+      svg.setAttribute('width', w * s);
+      svg.setAttribute('height', h * s);
+      if (svg.style.marginLeft) {
+        svg.style.marginLeft = (parseFloat(svg.style.marginLeft) * s) + 'px';
+        svg.style.marginRight = (parseFloat(svg.style.marginRight) * s) + 'px';
+      }
+    }
+  }
 }
 
 function runRitual() {
@@ -3590,40 +3642,11 @@ function runRitual() {
     return;
   }
 
-  // Scale word down on narrow screens
-  function scaleWord() {
-    var row = document.getElementById('lettersRow');
-    row.style.transform = 'scale(1)';
-    row.style.transformOrigin = 'center center';
-    // Get the natural width of the row by temporarily removing overflow constraint
-    var block = row.parentElement;
-    var prevOverflow = block.style.overflow;
-    block.style.overflow = 'visible';
-    var rowWidth = row.scrollWidth;
-    block.style.overflow = prevOverflow || '';
-    var availWidth = block.clientWidth || (window.innerWidth - 40);
-    if (rowWidth > availWidth) {
-      var scale = availWidth / rowWidth;
-      row.style.transform = 'scale(' + scale + ')';
-      // Collapse the empty space left by scaling
-      var newHeight = row.getBoundingClientRect().height;
-      block.style.height = newHeight + 'px';
-    }
-  }
-  scaleWord();
-  window.addEventListener('resize', function() {
-    var block = document.getElementById('lettersRow').parentElement;
-    block.style.height = '';
-    scaleWord();
-  });
-  // Re-scale after fonts and SVGs fully load (mobile Safari timing)
-  setTimeout(scaleWord, 100);
-  setTimeout(scaleWord, 500);
-
   const threshold = document.getElementById('threshold');
   const essay = document.getElementById('essay');
   const footnotes = document.getElementById('footnotes');
   const colophon = document.getElementById('colophon');
+  const pageNav = document.getElementById('pageNav');
 
   let ritualStarted = false;
 
@@ -3638,6 +3661,7 @@ function runRitual() {
       if (essay) essay.classList.add('visible');
       if (footnotes) footnotes.classList.add('visible');
       if (colophon) colophon.classList.add('visible');
+      if (pageNav) pageNav.classList.add('visible');
     }, 1200);
   }
 

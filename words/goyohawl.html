@@ -61,13 +61,15 @@
     display: flex;
     justify-content: center;
     margin-bottom: 2rem;
+    width: 100%;
+    min-width: 0;
   }
   .letters-row {
     display: flex;
     gap: 0;
     align-items: flex-end;
   }
-  .letter-svg { display: block; }
+  .letter-svg { display: block; flex-shrink: 0; }
 
   .pronunciation-block {
     text-align: center;
@@ -3561,10 +3563,10 @@ function renderWord() {
   const fnMap = { drawP, drawA, drawO, drawB, drawD, drawQ, drawG, drawV, drawW, drawN, drawU, drawM, drawH, drawC, drawE, drawEacute, drawEgrave, drawI, drawL, drawJ, drawT, drawF, drawR, drawS, drawX, drawK, drawY, drawZ, drawOe, drawUmacron, drawAmacron, drawImacron, drawOmacron, drawUumlaut, drawNtilde, drawAgrave, drawIacute, drawIgrave, drawUhorn, drawOhorn };
   const wordChars = [{"id": "svg_0_g", "fn": "drawG"}, {"id": "svg_1_o", "fn": "drawO"}, {"id": "svg_2_y", "fn": "drawY"}, {"id": "svg_3_o", "fn": "drawO"}, {"id": "svg_4_h", "fn": "drawH"}, {"id": "svg_5_a", "fn": "drawA"}, {"id": "svg_6_w", "fn": "drawW"}, {"id": "svg_7_l", "fn": "drawL"}];
 
-  const fullTop = -10;
+  const fullTop = -65;
   const fullBot = 270;
   const fullHeight = fullBot - fullTop;
-  const displayFullHeight = 260;
+  const displayFullHeight = 311;
   const scale = displayFullHeight / fullHeight;
   let totalDisplayWidth = 0;
 
@@ -3604,15 +3606,22 @@ function renderWord() {
     }
   });
   document.documentElement.style.setProperty('--word-width', Math.round(totalDisplayWidth) + 'px');
-  // Mobile only: if word is wider than viewport, scale it down
-  if (window.innerWidth < 480) {
-    var availW = window.innerWidth - 32;
-    if (totalDisplayWidth > availW) {
-      var s = availW / totalDisplayWidth;
-      var row = document.getElementById('lettersRow');
-      row.style.transform = 'scale(' + s + ')';
-      row.style.transformOrigin = 'left top';
-      row.parentElement.style.height = Math.round(260 * s) + 'px';
+  // Scale word down if wider than parent container by resizing SVGs directly.
+  // Avoids transform-based layout/visual mismatch.
+  var row = document.getElementById('lettersRow');
+  var availW = row.parentElement.getBoundingClientRect().width;
+  if (totalDisplayWidth > availW) {
+    var s = availW / totalDisplayWidth;
+    for (var i = 0; i < row.children.length; i++) {
+      var svg = row.children[i];
+      var w = parseFloat(svg.getAttribute('width'));
+      var h = parseFloat(svg.getAttribute('height'));
+      svg.setAttribute('width', w * s);
+      svg.setAttribute('height', h * s);
+      if (svg.style.marginLeft) {
+        svg.style.marginLeft = (parseFloat(svg.style.marginLeft) * s) + 'px';
+        svg.style.marginRight = (parseFloat(svg.style.marginRight) * s) + 'px';
+      }
     }
   }
 }
