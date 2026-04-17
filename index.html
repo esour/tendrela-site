@@ -28,15 +28,14 @@
   .name-block {
     display: flex;
     justify-content: center;
-    overflow: visible;
+    overflow: hidden;
     width: 100%;
-    max-width: 100vw;
   }
   .letters-row {
     display: flex;
     gap: 0;
     align-items: flex-end;
-    transform-origin: center center;
+    transform-origin: center top;
   }
   .letter-svg { display: block; }
 
@@ -185,6 +184,13 @@
   }
 
   @media (max-width: 640px) {
+    .letters-row {
+      transform: scale(0.38);
+      transform-origin: center top;
+    }
+    .name-block {
+      height: 120px;
+    }
     .menu {
       bottom: 1.5rem;
       gap: 1.5rem;
@@ -3226,36 +3232,6 @@ try { renderWord(); } catch(e) {
 }
 
 // Scale name down on narrow screens
-function scaleName() {
-  var row = document.getElementById('lettersRow');
-  var block = row.parentElement;
-  var svgs = row.querySelectorAll('.letter-svg');
-  if (!svgs.length) return;
-  row.style.transform = 'scale(1)';
-  block.style.overflow = 'visible';
-  // Sum actual rendered SVG widths
-  var totalWidth = 0;
-  svgs.forEach(function(s) { totalWidth += s.getBoundingClientRect().width; });
-  var availWidth = window.innerWidth - 40;
-  if (totalWidth > availWidth && totalWidth > 0) {
-    var scale = availWidth / totalWidth;
-    row.style.transform = 'scale(' + scale + ')';
-    row.style.transformOrigin = 'center center';
-    block.style.height = (row.getBoundingClientRect().height) + 'px';
-  } else {
-    block.style.height = '';
-  }
-  block.style.overflow = 'hidden';
-}
-scaleName();
-window.addEventListener('resize', function() {
-  document.getElementById('lettersRow').parentElement.style.height = '';
-  scaleName();
-});
-setTimeout(scaleName, 100);
-setTimeout(scaleName, 500);
-setTimeout(scaleName, 1500);
-
 // Name click toggles footnotes
 const fnBox = document.getElementById('footnotes');
 document.getElementById('nameBlock').addEventListener('click', function() {

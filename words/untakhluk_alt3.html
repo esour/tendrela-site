@@ -61,13 +61,12 @@
     display: flex;
     justify-content: center;
     margin-bottom: 2rem;
-    overflow: hidden;
   }
   .letters-row {
     display: flex;
     gap: 0;
     align-items: flex-end;
-    transform-origin: center center;
+    transform-origin: center top;
   }
   .letter-svg { display: block; }
 
@@ -235,6 +234,14 @@
   @media (max-width: 640px) {
     .page {
       padding: 8vh 1.5rem 4rem;
+    }
+    .word-block {
+      overflow: hidden;
+      height: 140px;
+    }
+    .letters-row {
+      transform: scale(0.42);
+      transform-origin: center top;
     }
     .meta-row {
       flex-direction: column;
@@ -3568,36 +3575,6 @@ function runRitual() {
     document.body.innerHTML = '<pre style="color:red;padding:2rem">' + e.message + '\n' + e.stack + '</pre>';
     return;
   }
-
-  // Scale word down on narrow screens
-  function scaleWord() {
-    var row = document.getElementById('lettersRow');
-    row.style.transform = 'scale(1)';
-    row.style.transformOrigin = 'center center';
-    // Get the natural width of the row by temporarily removing overflow constraint
-    var block = row.parentElement;
-    var prevOverflow = block.style.overflow;
-    block.style.overflow = 'visible';
-    var rowWidth = row.scrollWidth;
-    block.style.overflow = prevOverflow || '';
-    var availWidth = block.clientWidth || (window.innerWidth - 40);
-    if (rowWidth > availWidth) {
-      var scale = availWidth / rowWidth;
-      row.style.transform = 'scale(' + scale + ')';
-      // Collapse the empty space left by scaling
-      var newHeight = row.getBoundingClientRect().height;
-      block.style.height = newHeight + 'px';
-    }
-  }
-  scaleWord();
-  window.addEventListener('resize', function() {
-    var block = document.getElementById('lettersRow').parentElement;
-    block.style.height = '';
-    scaleWord();
-  });
-  // Re-scale after fonts and SVGs fully load (mobile Safari timing)
-  setTimeout(scaleWord, 100);
-  setTimeout(scaleWord, 500);
 
   const threshold = document.getElementById('threshold');
   const essay = document.getElementById('essay');
