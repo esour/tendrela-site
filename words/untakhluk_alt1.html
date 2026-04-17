@@ -9,9 +9,9 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --letter-color: hsl(38, 52%, 72%);
-    --bg-color: hsl(255, 35%, 18%);
-    --text-color: hsl(38, 52%, 72%);
+    --letter-color: hsl(160, 45%, 32%);
+    --bg-color: hsl(38, 72%, 82%);
+    --text-color: hsl(160, 45%, 32%);
     --word-width: 480px;
   }
 
@@ -61,11 +61,13 @@
     display: flex;
     justify-content: center;
     margin-bottom: 2rem;
+    overflow: hidden;
   }
   .letters-row {
     display: flex;
     gap: 0;
     align-items: flex-end;
+    transform-origin: center center;
   }
   .letter-svg { display: block; }
 
@@ -253,11 +255,10 @@
 <div class="threshold" id="threshold"><span class="threshold-prompt">listen</span></div>
 
 <svg class="iching-glyph" viewBox="0 0 20 29.0" width="20" height="29.0">
-    <rect x="0" y="0.0" width="8.4" height="3" fill="currentColor"/>
-    <rect x="11.6" y="0.0" width="8.4" height="3" fill="currentColor"/>
-    <rect x="0" y="5.5" width="20" height="3" fill="currentColor"/>
-    <rect x="0" y="11.0" width="8.4" height="3" fill="currentColor"/>
-    <rect x="11.6" y="11.0" width="8.4" height="3" fill="currentColor"/>
+    <rect x="0" y="0.0" width="20" height="3" fill="currentColor"/>
+    <rect x="0" y="5.5" width="8.4" height="3" fill="currentColor"/>
+    <rect x="11.6" y="5.5" width="8.4" height="3" fill="currentColor"/>
+    <rect x="0" y="11.0" width="20" height="3" fill="currentColor"/>
     <rect x="1.75" y="19.0" width="3.5" height="10" fill="currentColor"/>
     <rect x="8.25" y="19.0" width="3.5" height="10" fill="currentColor"/>
     <rect x="14.75" y="19.0" width="3.5" height="10" fill="currentColor"/>
@@ -322,20 +323,20 @@
 
   <div class="footnotes" id="footnotes">
 <div class="fn-block">
-  <p class="fn-reasoning">heavy because nobody left</p>
-  <p class="fn-label">weight &middot; belonging</p>
+  <p class="fn-reasoning">almost nothing held back</p>
+  <p class="fn-label">tension &middot; trust</p>
 </div>
 <div class="fn-block">
-  <p class="fn-reasoning">nothing performed, nothing hidden</p>
-  <p class="fn-label">tension &middot; authenticity</p>
+  <p class="fn-reasoning">low warm hum, nothing reaching</p>
+  <p class="fn-label">reach &middot; thermoception</p>
 </div>
 <div class="fn-block">
-  <p class="fn-reasoning">beautiful without trying to be</p>
-  <p class="fn-label">vibrancy &middot; beauty</p>
+  <p class="fn-reasoning">arms open, no occasion needed</p>
+  <p class="fn-label">expanse &middot; play</p>
 </div>
 <div class="fn-block">
-  <p class="fn-reasoning">low ceiling, full room</p>
-  <p class="fn-label">reach &middot; interoception</p>
+  <p class="fn-reasoning">unglamorous, not performing vibrancy</p>
+  <p class="fn-label">vibrancy &middot; authenticity</p>
 </div>
   </div>
 
@@ -373,8 +374,8 @@
 </button>
 
 <script>
-const TENDRELA_LETTER_COLOR = "hsl(38, 52%, 72%)";
-const TENDRELA_BG_COLOR = "hsl(255, 35%, 18%)";
+const TENDRELA_LETTER_COLOR = "hsl(160, 45%, 32%)";
+const TENDRELA_BG_COLOR = "hsl(38, 72%, 82%)";
 
 
 const K = 0.5523;
@@ -3520,8 +3521,8 @@ function drawOhorn(p) {
 
 function renderWord() {
   const p = {
-    weight: 0.82, reach: 0.44, expanse: 0.71, tension: 0.28,
-    fillDir: 'west', floodRain: 'flood', debug: false
+    weight: 0.42, reach: 0.33, expanse: 0.97, tension: 0.08,
+    fillDir: 'east', floodRain: 'flood', debug: false
   };
 
   const fnMap = { drawP, drawA, drawO, drawB, drawD, drawQ, drawG, drawV, drawW, drawN, drawU, drawM, drawH, drawC, drawE, drawEacute, drawEgrave, drawI, drawL, drawJ, drawT, drawF, drawR, drawS, drawX, drawK, drawY, drawZ, drawOe, drawUmacron, drawAmacron, drawImacron, drawOmacron, drawUumlaut, drawNtilde, drawAgrave, drawIacute, drawIgrave, drawUhorn, drawOhorn };
@@ -3569,6 +3570,33 @@ function runRitual() {
     return;
   }
 
+  // Scale word down on narrow screens
+  function scaleWord() {
+    var row = document.getElementById('lettersRow');
+    row.style.transform = 'scale(1)';
+    row.style.transformOrigin = 'center center';
+    // Get the natural width of the row by temporarily removing overflow constraint
+    var block = row.parentElement;
+    var prevOverflow = block.style.overflow;
+    block.style.overflow = 'visible';
+    var rowWidth = row.scrollWidth;
+    block.style.overflow = prevOverflow || '';
+    var availWidth = block.clientWidth || (window.innerWidth - 40);
+    if (rowWidth > availWidth) {
+      var scale = availWidth / rowWidth;
+      row.style.transform = 'scale(' + scale + ')';
+      // Collapse the empty space left by scaling
+      var newHeight = row.getBoundingClientRect().height;
+      block.style.height = newHeight + 'px';
+    }
+  }
+  scaleWord();
+  window.addEventListener('resize', function() {
+    var block = document.getElementById('lettersRow').parentElement;
+    block.style.height = '';
+    scaleWord();
+  });
+
   const threshold = document.getElementById('threshold');
   const essay = document.getElementById('essay');
   const footnotes = document.getElementById('footnotes');
@@ -3576,13 +3604,13 @@ function runRitual() {
 
   let ritualStarted = false;
 
-  function beginReveal() {
+  async function beginReveal() {
     if (ritualStarted) return;
     ritualStarted = true;
     threshold.classList.add('dismissed');
     document.body.classList.add('ritual-started');
-    // Play invocation tone — we're inside a click handler so browser allows it
-    if (window._tendrelaPlayTone) { try { window._tendrelaPlayTone(); } catch(e) {} }
+    // Play invocation tone — await ensures Tone.start() completes within gesture context
+    if (window._tendrelaPlayTone) { try { await window._tendrelaPlayTone(); } catch(e) {} }
     setTimeout(() => {
       if (essay) essay.classList.add('visible');
       if (footnotes) footnotes.classList.add('visible');
@@ -3591,7 +3619,7 @@ function runRitual() {
   }
 
   threshold.addEventListener('click', beginReveal);
-  threshold.addEventListener('touchstart', beginReveal);
+  threshold.addEventListener('touchend', beginReveal);
 }
 
 runRitual();
@@ -3600,7 +3628,7 @@ runRitual();
 <script>
 // ── Invocation Tone (static embed from tones table) ──
 (function() {
-  const TONE_DATA = {"component_data": {"bodies": {"sun": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 24.7538}, "mars": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 3.7271}, "moon": {"sign": "Pisces", "element": "water", "modality": "mutable", "ecliptic_longitude": 352.559}, "pluto": {"sign": "Aquarius", "element": "air", "modality": "fixed", "ecliptic_longitude": 305.0337}, "venus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "ecliptic_longitude": 48.5496}, "saturn": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 6.916}, "uranus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "ecliptic_longitude": 59.0599}, "jupiter": {"sign": "Cancer", "element": "water", "modality": "cardinal", "ecliptic_longitude": 106.604}, "mercury": {"sign": "Pisces", "element": "water", "modality": "mutable", "ecliptic_longitude": 359.549}, "neptune": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 2.3575}}, "aspects": [{"orb": 0.4891, "type": "sextile", "body_a": "mercury", "body_b": "uranus", "orb_tightness": 0.8777}, {"orb": 1.3696, "type": "conjunction", "body_a": "mars", "body_b": "neptune", "orb_tightness": 0.8288}, {"orb": 1.3066, "type": "sextile", "body_a": "mars", "body_b": "pluto", "orb_tightness": 0.6733}, {"orb": 2.8085, "type": "conjunction", "body_a": "mercury", "body_b": "neptune", "orb_tightness": 0.6489}, {"orb": 3.1889, "type": "conjunction", "body_a": "mars", "body_b": "saturn", "orb_tightness": 0.6014}, {"orb": 1.8823, "type": "sextile", "body_a": "saturn", "body_b": "pluto", "orb_tightness": 0.5294}, {"orb": 1.9456, "type": "sextile", "body_a": "venus", "body_b": "jupiter", "orb_tightness": 0.5136}, {"orb": 4.1781, "type": "conjunction", "body_a": "mercury", "body_b": "mars", "orb_tightness": 0.4777}, {"orb": 4.5585, "type": "conjunction", "body_a": "saturn", "body_b": "neptune", "orb_tightness": 0.4302}, {"orb": 2.6762, "type": "sextile", "body_a": "neptune", "body_b": "pluto", "orb_tightness": 0.331}, {"orb": 3.2976, "type": "sextile", "body_a": "uranus", "body_b": "neptune", "orb_tightness": 0.1756}, {"orb": 6.99, "type": "conjunction", "body_a": "moon", "body_b": "mercury", "orb_tightness": 0.1263}], "timestamp": "2026-04-15T01:52:05.062620+00:00", "lunar_phase": 0.9106, "aspect_density": 6.3049, "lunar_phase_name": "Waning Crescent"}, "celestial_snapshot": {"bodies": {"sun": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 24.7538, "ecliptic_longitude": 24.7538}, "mars": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 3.7271, "ecliptic_longitude": 3.7271}, "moon": {"sign": "Pisces", "element": "water", "modality": "mutable", "is_retrograde": false, "degree_in_sign": 22.559, "ecliptic_longitude": 352.559}, "pluto": {"sign": "Aquarius", "element": "air", "modality": "fixed", "is_retrograde": false, "degree_in_sign": 5.0337, "ecliptic_longitude": 305.0337}, "venus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "is_retrograde": false, "degree_in_sign": 18.5496, "ecliptic_longitude": 48.5496}, "saturn": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 6.916, "ecliptic_longitude": 6.916}, "uranus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "is_retrograde": false, "degree_in_sign": 29.0599, "ecliptic_longitude": 59.0599}, "jupiter": {"sign": "Cancer", "element": "water", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 16.604, "ecliptic_longitude": 106.604}, "mercury": {"sign": "Pisces", "element": "water", "modality": "mutable", "is_retrograde": false, "degree_in_sign": 29.549, "ecliptic_longitude": 359.549}, "neptune": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 2.3575, "ecliptic_longitude": 2.3575}}, "aspects": [{"orb": 0.4891, "type": "sextile", "body_a": "mercury", "body_b": "uranus", "exact_angle": 60, "actual_angle": 59.5109, "orb_tightness": 0.8777}, {"orb": 1.3696, "type": "conjunction", "body_a": "mars", "body_b": "neptune", "exact_angle": 0, "actual_angle": 1.3696, "orb_tightness": 0.8288}, {"orb": 1.3066, "type": "sextile", "body_a": "mars", "body_b": "pluto", "exact_angle": 60, "actual_angle": 58.6934, "orb_tightness": 0.6733}, {"orb": 2.8085, "type": "conjunction", "body_a": "mercury", "body_b": "neptune", "exact_angle": 0, "actual_angle": 2.8085, "orb_tightness": 0.6489}, {"orb": 3.1889, "type": "conjunction", "body_a": "mars", "body_b": "saturn", "exact_angle": 0, "actual_angle": 3.1889, "orb_tightness": 0.6014}, {"orb": 1.8823, "type": "sextile", "body_a": "saturn", "body_b": "pluto", "exact_angle": 60, "actual_angle": 61.8823, "orb_tightness": 0.5294}, {"orb": 1.9456, "type": "sextile", "body_a": "venus", "body_b": "jupiter", "exact_angle": 60, "actual_angle": 58.0544, "orb_tightness": 0.5136}, {"orb": 4.1781, "type": "conjunction", "body_a": "mercury", "body_b": "mars", "exact_angle": 0, "actual_angle": 4.1781, "orb_tightness": 0.4777}, {"orb": 4.5585, "type": "conjunction", "body_a": "saturn", "body_b": "neptune", "exact_angle": 0, "actual_angle": 4.5585, "orb_tightness": 0.4302}, {"orb": 2.6762, "type": "sextile", "body_a": "neptune", "body_b": "pluto", "exact_angle": 60, "actual_angle": 57.3238, "orb_tightness": 0.331}, {"orb": 3.2976, "type": "sextile", "body_a": "uranus", "body_b": "neptune", "exact_angle": 60, "actual_angle": 56.7024, "orb_tightness": 0.1756}, {"orb": 6.99, "type": "conjunction", "body_a": "moon", "body_b": "mercury", "exact_angle": 0, "actual_angle": 6.99, "orb_tightness": 0.1263}, {"orb": 7.367, "type": "conjunction", "body_a": "mercury", "body_b": "saturn", "exact_angle": 0, "actual_angle": 7.367, "orb_tightness": 0.0791}, {"orb": 5.955, "type": "trine", "body_a": "moon", "body_b": "jupiter", "exact_angle": 120, "actual_angle": 114.045, "orb_tightness": 0.0075}, {"orb": 5.9738, "type": "trine", "body_a": "uranus", "body_b": "pluto", "exact_angle": 120, "actual_angle": 114.0262, "orb_tightness": 0.0044}], "location": null, "timestamp": "2026-04-15T01:52:05.062620+00:00", "lunar_nodes": {"north_node_sign": "Pisces", "south_node_sign": "Virgo", "north_node_longitude": 336.6579, "south_node_longitude": 156.6579}, "lunar_phase": 0.9106, "random_seed": 3129902457, "aspect_count": 15, "aspect_density": 6.3049, "lunar_phase_name": "Waning Crescent", "eclipse_proximity": {"sun_node_distance": 48.1, "moon_node_distance": 15.9, "lunar_eclipse_factor": 0, "solar_eclipse_factor": 0}}};
+  const TONE_DATA = {"component_data": {"bodies": {"sun": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 26.6936}, "mars": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 5.2638}, "moon": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 20.7391}, "pluto": {"sign": "Aquarius", "element": "air", "modality": "fixed", "ecliptic_longitude": 305.0524}, "venus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "ecliptic_longitude": 50.9703}, "saturn": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 7.1549}, "uranus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "ecliptic_longitude": 59.1607}, "jupiter": {"sign": "Cancer", "element": "water", "modality": "cardinal", "ecliptic_longitude": 106.8136}, "mercury": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 2.3912}, "neptune": {"sign": "Aries", "element": "fire", "modality": "cardinal", "ecliptic_longitude": 2.4276}}, "aspects": [{"orb": 0.0364, "type": "conjunction", "body_a": "mercury", "body_b": "neptune", "orb_tightness": 0.9954}, {"orb": 0.2114, "type": "sextile", "body_a": "mars", "body_b": "pluto", "orb_tightness": 0.9471}, {"orb": 1.8911, "type": "conjunction", "body_a": "mars", "body_b": "saturn", "orb_tightness": 0.7636}, {"orb": 2.8362, "type": "conjunction", "body_a": "mars", "body_b": "neptune", "orb_tightness": 0.6455}, {"orb": 2.8726, "type": "conjunction", "body_a": "mercury", "body_b": "mars", "orb_tightness": 0.6409}, {"orb": 2.1025, "type": "sextile", "body_a": "saturn", "body_b": "pluto", "orb_tightness": 0.4744}, {"orb": 4.7273, "type": "conjunction", "body_a": "saturn", "body_b": "neptune", "orb_tightness": 0.4091}, {"orb": 4.7637, "type": "conjunction", "body_a": "mercury", "body_b": "saturn", "orb_tightness": 0.4045}, {"orb": 3.9255, "type": "square", "body_a": "moon", "body_b": "jupiter", "orb_tightness": 0.3458}, {"orb": 2.6248, "type": "sextile", "body_a": "neptune", "body_b": "pluto", "orb_tightness": 0.3438}, {"orb": 2.6612, "type": "sextile", "body_a": "mercury", "body_b": "pluto", "orb_tightness": 0.3347}, {"orb": 5.9545, "type": "conjunction", "body_a": "sun", "body_b": "moon", "orb_tightness": 0.2557}, {"orb": 3.2305, "type": "sextile", "body_a": "mercury", "body_b": "uranus", "orb_tightness": 0.1924}, {"orb": 3.2669, "type": "sextile", "body_a": "uranus", "body_b": "neptune", "orb_tightness": 0.1833}], "timestamp": "2026-04-17T01:24:49.643726+00:00", "lunar_phase": 0.9835, "aspect_density": 6.9543, "lunar_phase_name": "New Moon"}, "celestial_snapshot": {"bodies": {"sun": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 26.6936, "ecliptic_longitude": 26.6936}, "mars": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 5.2638, "ecliptic_longitude": 5.2638}, "moon": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 20.7391, "ecliptic_longitude": 20.7391}, "pluto": {"sign": "Aquarius", "element": "air", "modality": "fixed", "is_retrograde": false, "degree_in_sign": 5.0524, "ecliptic_longitude": 305.0524}, "venus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "is_retrograde": false, "degree_in_sign": 20.9703, "ecliptic_longitude": 50.9703}, "saturn": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 7.1549, "ecliptic_longitude": 7.1549}, "uranus": {"sign": "Taurus", "element": "earth", "modality": "fixed", "is_retrograde": false, "degree_in_sign": 29.1607, "ecliptic_longitude": 59.1607}, "jupiter": {"sign": "Cancer", "element": "water", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 16.8136, "ecliptic_longitude": 106.8136}, "mercury": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 2.3912, "ecliptic_longitude": 2.3912}, "neptune": {"sign": "Aries", "element": "fire", "modality": "cardinal", "is_retrograde": false, "degree_in_sign": 2.4276, "ecliptic_longitude": 2.4276}}, "aspects": [{"orb": 0.0364, "type": "conjunction", "body_a": "mercury", "body_b": "neptune", "exact_angle": 0, "actual_angle": 0.0364, "orb_tightness": 0.9954}, {"orb": 0.2114, "type": "sextile", "body_a": "mars", "body_b": "pluto", "exact_angle": 60, "actual_angle": 60.2114, "orb_tightness": 0.9471}, {"orb": 1.8911, "type": "conjunction", "body_a": "mars", "body_b": "saturn", "exact_angle": 0, "actual_angle": 1.8911, "orb_tightness": 0.7636}, {"orb": 2.8362, "type": "conjunction", "body_a": "mars", "body_b": "neptune", "exact_angle": 0, "actual_angle": 2.8362, "orb_tightness": 0.6455}, {"orb": 2.8726, "type": "conjunction", "body_a": "mercury", "body_b": "mars", "exact_angle": 0, "actual_angle": 2.8726, "orb_tightness": 0.6409}, {"orb": 2.1025, "type": "sextile", "body_a": "saturn", "body_b": "pluto", "exact_angle": 60, "actual_angle": 62.1025, "orb_tightness": 0.4744}, {"orb": 4.7273, "type": "conjunction", "body_a": "saturn", "body_b": "neptune", "exact_angle": 0, "actual_angle": 4.7273, "orb_tightness": 0.4091}, {"orb": 4.7637, "type": "conjunction", "body_a": "mercury", "body_b": "saturn", "exact_angle": 0, "actual_angle": 4.7637, "orb_tightness": 0.4045}, {"orb": 3.9255, "type": "square", "body_a": "moon", "body_b": "jupiter", "exact_angle": 90, "actual_angle": 86.0745, "orb_tightness": 0.3458}, {"orb": 2.6248, "type": "sextile", "body_a": "neptune", "body_b": "pluto", "exact_angle": 60, "actual_angle": 57.3752, "orb_tightness": 0.3438}, {"orb": 2.6612, "type": "sextile", "body_a": "mercury", "body_b": "pluto", "exact_angle": 60, "actual_angle": 57.3388, "orb_tightness": 0.3347}, {"orb": 5.9545, "type": "conjunction", "body_a": "sun", "body_b": "moon", "exact_angle": 0, "actual_angle": 5.9545, "orb_tightness": 0.2557}, {"orb": 3.2305, "type": "sextile", "body_a": "mercury", "body_b": "uranus", "exact_angle": 60, "actual_angle": 56.7695, "orb_tightness": 0.1924}, {"orb": 3.2669, "type": "sextile", "body_a": "uranus", "body_b": "neptune", "exact_angle": 60, "actual_angle": 56.7331, "orb_tightness": 0.1833}, {"orb": 5.8917, "type": "trine", "body_a": "uranus", "body_b": "pluto", "exact_angle": 120, "actual_angle": 114.1083, "orb_tightness": 0.0181}], "location": null, "timestamp": "2026-04-17T01:24:49.643726+00:00", "lunar_nodes": {"north_node_sign": "Pisces", "south_node_sign": "Virgo", "north_node_longitude": 336.553, "south_node_longitude": 156.553}, "lunar_phase": 0.9835, "random_seed": 2764891503, "aspect_count": 15, "aspect_density": 6.9543, "lunar_phase_name": "New Moon", "eclipse_proximity": {"sun_node_distance": 50.14, "moon_node_distance": 44.19, "lunar_eclipse_factor": 0, "solar_eclipse_factor": 0.0}}};
   const cd = TONE_DATA.celestial_snapshot || TONE_DATA;
   let toneLoaded = false, tonePlaying = false, toneCleanup = [];
   const btn = document.getElementById('toneBtn');
@@ -3970,7 +3998,7 @@ runRitual();
   .c-sentence-item {
     margin-bottom: 1.3rem;
     padding-bottom: 1.3rem;
-    border-bottom: 1px solid hsla(255, 35%, 18%, 0.33);
+    border-bottom: 1px solid hsla(38, 72%, 82%, 0.33);
   }
   .c-sentence-item:last-child {
     border-bottom: none;
@@ -3994,7 +4022,7 @@ runRitual();
   .c-textarea {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(38, 52%, 84%, 0.42);
+    background: hsla(160, 45%, 44%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4009,7 +4037,7 @@ runRitual();
   .c-input {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(38, 52%, 84%, 0.42);
+    background: hsla(160, 45%, 44%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4020,7 +4048,7 @@ runRitual();
   .c-input::placeholder { color: var(--bg-color); opacity: 0.3; }
   .c-btn {
     background: none;
-    border: 1px solid hsla(255, 35%, 18%, 0.20);
+    border: 1px solid hsla(38, 72%, 82%, 0.20);
     color: var(--bg-color);
     opacity: 0.81;
     font-family: 'Spectral', Georgia, serif;
@@ -4046,7 +4074,7 @@ runRitual();
     flex: 1;
     min-width: 0;
     box-sizing: border-box;
-    background: hsla(38, 52%, 84%, 0.42);
+    background: hsla(160, 45%, 44%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4058,9 +4086,9 @@ runRitual();
   .c-email-name {
     width: 140px;
     box-sizing: border-box;
-    background: hsla(38, 52%, 84%, 0.42);
+    background: hsla(160, 45%, 44%, 0.42);
     border: none;
-    border-left: 1px solid hsla(255, 35%, 18%, 0.20);
+    border-left: 1px solid hsla(38, 72%, 82%, 0.20);
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
     font-size: 1.0rem;

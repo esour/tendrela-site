@@ -61,11 +61,13 @@
     display: flex;
     justify-content: center;
     margin-bottom: 2rem;
+    overflow: hidden;
   }
   .letters-row {
     display: flex;
     gap: 0;
     align-items: flex-end;
+    transform-origin: center center;
   }
   .letter-svg { display: block; }
 
@@ -3566,6 +3568,33 @@ function runRitual() {
     return;
   }
 
+  // Scale word down on narrow screens
+  function scaleWord() {
+    var row = document.getElementById('lettersRow');
+    row.style.transform = 'scale(1)';
+    row.style.transformOrigin = 'center center';
+    // Get the natural width of the row by temporarily removing overflow constraint
+    var block = row.parentElement;
+    var prevOverflow = block.style.overflow;
+    block.style.overflow = 'visible';
+    var rowWidth = row.scrollWidth;
+    block.style.overflow = prevOverflow || '';
+    var availWidth = block.clientWidth || (window.innerWidth - 40);
+    if (rowWidth > availWidth) {
+      var scale = availWidth / rowWidth;
+      row.style.transform = 'scale(' + scale + ')';
+      // Collapse the empty space left by scaling
+      var newHeight = row.getBoundingClientRect().height;
+      block.style.height = newHeight + 'px';
+    }
+  }
+  scaleWord();
+  window.addEventListener('resize', function() {
+    var block = document.getElementById('lettersRow').parentElement;
+    block.style.height = '';
+    scaleWord();
+  });
+
   const threshold = document.getElementById('threshold');
   const essay = document.getElementById('essay');
   const footnotes = document.getElementById('footnotes');
@@ -3573,13 +3602,13 @@ function runRitual() {
 
   let ritualStarted = false;
 
-  function beginReveal() {
+  async function beginReveal() {
     if (ritualStarted) return;
     ritualStarted = true;
     threshold.classList.add('dismissed');
     document.body.classList.add('ritual-started');
-    // Play invocation tone — we're inside a click handler so browser allows it
-    if (window._tendrelaPlayTone) { try { window._tendrelaPlayTone(); } catch(e) {} }
+    // Play invocation tone — await ensures Tone.start() completes within gesture context
+    if (window._tendrelaPlayTone) { try { await window._tendrelaPlayTone(); } catch(e) {} }
     setTimeout(() => {
       if (essay) essay.classList.add('visible');
       if (footnotes) footnotes.classList.add('visible');
@@ -3588,7 +3617,7 @@ function runRitual() {
   }
 
   threshold.addEventListener('click', beginReveal);
-  threshold.addEventListener('touchstart', beginReveal);
+  threshold.addEventListener('touchend', beginReveal);
 }
 
 runRitual();

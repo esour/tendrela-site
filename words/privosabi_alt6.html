@@ -9,9 +9,9 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --letter-color: hsl(32, 64%, 72%);
-    --bg-color: hsl(232, 42%, 14%);
-    --text-color: hsl(32, 64%, 72%);
+    --letter-color: hsl(30, 65%, 72%);
+    --bg-color: hsl(260, 45%, 18%);
+    --text-color: hsl(30, 65%, 72%);
     --word-width: 480px;
   }
 
@@ -61,11 +61,13 @@
     display: flex;
     justify-content: center;
     margin-bottom: 2rem;
+    overflow: hidden;
   }
   .letters-row {
     display: flex;
     gap: 0;
     align-items: flex-end;
+    transform-origin: center center;
   }
   .letter-svg { display: block; }
 
@@ -318,22 +320,7 @@
   </div>
 
   <div class="footnotes" id="footnotes">
-<div class="fn-block">
-  <p class="fn-reasoning">light enough to vanish</p>
-  <p class="fn-label">weight &middot; mortality / finitude</p>
-</div>
-<div class="fn-block">
-  <p class="fn-reasoning">privacy against permanent record</p>
-  <p class="fn-label">tension &middot; authenticity</p>
-</div>
-<div class="fn-block">
-  <p class="fn-reasoning">looking back without grasping</p>
-  <p class="fn-label">fill &middot; time</p>
-</div>
-<div class="fn-block">
-  <p class="fn-reasoning">three open vowels widen</p>
-  <p class="fn-label">expanse &middot; presence</p>
-</div>
+
   </div>
 
   <div class="colophon" id="colophon">
@@ -370,8 +357,8 @@
 </button>
 
 <script>
-const TENDRELA_LETTER_COLOR = "hsl(32, 64%, 72%)";
-const TENDRELA_BG_COLOR = "hsl(232, 42%, 14%)";
+const TENDRELA_LETTER_COLOR = "hsl(30, 65%, 72%)";
+const TENDRELA_BG_COLOR = "hsl(260, 45%, 18%)";
 
 
 const K = 0.5523;
@@ -3517,7 +3504,7 @@ function drawOhorn(p) {
 
 function renderWord() {
   const p = {
-    weight: 0.38, reach: 0.54, expanse: 0.78, tension: 0.72,
+    weight: 0.42, reach: 0.52, expanse: 0.78, tension: 0.38,
     fillDir: 'west', floodRain: 'rain', debug: false
   };
 
@@ -3566,6 +3553,33 @@ function runRitual() {
     return;
   }
 
+  // Scale word down on narrow screens
+  function scaleWord() {
+    var row = document.getElementById('lettersRow');
+    row.style.transform = 'scale(1)';
+    row.style.transformOrigin = 'center center';
+    // Get the natural width of the row by temporarily removing overflow constraint
+    var block = row.parentElement;
+    var prevOverflow = block.style.overflow;
+    block.style.overflow = 'visible';
+    var rowWidth = row.scrollWidth;
+    block.style.overflow = prevOverflow || '';
+    var availWidth = block.clientWidth || (window.innerWidth - 40);
+    if (rowWidth > availWidth) {
+      var scale = availWidth / rowWidth;
+      row.style.transform = 'scale(' + scale + ')';
+      // Collapse the empty space left by scaling
+      var newHeight = row.getBoundingClientRect().height;
+      block.style.height = newHeight + 'px';
+    }
+  }
+  scaleWord();
+  window.addEventListener('resize', function() {
+    var block = document.getElementById('lettersRow').parentElement;
+    block.style.height = '';
+    scaleWord();
+  });
+
   const threshold = document.getElementById('threshold');
   const essay = document.getElementById('essay');
   const footnotes = document.getElementById('footnotes');
@@ -3573,13 +3587,13 @@ function runRitual() {
 
   let ritualStarted = false;
 
-  function beginReveal() {
+  async function beginReveal() {
     if (ritualStarted) return;
     ritualStarted = true;
     threshold.classList.add('dismissed');
     document.body.classList.add('ritual-started');
-    // Play invocation tone — we're inside a click handler so browser allows it
-    if (window._tendrelaPlayTone) { try { window._tendrelaPlayTone(); } catch(e) {} }
+    // Play invocation tone — await ensures Tone.start() completes within gesture context
+    if (window._tendrelaPlayTone) { try { await window._tendrelaPlayTone(); } catch(e) {} }
     setTimeout(() => {
       if (essay) essay.classList.add('visible');
       if (footnotes) footnotes.classList.add('visible');
@@ -3588,7 +3602,7 @@ function runRitual() {
   }
 
   threshold.addEventListener('click', beginReveal);
-  threshold.addEventListener('touchstart', beginReveal);
+  threshold.addEventListener('touchend', beginReveal);
 }
 
 runRitual();
@@ -3967,7 +3981,7 @@ runRitual();
   .c-sentence-item {
     margin-bottom: 1.3rem;
     padding-bottom: 1.3rem;
-    border-bottom: 1px solid hsla(232, 42%, 14%, 0.33);
+    border-bottom: 1px solid hsla(260, 45%, 18%, 0.33);
   }
   .c-sentence-item:last-child {
     border-bottom: none;
@@ -3991,7 +4005,7 @@ runRitual();
   .c-textarea {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(32, 64%, 84%, 0.42);
+    background: hsla(30, 65%, 84%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4006,7 +4020,7 @@ runRitual();
   .c-input {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(32, 64%, 84%, 0.42);
+    background: hsla(30, 65%, 84%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4017,7 +4031,7 @@ runRitual();
   .c-input::placeholder { color: var(--bg-color); opacity: 0.3; }
   .c-btn {
     background: none;
-    border: 1px solid hsla(232, 42%, 14%, 0.20);
+    border: 1px solid hsla(260, 45%, 18%, 0.20);
     color: var(--bg-color);
     opacity: 0.81;
     font-family: 'Spectral', Georgia, serif;
@@ -4043,7 +4057,7 @@ runRitual();
     flex: 1;
     min-width: 0;
     box-sizing: border-box;
-    background: hsla(32, 64%, 84%, 0.42);
+    background: hsla(30, 65%, 84%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4055,9 +4069,9 @@ runRitual();
   .c-email-name {
     width: 140px;
     box-sizing: border-box;
-    background: hsla(32, 64%, 84%, 0.42);
+    background: hsla(30, 65%, 84%, 0.42);
     border: none;
-    border-left: 1px solid hsla(232, 42%, 14%, 0.20);
+    border-left: 1px solid hsla(260, 45%, 18%, 0.20);
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
     font-size: 1.0rem;

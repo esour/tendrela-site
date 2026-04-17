@@ -9,9 +9,9 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --letter-color: hsl(45, 28%, 82%);
-    --bg-color: hsl(220, 32%, 14%);
-    --text-color: hsl(45, 28%, 82%);
+    --letter-color: hsl(15, 22%, 25%);
+    --bg-color: hsl(45, 30%, 88%);
+    --text-color: hsl(15, 22%, 25%);
     --word-width: 480px;
   }
 
@@ -61,11 +61,13 @@
     display: flex;
     justify-content: center;
     margin-bottom: 2rem;
+    overflow: hidden;
   }
   .letters-row {
     display: flex;
     gap: 0;
     align-items: flex-end;
+    transform-origin: center center;
   }
   .letter-svg { display: block; }
 
@@ -253,14 +255,13 @@
 <div class="threshold" id="threshold"><span class="threshold-prompt">listen</span></div>
 
 <svg class="iching-glyph" viewBox="0 0 20 29.0" width="20" height="29.0">
-    <rect x="1.75" y="0" width="3.5" height="10" fill="currentColor"/>
-    <rect x="8.25" y="0" width="3.5" height="10" fill="currentColor"/>
-    <rect x="14.75" y="0" width="3.5" height="10" fill="currentColor"/>
-    <rect x="0" y="15.0" width="8.4" height="3" fill="currentColor"/>
-    <rect x="11.6" y="15.0" width="8.4" height="3" fill="currentColor"/>
-    <rect x="0" y="20.5" width="20" height="3" fill="currentColor"/>
-    <rect x="0" y="26.0" width="8.4" height="3" fill="currentColor"/>
-    <rect x="11.6" y="26.0" width="8.4" height="3" fill="currentColor"/>
+    <rect x="0" y="0.0" width="20" height="3" fill="currentColor"/>
+    <rect x="0" y="5.5" width="8.4" height="3" fill="currentColor"/>
+    <rect x="11.6" y="5.5" width="8.4" height="3" fill="currentColor"/>
+    <rect x="0" y="11.0" width="20" height="3" fill="currentColor"/>
+    <rect x="1.75" y="19.0" width="3.5" height="10" fill="currentColor"/>
+    <rect x="8.25" y="19.0" width="3.5" height="10" fill="currentColor"/>
+    <rect x="14.75" y="19.0" width="3.5" height="10" fill="currentColor"/>
   </svg>
 
 <div class="page">
@@ -319,20 +320,20 @@
 
   <div class="footnotes" id="footnotes">
 <div class="fn-block">
-  <p class="fn-reasoning">almost not there, still there</p>
-  <p class="fn-label">weight &middot; presence</p>
+  <p class="fn-reasoning">heavy as held silence</p>
+  <p class="fn-label">weight &middot; touch</p>
 </div>
 <div class="fn-block">
-  <p class="fn-reasoning">mostly eclipse, light leaking</p>
-  <p class="fn-label">tension &middot; mortality / finitude</p>
+  <p class="fn-reasoning">almost everything exposed, almost</p>
+  <p class="fn-label">tension &middot; authenticity</p>
 </div>
 <div class="fn-block">
-  <p class="fn-reasoning">unperformed, unenhanced color</p>
-  <p class="fn-label">vibrancy &middot; authenticity</p>
+  <p class="fn-reasoning">low ceiling, close walls</p>
+  <p class="fn-label">reach &middot; belonging</p>
 </div>
 <div class="fn-block">
-  <p class="fn-reasoning">held close to the body</p>
-  <p class="fn-label">reach &middot; interoception</p>
+  <p class="fn-reasoning">color worn by handling</p>
+  <p class="fn-label">vibrancy &middot; familiarity</p>
 </div>
   </div>
 
@@ -370,8 +371,8 @@
 </button>
 
 <script>
-const TENDRELA_LETTER_COLOR = "hsl(45, 28%, 82%)";
-const TENDRELA_BG_COLOR = "hsl(220, 32%, 14%)";
+const TENDRELA_LETTER_COLOR = "hsl(15, 22%, 25%)";
+const TENDRELA_BG_COLOR = "hsl(45, 30%, 88%)";
 
 
 const K = 0.5523;
@@ -3517,8 +3518,8 @@ function drawOhorn(p) {
 
 function renderWord() {
   const p = {
-    weight: 0.08, reach: 0.36, expanse: 0.62, tension: 0.15,
-    fillDir: 'west', floodRain: 'rain', debug: false
+    weight: 0.88, reach: 0.38, expanse: 0.58, tension: 0.85,
+    fillDir: 'east', floodRain: 'flood', debug: false
   };
 
   const fnMap = { drawP, drawA, drawO, drawB, drawD, drawQ, drawG, drawV, drawW, drawN, drawU, drawM, drawH, drawC, drawE, drawEacute, drawEgrave, drawI, drawL, drawJ, drawT, drawF, drawR, drawS, drawX, drawK, drawY, drawZ, drawOe, drawUmacron, drawAmacron, drawImacron, drawOmacron, drawUumlaut, drawNtilde, drawAgrave, drawIacute, drawIgrave, drawUhorn, drawOhorn };
@@ -3566,6 +3567,33 @@ function runRitual() {
     return;
   }
 
+  // Scale word down on narrow screens
+  function scaleWord() {
+    var row = document.getElementById('lettersRow');
+    row.style.transform = 'scale(1)';
+    row.style.transformOrigin = 'center center';
+    // Get the natural width of the row by temporarily removing overflow constraint
+    var block = row.parentElement;
+    var prevOverflow = block.style.overflow;
+    block.style.overflow = 'visible';
+    var rowWidth = row.scrollWidth;
+    block.style.overflow = prevOverflow || '';
+    var availWidth = block.clientWidth || (window.innerWidth - 40);
+    if (rowWidth > availWidth) {
+      var scale = availWidth / rowWidth;
+      row.style.transform = 'scale(' + scale + ')';
+      // Collapse the empty space left by scaling
+      var newHeight = row.getBoundingClientRect().height;
+      block.style.height = newHeight + 'px';
+    }
+  }
+  scaleWord();
+  window.addEventListener('resize', function() {
+    var block = document.getElementById('lettersRow').parentElement;
+    block.style.height = '';
+    scaleWord();
+  });
+
   const threshold = document.getElementById('threshold');
   const essay = document.getElementById('essay');
   const footnotes = document.getElementById('footnotes');
@@ -3573,13 +3601,13 @@ function runRitual() {
 
   let ritualStarted = false;
 
-  function beginReveal() {
+  async function beginReveal() {
     if (ritualStarted) return;
     ritualStarted = true;
     threshold.classList.add('dismissed');
     document.body.classList.add('ritual-started');
-    // Play invocation tone — we're inside a click handler so browser allows it
-    if (window._tendrelaPlayTone) { try { window._tendrelaPlayTone(); } catch(e) {} }
+    // Play invocation tone — await ensures Tone.start() completes within gesture context
+    if (window._tendrelaPlayTone) { try { await window._tendrelaPlayTone(); } catch(e) {} }
     setTimeout(() => {
       if (essay) essay.classList.add('visible');
       if (footnotes) footnotes.classList.add('visible');
@@ -3588,7 +3616,7 @@ function runRitual() {
   }
 
   threshold.addEventListener('click', beginReveal);
-  threshold.addEventListener('touchstart', beginReveal);
+  threshold.addEventListener('touchend', beginReveal);
 }
 
 runRitual();
@@ -3967,7 +3995,7 @@ runRitual();
   .c-sentence-item {
     margin-bottom: 1.3rem;
     padding-bottom: 1.3rem;
-    border-bottom: 1px solid hsla(220, 32%, 14%, 0.33);
+    border-bottom: 1px solid hsla(45, 30%, 88%, 0.33);
   }
   .c-sentence-item:last-child {
     border-bottom: none;
@@ -3991,7 +4019,7 @@ runRitual();
   .c-textarea {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(45, 28%, 94%, 0.42);
+    background: hsla(15, 22%, 37%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4006,7 +4034,7 @@ runRitual();
   .c-input {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(45, 28%, 94%, 0.42);
+    background: hsla(15, 22%, 37%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4017,7 +4045,7 @@ runRitual();
   .c-input::placeholder { color: var(--bg-color); opacity: 0.3; }
   .c-btn {
     background: none;
-    border: 1px solid hsla(220, 32%, 14%, 0.20);
+    border: 1px solid hsla(45, 30%, 88%, 0.20);
     color: var(--bg-color);
     opacity: 0.81;
     font-family: 'Spectral', Georgia, serif;
@@ -4043,7 +4071,7 @@ runRitual();
     flex: 1;
     min-width: 0;
     box-sizing: border-box;
-    background: hsla(45, 28%, 94%, 0.42);
+    background: hsla(15, 22%, 37%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4055,9 +4083,9 @@ runRitual();
   .c-email-name {
     width: 140px;
     box-sizing: border-box;
-    background: hsla(45, 28%, 94%, 0.42);
+    background: hsla(15, 22%, 37%, 0.42);
     border: none;
-    border-left: 1px solid hsla(220, 32%, 14%, 0.20);
+    border-left: 1px solid hsla(45, 30%, 88%, 0.20);
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
     font-size: 1.0rem;
