@@ -1832,11 +1832,16 @@ function drawJ(p) {
     floodY = lerp(stemTop, lowestY, p.tension);
   }
 
+  // Fill bounds tight to the j's actual horizontal extent.
+  // Hook swings left of arcCx by arcRx + arcThickW/2; stem ends at stemRight.
+  // Small margin on each side ensures the clip-path edge isn't grazed.
+  const fillLeft = (arcCx - arcRx - arcThickW / 2) - 4;
+  const fillRight = stemRight + 4;
   let fillRect;
   if (p.floodRain === 'flood') {
-    fillRect = `M -50 ${floodY} L 210 ${floodY} L 210 ${lowestY + 10} L -50 ${lowestY + 10} Z`;
+    fillRect = `M ${fillLeft} ${floodY} L ${fillRight} ${floodY} L ${fillRight} ${lowestY + 10} L ${fillLeft} ${lowestY + 10} Z`;
   } else {
-    fillRect = `M -50 ${stemTop - 10} L 210 ${stemTop - 10} L 210 ${floodY} L -50 ${floodY} Z`;
+    fillRect = `M ${fillLeft} ${stemTop - 10} L ${fillRight} ${stemTop - 10} L ${fillRight} ${floodY} L ${fillLeft} ${floodY} Z`;
   }
 
   // DOT — always opposes stem
@@ -3520,7 +3525,7 @@ function renderWord() {
   const fnMap = { drawP, drawA, drawO, drawB, drawD, drawQ, drawG, drawV, drawW, drawN, drawU, drawM, drawH, drawC, drawE, drawEacute, drawEgrave, drawI, drawL, drawJ, drawT, drawF, drawR, drawS, drawX, drawK, drawY, drawZ, drawOe, drawUmacron, drawAmacron, drawImacron, drawOmacron, drawUumlaut, drawNtilde, drawAgrave, drawIacute, drawIgrave, drawUhorn, drawOhorn };
   const wordChars = [{"id": "svg_0_g", "fn": "drawG"}, {"id": "svg_1_o", "fn": "drawO"}, {"id": "svg_2_y", "fn": "drawY"}, {"id": "svg_3_o", "fn": "drawO"}, {"id": "svg_4_h", "fn": "drawH"}, {"id": "svg_5_a", "fn": "drawA"}, {"id": "svg_6_w", "fn": "drawW"}, {"id": "svg_7_l", "fn": "drawL"}];
 
-  const fullTop = -10;
+  const fullTop = -30;
   const fullBot = 270;
   const fullHeight = fullBot - fullTop;
   const displayFullHeight = 260;
@@ -3538,6 +3543,15 @@ function renderWord() {
     raw = raw.replace(new RegExp('<rect[^>]*fill="' + bgEsc + '"[^/]*/>', 'g'), '');
     svg.innerHTML = raw;
     const bbox = svg.getBBox();
+    // Sanity check: glyphs should be roughly upright. A bbox much wider
+    // than tall usually means a fill path or rect has bounds that exceed
+    // the visible glyph (e.g. an oversized clipped fill). The clip-path
+    // hides this visually but getBBox ignores clip-path.
+    if (bbox.width > bbox.height * 2.5) {
+      console.warn('[tendrela] Suspiciously wide bbox for ' + item.fn +
+        ' (w=' + bbox.width.toFixed(1) + ' h=' + bbox.height.toFixed(1) +
+        '). Likely an oversized fill path inside a clip-path.');
+    }
     const padX = 3;
     const vbX = bbox.x - padX;
     const vbW = bbox.width + padX * 2;
@@ -3588,6 +3602,9 @@ function runRitual() {
     block.style.height = '';
     scaleWord();
   });
+  // Re-scale after fonts and SVGs fully load (mobile Safari timing)
+  setTimeout(scaleWord, 100);
+  setTimeout(scaleWord, 500);
 
   const threshold = document.getElementById('threshold');
   const essay = document.getElementById('essay');

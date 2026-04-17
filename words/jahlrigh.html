@@ -3529,7 +3529,7 @@ function renderWord() {
   const fnMap = { drawP, drawA, drawO, drawB, drawD, drawQ, drawG, drawV, drawW, drawN, drawU, drawM, drawH, drawC, drawE, drawEacute, drawEgrave, drawI, drawL, drawJ, drawT, drawF, drawR, drawS, drawX, drawK, drawY, drawZ, drawOe, drawUmacron, drawAmacron, drawImacron, drawOmacron, drawUumlaut, drawNtilde, drawAgrave, drawIacute, drawIgrave, drawUhorn, drawOhorn };
   const wordChars = [{"id": "svg_0_j", "fn": "drawJ"}, {"id": "svg_1_\u0101", "fn": "drawAmacron"}, {"id": "svg_2_h", "fn": "drawH"}, {"id": "svg_3_l", "fn": "drawL"}, {"id": "svg_4_r", "fn": "drawR"}, {"id": "svg_5_i", "fn": "drawI"}, {"id": "svg_6_g", "fn": "drawG"}, {"id": "svg_7_h", "fn": "drawH"}];
 
-  const fullTop = -10;
+  const fullTop = -30;
   const fullBot = 270;
   const fullHeight = fullBot - fullTop;
   const displayFullHeight = 260;
@@ -3606,6 +3606,9 @@ function runRitual() {
     block.style.height = '';
     scaleWord();
   });
+  // Re-scale after fonts and SVGs fully load (mobile Safari timing)
+  setTimeout(scaleWord, 100);
+  setTimeout(scaleWord, 500);
 
   const threshold = document.getElementById('threshold');
   const essay = document.getElementById('essay');

@@ -28,11 +28,13 @@
   .name-block {
     display: flex;
     justify-content: center;
+    overflow: hidden;
   }
   .letters-row {
     display: flex;
     gap: 0;
     align-items: flex-end;
+    transform-origin: center center;
   }
   .letter-svg { display: block; }
 
@@ -87,6 +89,45 @@
     opacity: 0.44;
     color: var(--letter-color);
     letter-spacing: 0.05em;
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  /* ── Dependent Arising overlay ── */
+  .arising-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-color);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+  .arising-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .arising-overlay.fade-out {
+    opacity: 0;
+  }
+  .arising-text {
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 3rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--letter-color);
+    opacity: 0.8;
+    text-align: center;
+    padding: 2rem;
+  }
+  @media (max-width: 640px) {
+    .arising-text {
+      font-size: 1.8rem;
+      letter-spacing: 0.15em;
+    }
   }
 
   /* ── Footnotes ── */
@@ -99,6 +140,8 @@
   .name-block {
     display: flex;
     justify-content: center;
+    width: 100%;
+    overflow: hidden;
   }
   .footnotes {
     display: grid;
@@ -142,11 +185,26 @@
   @media (max-width: 640px) {
     .menu {
       bottom: 1.5rem;
-      right: 1.5rem;
+      gap: 1.5rem;
+      flex-wrap: nowrap;
+      justify-content: center;
+      width: 90%;
+    }
+    .menu a {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
     }
     .tibetan {
       bottom: 1.5rem;
       left: 1.5rem;
+    }
+    .footnotes {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem 1.5rem;
+    }
+    .today-link a {
+      font-size: 1.8rem;
     }
   }
 </style>
@@ -179,6 +237,7 @@
 </div>
 
 <div class="tibetan">རྟེན་འབྲེལ</div>
+<div class="arising-overlay" id="arisingOverlay"><span class="arising-text">dependent arising</span></div>
 
 <script src="handwritings.js"></script>
 <script>
@@ -3164,10 +3223,53 @@ try { renderWord(); } catch(e) {
   console.error('Render error:', e);
 }
 
+// Scale name down on narrow screens
+function scaleName() {
+  var row = document.getElementById('lettersRow');
+  row.style.transform = 'scale(1)';
+  row.style.transformOrigin = 'center center';
+  var block = row.parentElement;
+  var prevOverflow = block.style.overflow;
+  block.style.overflow = 'visible';
+  var rowWidth = row.scrollWidth;
+  block.style.overflow = prevOverflow || '';
+  var availWidth = block.clientWidth || (window.innerWidth - 40);
+  if (rowWidth > availWidth) {
+    var scale = availWidth / rowWidth;
+    row.style.transform = 'scale(' + scale + ')';
+    var newHeight = row.getBoundingClientRect().height;
+    block.style.height = newHeight + 'px';
+  }
+}
+scaleName();
+window.addEventListener('resize', function() {
+  var block = document.getElementById('lettersRow').parentElement;
+  block.style.height = '';
+  scaleName();
+});
+// Re-scale after fonts and SVGs fully load (mobile Safari timing)
+setTimeout(scaleName, 100);
+setTimeout(scaleName, 500);
+window.addEventListener('resize', scaleName);
+
 // Name click toggles footnotes
 const fnBox = document.getElementById('footnotes');
 document.getElementById('nameBlock').addEventListener('click', function() {
   fnBox.classList.toggle('visible');
+});
+
+// Tibetan click shows "DEPENDENT ARISING" overlay
+document.querySelector('.tibetan').addEventListener('click', function() {
+  var overlay = document.getElementById('arisingOverlay');
+  overlay.classList.add('visible');
+  overlay.classList.remove('fade-out');
+  setTimeout(function() {
+    overlay.classList.add('fade-out');
+  }, 2400);
+  setTimeout(function() {
+    overlay.classList.remove('visible');
+    overlay.classList.remove('fade-out');
+  }, 3000);
 });
 </script>
 </body>
