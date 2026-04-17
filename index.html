@@ -184,13 +184,6 @@
   }
 
   @media (max-width: 640px) {
-    .letters-row {
-      transform: scale(0.38);
-      transform-origin: center top;
-    }
-    .name-block {
-      height: 120px;
-    }
     .menu {
       bottom: 1.5rem;
       gap: 1.5rem;
@@ -3199,6 +3192,7 @@ function renderWord() {
   const fullHeight = fullBot - fullTop;
   const displayFullHeight = 260;
   const scale = displayFullHeight / fullHeight;
+  let totalDisplayWidth = 0;
 
   wordChars.forEach((item, idx) => {
     const svg = document.getElementById(item.id);
@@ -3218,13 +3212,27 @@ function renderWord() {
     const displayW = vbW * scale;
     svg.setAttribute('width', displayW);
     svg.setAttribute('height', displayFullHeight);
+    totalDisplayWidth += displayW;
 
     const letter = item.fn.replace('draw', '').toLowerCase();
     if (letter === 'q') {
       svg.style.marginLeft = (-displayW * 0.25) + 'px';
       svg.style.marginRight = (-displayW * 0.25) + 'px';
+      totalDisplayWidth -= displayW * 0.5;
     }
   });
+
+  // Mobile only: if word is wider than viewport, scale it down
+  if (window.innerWidth < 480) {
+    var availW = window.innerWidth - 32;
+    if (totalDisplayWidth > availW) {
+      var s = availW / totalDisplayWidth;
+      var row = document.getElementById('lettersRow');
+      row.style.transform = 'scale(' + s + ')';
+      row.style.transformOrigin = 'left top';
+      row.parentElement.style.height = Math.round(260 * s) + 'px';
+    }
+  }
 }
 
 try { renderWord(); } catch(e) {

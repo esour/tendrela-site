@@ -66,7 +66,6 @@
     display: flex;
     gap: 0;
     align-items: flex-end;
-    transform-origin: center top;
   }
   .letter-svg { display: block; }
 
@@ -231,17 +230,37 @@
     letter-spacing: 0.03em;
   }
 
+  .page-nav {
+    text-align: center;
+    margin-top: 4rem;
+    padding-bottom: 2rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .page-nav.visible {
+    opacity: 1;
+  }
+  .page-nav a {
+    font-size: 0.9rem;
+    letter-spacing: 0.16em;
+    text-transform: lowercase;
+    text-decoration: none;
+    color: var(--text-color);
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+  .page-nav a:hover {
+    opacity: 0.8;
+  }
+
   @media (max-width: 640px) {
     .page {
       padding: 8vh 1.5rem 4rem;
-    }
-    .word-block {
-      overflow: hidden;
-      height: 140px;
-    }
-    .letters-row {
-      transform: scale(0.42);
-      transform-origin: center top;
     }
     .meta-row {
       flex-direction: column;
@@ -351,6 +370,12 @@
 
   <div class="colophon" id="colophon">
     <p class="date-forged">2026-04-08</p>
+  </div>
+
+  <div class="page-nav" id="pageNav">
+    <a href="../index.html">home</a>
+    <a href="../lexicon.html">the liminal lexicon</a>
+    <a href="../about.html">who</a>
   </div>
 
 </div>
@@ -3542,7 +3567,7 @@ function renderWord() {
   const fnMap = { drawP, drawA, drawO, drawB, drawD, drawQ, drawG, drawV, drawW, drawN, drawU, drawM, drawH, drawC, drawE, drawEacute, drawEgrave, drawI, drawL, drawJ, drawT, drawF, drawR, drawS, drawX, drawK, drawY, drawZ, drawOe, drawUmacron, drawAmacron, drawImacron, drawOmacron, drawUumlaut, drawNtilde, drawAgrave, drawIacute, drawIgrave, drawUhorn, drawOhorn };
   const wordChars = [{"id": "svg_0_s", "fn": "drawS"}, {"id": "svg_1_a", "fn": "drawA"}, {"id": "svg_2_l", "fn": "drawL"}, {"id": "svg_3_e", "fn": "drawE"}, {"id": "svg_4_t", "fn": "drawT"}, {"id": "svg_5_h", "fn": "drawH"}, {"id": "svg_6_e", "fn": "drawE"}, {"id": "svg_7_d", "fn": "drawD"}, {"id": "svg_8_\u00f6", "fn": "drawOe"}, {"id": "svg_9_n", "fn": "drawN"}];
 
-  const fullTop = -30;
+  const fullTop = -10;
   const fullBot = 270;
   const fullHeight = fullBot - fullTop;
   const displayFullHeight = 260;
@@ -3585,6 +3610,17 @@ function renderWord() {
     }
   });
   document.documentElement.style.setProperty('--word-width', Math.round(totalDisplayWidth) + 'px');
+  // Mobile only: if word is wider than viewport, scale it down
+  if (window.innerWidth < 480) {
+    var availW = window.innerWidth - 32;
+    if (totalDisplayWidth > availW) {
+      var s = availW / totalDisplayWidth;
+      var row = document.getElementById('lettersRow');
+      row.style.transform = 'scale(' + s + ')';
+      row.style.transformOrigin = 'left top';
+      row.parentElement.style.height = Math.round(260 * s) + 'px';
+    }
+  }
 }
 
 function runRitual() {
@@ -3597,6 +3633,7 @@ function runRitual() {
   const essay = document.getElementById('essay');
   const footnotes = document.getElementById('footnotes');
   const colophon = document.getElementById('colophon');
+  const pageNav = document.getElementById('pageNav');
 
   let ritualStarted = false;
 
@@ -3611,6 +3648,7 @@ function runRitual() {
       if (essay) essay.classList.add('visible');
       if (footnotes) footnotes.classList.add('visible');
       if (colophon) colophon.classList.add('visible');
+      if (pageNav) pageNav.classList.add('visible');
     }, 1200);
   }
 
