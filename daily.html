@@ -29,60 +29,15 @@
 <span class="loading">opening daily ritual</span>
 
 <script>
-// Supabase config
-var SB_URL = 'https://bfzqxqhuxfcpzigayqji.supabase.co';
-var SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmenF4cWh1eGZjcHppZ2F5cWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NzY1MjgsImV4cCI6MjA4ODI1MjUyOH0.EckWMCz1y7TZBvkwxcKqLz6m8Rr2HDLDOPoCOZw2HkI';
+// DAILY_WORD is rewritten by publish.py and publish_archive.py.
+// It holds the ASCII filename (no .html) of the word currently fronting daily.
+var DAILY_WORD = '<!-- DAILY_WORD_START -->privosabi<!-- DAILY_WORD_END -->';
 
-// Map of word_text (with diacritics) to sanitized ASCII filename.
-var FILENAME_MAP = {
-  'aloríssī': 'alorissi',
-  'amalgré': 'amalgre',
-  'cedözsabir': 'cedozsabir',
-  'colligakūsma': 'colligakusma',
-  'doxamoha': 'doxamoha',
-  'goyohawl': 'goyohawl',
-  'idiopillu': 'idiopillu',
-  'kökthương': 'kokthuong',
-  'privosabi': 'privosabi',
-  'salethedön': 'salethedon'
-};
-
-function sanitize(word) {
-  if (FILENAME_MAP[word]) return FILENAME_MAP[word];
-  return word.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-}
-
-var redirected = false;
-function goToLexicon() {
-  if (redirected) return;
-  redirected = true;
+if (DAILY_WORD) {
+  window.location.replace('words/' + DAILY_WORD + '.html');
+} else {
   window.location.replace('lexicon.html');
 }
-function goToWord(filename) {
-  if (redirected) return;
-  redirected = true;
-  window.location.replace('words/' + filename + '.html');
-}
-
-var fallbackTimer = setTimeout(goToLexicon, 5000);
-
-fetch(
-  SB_URL + '/rest/v1/lexicon?is_published=eq.true&select=word_text,published_at&order=published_at.desc&limit=1',
-  { headers: { 'apikey': SB_ANON_KEY, 'Authorization': 'Bearer ' + SB_ANON_KEY } }
-)
-.then(function(r) { return r.json(); })
-.then(function(data) {
-  clearTimeout(fallbackTimer);
-  if (Array.isArray(data) && data.length > 0 && data[0].word_text) {
-    goToWord(sanitize(data[0].word_text));
-  } else {
-    goToLexicon();
-  }
-})
-.catch(function() {
-  clearTimeout(fallbackTimer);
-  goToLexicon();
-});
 </script>
 
 </body>
