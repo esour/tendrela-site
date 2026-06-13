@@ -9,9 +9,9 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --letter-color: hsl(30, 88%, 42%);
-    --bg-color: hsl(55, 32%, 90%);
-    --text-color: hsl(30, 88%, 42%);
+    --letter-color: hsl(45, 78%, 68%);
+    --bg-color: hsl(355, 72%, 14%);
+    --text-color: hsl(45, 78%, 68%);
     --word-width: 480px;
   }
 
@@ -358,20 +358,20 @@
 
   <div class="footnotes" id="footnotes">
 <div class="fn-block">
-  <p class="fn-reasoning">almost entirely eclipsed inside</p>
-  <p class="fn-label">tension &middot; authenticity</p>
+  <p class="fn-reasoning">judge and wound, both exposed</p>
+  <p class="fn-label">tension &middot; conscience</p>
 </div>
 <div class="fn-block">
-  <p class="fn-reasoning">the gavel's full descent</p>
+  <p class="fn-reasoning">suffering crouches, does not stretch</p>
+  <p class="fn-label">reach &middot; interoception</p>
+</div>
+<div class="fn-block">
+  <p class="fn-reasoning">second blow lands heavier</p>
   <p class="fn-label">weight &middot; nociception</p>
 </div>
 <div class="fn-block">
-  <p class="fn-reasoning">open light exposing everything</p>
-  <p class="fn-label">field light &middot; beauty</p>
-</div>
-<div class="fn-block">
-  <p class="fn-reasoning">crouched under its own verdict</p>
-  <p class="fn-label">reach &middot; mortality / finitude</p>
+  <p class="fn-reasoning">red beneath, not above</p>
+  <p class="fn-label">field color &middot; nociception</p>
 </div>
   </div>
 
@@ -415,8 +415,8 @@
 </button>
 
 <script>
-const TENDRELA_LETTER_COLOR = "hsl(30, 88%, 42%)";
-const TENDRELA_BG_COLOR = "hsl(55, 32%, 90%)";
+const TENDRELA_LETTER_COLOR = "hsl(45, 78%, 68%)";
+const TENDRELA_BG_COLOR = "hsl(355, 72%, 14%)";
 
 
 const K = 0.5523;
@@ -3701,7 +3701,7 @@ function drawOdotCircle(p) {
 
 function renderWord() {
   const p = {
-    weight: 0.95, reach: 0.42, expanse: 0.61, tension: 0.08,
+    weight: 0.88, reach: 0.38, expanse: 0.58, tension: 0.92,
     fillDir: 'west', floodRain: 'rain', debug: false
   };
 
@@ -4226,7 +4226,7 @@ runRitual();
   .c-sentence-item {
     margin-bottom: 1.3rem;
     padding-bottom: 1.3rem;
-    border-bottom: 1px solid hsla(55, 32%, 90%, 0.33);
+    border-bottom: 1px solid hsla(355, 72%, 14%, 0.33);
   }
   .c-sentence-item:last-child {
     border-bottom: none;
@@ -4250,7 +4250,7 @@ runRitual();
   .c-textarea {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(30, 88%, 54%, 0.42);
+    background: hsla(45, 78%, 80%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4265,7 +4265,7 @@ runRitual();
   .c-input {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(30, 88%, 54%, 0.42);
+    background: hsla(45, 78%, 80%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4276,7 +4276,7 @@ runRitual();
   .c-input::placeholder { color: var(--bg-color); opacity: 0.3; }
   .c-btn {
     background: none;
-    border: 1px solid hsla(55, 32%, 90%, 0.20);
+    border: 1px solid hsla(355, 72%, 14%, 0.20);
     color: var(--bg-color);
     opacity: 0.81;
     font-family: 'Spectral', Georgia, serif;
@@ -4302,7 +4302,7 @@ runRitual();
     flex: 1;
     min-width: 0;
     box-sizing: border-box;
-    background: hsla(30, 88%, 54%, 0.42);
+    background: hsla(45, 78%, 80%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4314,9 +4314,9 @@ runRitual();
   .c-email-name {
     width: 140px;
     box-sizing: border-box;
-    background: hsla(30, 88%, 54%, 0.42);
+    background: hsla(45, 78%, 80%, 0.42);
     border: none;
-    border-left: 1px solid hsla(55, 32%, 90%, 0.20);
+    border-left: 1px solid hsla(355, 72%, 14%, 0.20);
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
     font-size: 1.0rem;
