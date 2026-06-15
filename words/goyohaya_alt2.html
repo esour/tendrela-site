@@ -9,9 +9,9 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --letter-color: hsl(45, 88%, 22%);
-    --bg-color: hsl(55, 78%, 75%);
-    --text-color: hsl(45, 88%, 22%);
+    --letter-color: hsl(45, 90%, 68%);
+    --bg-color: hsl(210, 55%, 22%);
+    --text-color: hsl(45, 90%, 68%);
     --word-width: 480px;
   }
 
@@ -290,10 +290,11 @@
 <div class="threshold" id="threshold"><span class="threshold-prompt">listen</span></div>
 
 <svg class="iching-glyph" viewBox="0 0 20 29.0" width="20" height="29.0">
-    <rect x="0" y="0.0" width="20" height="3" fill="currentColor"/>
-    <rect x="0" y="5.5" width="8.4" height="3" fill="currentColor"/>
-    <rect x="11.6" y="5.5" width="8.4" height="3" fill="currentColor"/>
-    <rect x="0" y="11.0" width="20" height="3" fill="currentColor"/>
+    <rect x="0" y="0.0" width="8.4" height="3" fill="currentColor"/>
+    <rect x="11.6" y="0.0" width="8.4" height="3" fill="currentColor"/>
+    <rect x="0" y="5.5" width="20" height="3" fill="currentColor"/>
+    <rect x="0" y="11.0" width="8.4" height="3" fill="currentColor"/>
+    <rect x="11.6" y="11.0" width="8.4" height="3" fill="currentColor"/>
     <rect x="1.75" y="19.0" width="3.5" height="10" fill="currentColor"/>
     <rect x="8.25" y="19.0" width="3.5" height="10" fill="currentColor"/>
     <rect x="14.75" y="19.0" width="3.5" height="10" fill="currentColor"/>
@@ -350,22 +351,7 @@
   </div>
 
   <div class="footnotes" id="footnotes">
-<div class="fn-block">
-  <p class="fn-reasoning">body dense with trained quiet</p>
-  <p class="fn-label">weight &middot; proprioception</p>
-</div>
-<div class="fn-block">
-  <p class="fn-reasoning">low horizon, ground-bound velocity</p>
-  <p class="fn-label">reach &middot; mortality / finitude</p>
-</div>
-<div class="fn-block">
-  <p class="fn-reasoning">effortlessness inside the force</p>
-  <p class="fn-label">tension &middot; effort</p>
-</div>
-<div class="fn-block">
-  <p class="fn-reasoning">dark letters cut through</p>
-  <p class="fn-label">light &middot; authenticity</p>
-</div>
+
   </div>
 
   <div class="colophon" id="colophon">
@@ -408,8 +394,8 @@
 </button>
 
 <script>
-const TENDRELA_LETTER_COLOR = "hsl(45, 88%, 22%)";
-const TENDRELA_BG_COLOR = "hsl(55, 78%, 75%)";
+const TENDRELA_LETTER_COLOR = "hsl(45, 90%, 68%)";
+const TENDRELA_BG_COLOR = "hsl(210, 55%, 22%)";
 
 
 const K = 0.5523;
@@ -3694,8 +3680,8 @@ function drawOdotCircle(p) {
 
 function renderWord() {
   const p = {
-    weight: 0.88, reach: 0.36, expanse: 0.95, tension: 0.15,
-    fillDir: 'east', floodRain: 'flood', debug: false
+    weight: 0.7, reach: 0.42, expanse: 0.62, tension: 0.55,
+    fillDir: 'west', floodRain: 'flood', debug: false
   };
 
   const fnMap = { drawP, drawA, drawO, drawB, drawD, drawQ, drawG, drawV, drawW, drawN, drawU, drawM, drawH, drawC, drawE, drawEacute, drawEgrave, drawI, drawL, drawJ, drawT, drawF, drawR, drawS, drawX, drawK, drawY, drawZ, drawOe, drawUmacron, drawAmacron, drawImacron, drawOmacron, drawUumlaut, drawNtilde, drawAacute, drawAgrave, drawIacute, drawIgrave, drawUhorn, drawOhorn, drawTdotCircle, drawNdotCircle, drawOdotCircle, drawAe };
@@ -4219,7 +4205,7 @@ runRitual();
   .c-sentence-item {
     margin-bottom: 1.3rem;
     padding-bottom: 1.3rem;
-    border-bottom: 1px solid hsla(55, 78%, 75%, 0.33);
+    border-bottom: 1px solid hsla(210, 55%, 22%, 0.33);
   }
   .c-sentence-item:last-child {
     border-bottom: none;
@@ -4243,7 +4229,7 @@ runRitual();
   .c-textarea {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(45, 88%, 34%, 0.42);
+    background: hsla(45, 90%, 80%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4258,7 +4244,7 @@ runRitual();
   .c-input {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(45, 88%, 34%, 0.42);
+    background: hsla(45, 90%, 80%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4269,7 +4255,7 @@ runRitual();
   .c-input::placeholder { color: var(--bg-color); opacity: 0.3; }
   .c-btn {
     background: none;
-    border: 1px solid hsla(55, 78%, 75%, 0.20);
+    border: 1px solid hsla(210, 55%, 22%, 0.20);
     color: var(--bg-color);
     opacity: 0.81;
     font-family: 'Spectral', Georgia, serif;
@@ -4295,7 +4281,7 @@ runRitual();
     flex: 1;
     min-width: 0;
     box-sizing: border-box;
-    background: hsla(45, 88%, 34%, 0.42);
+    background: hsla(45, 90%, 80%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
@@ -4307,9 +4293,9 @@ runRitual();
   .c-email-name {
     width: 140px;
     box-sizing: border-box;
-    background: hsla(45, 88%, 34%, 0.42);
+    background: hsla(45, 90%, 80%, 0.42);
     border: none;
-    border-left: 1px solid hsla(55, 78%, 75%, 0.20);
+    border-left: 1px solid hsla(210, 55%, 22%, 0.20);
     color: var(--bg-color);
     font-family: 'Spectral', Georgia, serif;
     font-size: 1.0rem;
