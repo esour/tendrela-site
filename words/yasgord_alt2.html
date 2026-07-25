@@ -9,9 +9,9 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --letter-color: hsl(45, 88%, 68%);
-    --bg-color: hsl(12, 72%, 14%);
-    --text-color: hsl(45, 88%, 68%);
+    --letter-color: hsl(48, 35%, 78%);
+    --bg-color: hsl(55, 82%, 85%);
+    --text-color: hsl(48, 35%, 78%);
     --word-width: 480px;
   }
 
@@ -353,16 +353,20 @@
 
   <div class="footnotes" id="footnotes">
 <div class="fn-block">
-  <p class="fn-reasoning">nearly everything exposed, nothing real</p>
+  <p class="fn-reasoning">thin enough to disappear</p>
+  <p class="fn-label">weight &middot; nociception</p>
+</div>
+<div class="fn-block">
+  <p class="fn-reasoning">almost nothing showing through</p>
   <p class="fn-label">tension &middot; authenticity</p>
 </div>
 <div class="fn-block">
-  <p class="fn-reasoning">crushing authority worn as costume</p>
-  <p class="fn-label">weight &middot; trust</p>
+  <p class="fn-reasoning">muted conviction, fading certainty</p>
+  <p class="fn-label">vibrancy &middot; metacognition</p>
 </div>
 <div class="fn-block">
-  <p class="fn-reasoning">heat beneath the gilt floor</p>
-  <p class="fn-label">field color &middot; thermoception</p>
+  <p class="fn-reasoning">effortless brightness, earned nothing</p>
+  <p class="fn-label">field light &middot; effort</p>
 </div>
   </div>
 
@@ -406,8 +410,8 @@
 </button>
 
 <script>
-const TENDRELA_LETTER_COLOR = "hsl(45, 88%, 68%)";
-const TENDRELA_BG_COLOR = "hsl(12, 72%, 14%)";
+const TENDRELA_LETTER_COLOR = "hsl(48, 35%, 78%)";
+const TENDRELA_BG_COLOR = "hsl(55, 82%, 85%)";
 
 
 const K = 0.5523;
@@ -3909,7 +3913,7 @@ function drawSdotCircle(p) {
 
 function renderWord() {
   const p = {
-    weight: 0.88, reach: 0.68, expanse: 0.61, tension: 0.92,
+    weight: 0.15, reach: 0.7, expanse: 0.95, tension: 0.12,
     fillDir: 'west', floodRain: 'flood', debug: false
   };
 
@@ -4434,7 +4438,7 @@ runRitual();
   .c-sentence-item {
     margin-bottom: 1.3rem;
     padding-bottom: 1.3rem;
-    border-bottom: 1px solid hsla(12, 72%, 14%, 0.33);
+    border-bottom: 1px solid hsla(55, 82%, 85%, 0.33);
   }
   .c-sentence-item:last-child {
     border-bottom: none;
@@ -4458,7 +4462,7 @@ runRitual();
   .c-textarea {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(45, 88%, 80%, 0.42);
+    background: hsla(48, 35%, 90%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', 'Noto Sans Cuneiform', Georgia, serif;
@@ -4473,7 +4477,7 @@ runRitual();
   .c-input {
     width: 100%;
     box-sizing: border-box;
-    background: hsla(45, 88%, 80%, 0.42);
+    background: hsla(48, 35%, 90%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', 'Noto Sans Cuneiform', Georgia, serif;
@@ -4484,7 +4488,7 @@ runRitual();
   .c-input::placeholder { color: var(--bg-color); opacity: 0.3; }
   .c-btn {
     background: none;
-    border: 1px solid hsla(12, 72%, 14%, 0.20);
+    border: 1px solid hsla(55, 82%, 85%, 0.20);
     color: var(--bg-color);
     opacity: 0.81;
     font-family: 'Spectral', 'Noto Sans Cuneiform', Georgia, serif;
@@ -4510,7 +4514,7 @@ runRitual();
     flex: 1;
     min-width: 0;
     box-sizing: border-box;
-    background: hsla(45, 88%, 80%, 0.42);
+    background: hsla(48, 35%, 90%, 0.42);
     border: none;
     color: var(--bg-color);
     font-family: 'Spectral', 'Noto Sans Cuneiform', Georgia, serif;
@@ -4522,9 +4526,9 @@ runRitual();
   .c-email-name {
     width: 140px;
     box-sizing: border-box;
-    background: hsla(45, 88%, 80%, 0.42);
+    background: hsla(48, 35%, 90%, 0.42);
     border: none;
-    border-left: 1px solid hsla(12, 72%, 14%, 0.20);
+    border-left: 1px solid hsla(55, 82%, 85%, 0.20);
     color: var(--bg-color);
     font-family: 'Spectral', 'Noto Sans Cuneiform', Georgia, serif;
     font-size: 1.0rem;
