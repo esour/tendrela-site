@@ -160,6 +160,8 @@
   }
   .vol-def { opacity: 0.75; }
   .vol-why {
+    display: block;
+    margin-top: 0.4em;
     font-style: italic;
     opacity: 0.5;
   }
@@ -4555,8 +4557,10 @@ try {
   function show(view) {
     var isVol = view === 'volume';
     if (isVol && !built) { buildVolume(); built = true; }
-    alpha.style.display  = isVol ? 'none' : '';
-    volume.style.display = isVol ? '' : 'none';
+    // Explicit values, not '': clearing an inline style falls back to the
+    // stylesheet, where #volumeView is display:none.
+    alpha.style.display  = isVol ? 'none' : 'block';
+    volume.style.display = isVol ? 'block' : 'none';
     toggle.innerHTML = isVol
       ? '<a data-view="alpha">alphabetical</a>' +
         '<span class="sep">|</span>' +
