@@ -94,6 +94,84 @@
     margin: 0 0 3.5rem;
   }
 
+  /* ── The two views ──────────────────────────────────────── */
+
+  .view-toggle {
+    text-align: center;
+    font-style: italic;
+    font-size: 1.2rem;
+    letter-spacing: 0.03em;
+    margin: -3rem 0 4rem;
+  }
+  .view-toggle a {
+    color: var(--letter-color);
+    text-decoration: none;
+    opacity: 0.4;
+    transition: opacity 0.3s;
+    cursor: pointer;
+  }
+  .view-toggle a:hover { opacity: 0.65; }
+  .view-toggle .current {
+    opacity: 0.75;
+    cursor: default;
+  }
+  .view-toggle .sep {
+    opacity: 0.25;
+    margin: 0 0.7em;
+  }
+
+  #volumeView { display: none; }
+
+  /* ── Volume one ─────────────────────────────────────────── */
+
+  .vol-row {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    margin-bottom: 0.55rem;
+    line-height: 1.7;
+  }
+  .vol-row.revealed {
+    margin-bottom: 1.9rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .vol-row.revealed:hover { opacity: 0.85; }
+
+  .vol-num {
+    font-family: 'Courier New', monospace;
+    font-size: 1.0rem;
+    opacity: 0.35;
+    letter-spacing: 0.03em;
+    padding-top: 0.28em;
+  }
+  .vol-row.today .vol-num { opacity: 1; }
+
+  .vol-text {
+    font-size: 1.25rem;
+    max-width: 560px;
+  }
+  .vol-word {
+    letter-spacing: 0.04em;
+    opacity: 0.7;
+  }
+  .vol-pron {
+    opacity: 0.45;
+    letter-spacing: 0.04em;
+  }
+  .vol-def { opacity: 0.75; }
+  .vol-why {
+    font-style: italic;
+    opacity: 0.5;
+  }
+
+  .vol-note {
+    font-size: 0.95rem;
+    font-style: italic;
+    opacity: 0.35;
+    margin-top: 3.5rem;
+    line-height: 1.7;
+  }
+
   .page-nav {
     text-align: center;
     margin-top: 5rem;
@@ -102,8 +180,7 @@
     align-items: center;
     justify-content: center;
     gap: 3rem;
-  }
-  .page-nav a {
+  }  .page-nav a {
     font-size: 0.9rem;
     letter-spacing: 0.16em;
     text-transform: lowercase;
@@ -152,6 +229,9 @@
     </div>
   </div>
 
+  <div class="view-toggle" id="viewToggle"></div>
+
+  <div id="alphaView">
   <!-- LEX_ENTRIES_START -->
   <div class="lex-entry" data-versions="abtel.html,abtel_alt1.html,abtel_alt2.html">
     <p class="lex-word">abtel</p>
@@ -1151,15 +1231,20 @@
   </div>
 
   <!-- LEX_ENTRIES_END -->
+  </div>
+
+  <div id="volumeView"></div>
 
   <div class="page-nav">
     <a href="index.html">home</a>
     <a href="lexicon.html">the liminal lexicon</a>
     <a href="about.html">who</a>
+    <a href="now.html">now</a>
   </div>
 
 </div>
 
+<script src="volume1.js"></script>
 <script>
 // ── Three title compositions ─────────────────────────────
 // Each has its own colors and typography params.
@@ -4401,6 +4486,94 @@ document.querySelectorAll('.lex-entry').forEach(function(entry) {
     window.location.href = 'words/' + pick.trim();
   });
 });
+
+// ── The two views ────────────────────────────────────────
+// Everything below is wrapped: if it fails, the alphabetical lexicon and its
+// routing above are already in place and keep working.
+try {
+(function () {
+  var toggle = document.getElementById('viewToggle');
+  var alpha  = document.getElementById('alphaView');
+  var volume = document.getElementById('volumeView');
+  if (!toggle || !alpha || !volume) return;
+  if (typeof VOLUME1 === 'undefined') return;   // volume1.js absent
+
+  // Version lists live in the entries above, written by the publish pipeline.
+  // Reading them from the DOM means new alts appear here on their own.
+  var versionsBySlug = {};
+  alpha.querySelectorAll('.lex-entry[data-versions]').forEach(function (e) {
+    var list = e.getAttribute('data-versions').split(',').map(function (s) {
+      return s.trim();
+    }).filter(Boolean);
+    versionsBySlug[list[0].replace('.html', '')] = list;
+  });
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+  }
+
+  function buildVolume() {
+    var shown = VOLUME1.revealed();
+    var html = '';
+
+    VOLUME1.days.forEach(function (d) {
+      var isRevealed = d.n <= shown;
+      var isToday    = d.n === shown;
+      var cls = 'vol-row' + (isRevealed ? ' revealed' : '') +
+                            (isToday ? ' today' : '');
+      html += '<div class="' + cls + '"' +
+              (isRevealed ? ' data-slug="' + esc(d.slug) + '"' : '') + '>' +
+              '<div class="vol-num">' + d.n + '.</div>' +
+              '<div class="vol-text">';
+      if (isRevealed) {
+        html += '<span class="vol-word">' + esc(d.word) + '</span> ' +
+                '<span class="vol-pron">(' + esc(d.pron) + ')</span>: ' +
+                '<span class="vol-def">' + esc(d.def) + '.</span> ' +
+                '<span class="vol-why">' + esc(d.why) + '</span>';
+      }
+      html += '</div></div>';
+    });
+
+    html += '<p class="vol-note">Volume one holds 111 words. ' +
+            'One is revealed each day as the daily ritual.</p>';
+
+    volume.innerHTML = html;
+
+    volume.querySelectorAll('.vol-row.revealed').forEach(function (row) {
+      row.addEventListener('click', function () {
+        var list = versionsBySlug[row.getAttribute('data-slug')];
+        if (!list || !list.length) return;
+        window.location.href = 'words/' +
+          list[Math.floor(Math.random() * list.length)];
+      });
+    });
+  }
+
+  var built = false;
+
+  function show(view) {
+    var isVol = view === 'volume';
+    if (isVol && !built) { buildVolume(); built = true; }
+    alpha.style.display  = isVol ? 'none' : '';
+    volume.style.display = isVol ? '' : 'none';
+    toggle.innerHTML = isVol
+      ? '<a data-view="alpha">alphabetical</a>' +
+        '<span class="sep">|</span>' +
+        '<span class="current">volume 1</span>'
+      : '<span class="current">alphabetical</span>' +
+        '<span class="sep">|</span>' +
+        '<a data-view="volume">volume 1</a>';
+    toggle.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        show(a.getAttribute('data-view'));
+      });
+    });
+  }
+
+  show('alpha');
+})();
+} catch (e) {}
 </script>
 </body>
 </html>
