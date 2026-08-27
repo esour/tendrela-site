@@ -2,10 +2,72 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Tendrela</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tendrela</title>
+<meta name="robots" content="noindex">
 <!-- DAILY_WORD_START -->
 <meta http-equiv="refresh" content="0; url=/words/veltikhon.html">
 <!-- DAILY_WORD_END -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --letter-color: hsl(40, 15%, 88%);
+    --bg-color: hsl(240, 7%, 4%);
+  }
+
+  body {
+    background: var(--bg-color);
+    color: var(--letter-color);
+    font-family: 'Spectral', Georgia, serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .page-nav {
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    padding: 2rem 1.5rem;
+  }
+  .page-nav a {
+    font-size: 0.9rem;
+    letter-spacing: 0.16em;
+    text-transform: lowercase;
+    text-decoration: none;
+    color: var(--letter-color);
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+  .page-nav a:hover {
+    opacity: 0.8;
+  }
+
+  @media (max-width: 640px) {
+    .page-nav {
+      flex-wrap: wrap;
+      gap: 1.5rem 2rem;
+    }
+  }
+</style>
 </head>
-<body></body>
+<body>
+
+<!-- Fallback only. The refresh above fires immediately; this shows solely if
+     the visitor's browser has meta-refresh disabled. -->
+<div class="page-nav">
+  <a href="index.html">home</a>
+  <a href="lexicon.html">the liminal lexicon</a>
+  <a href="about.html">who</a>
+  <a href="now.html">now</a>
+  <a href="elsewhere.html">elsewhere</a>
+</div>
+
+</body>
 </html>

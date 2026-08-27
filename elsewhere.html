@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tendrela — elsewhere</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --letter-color: hsl(40, 15%, 88%);
+    --bg-color: hsl(240, 7%, 4%);
+  }
+
+  body {
+    background: var(--bg-color);
+    color: var(--letter-color);
+    font-family: 'Spectral', Georgia, serif;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 12vh 2.5rem 6rem;
+  }
+
+  .page-title {
+    text-align: center;
+    margin-bottom: 5rem;
+  }
+  .page-title h1 {
+    font-size: 1.6rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    opacity: 0.55;
+  }
+
+  /* ── Exhibition entry ── */
+  .show {
+    margin-bottom: 3.5rem;
+  }
+  .show:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .show-title {
+    font-size: 1.35rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+  .show-title a {
+    color: var(--letter-color);
+    text-decoration: none;
+    opacity: 0.85;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 0.1em;
+    transition: opacity 0.3s;
+  }
+  .show-title a:hover {
+    opacity: 1;
+  }
+
+  .show-meta {
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: lowercase;
+    opacity: 0.45;
+    margin-bottom: 1.4rem;
+  }
+
+  .show-desc {
+    font-size: 1.2rem;
+    line-height: 1.85;
+    opacity: 0.75;
+    margin-bottom: 1.8rem;
+  }
+
+  .credit {
+    margin-bottom: 1.4rem;
+  }
+  .credit:last-child {
+    margin-bottom: 0;
+  }
+  .credit-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: lowercase;
+    opacity: 0.4;
+    margin-bottom: 0.4rem;
+  }
+  .credit-names {
+    font-size: 1rem;
+    line-height: 1.7;
+    opacity: 0.6;
+  }
+
+  .divider {
+    width: 30px;
+    height: 1px;
+    background: var(--letter-color);
+    opacity: 0.12;
+    margin: 0 auto 3.5rem;
+  }
+
+  .page-nav {
+    text-align: center;
+    margin-top: 6rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+  }
+  .page-nav a {
+    font-size: 0.9rem;
+    letter-spacing: 0.16em;
+    text-transform: lowercase;
+    text-decoration: none;
+    color: var(--letter-color);
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+  .page-nav a:hover {
+    opacity: 0.8;
+  }
+
+  @media (max-width: 640px) {
+    .page {
+      padding: 8vh 1.5rem 4rem;
+    }
+    .page-title {
+      margin-bottom: 3.5rem;
+    }
+    .show-desc {
+      font-size: 1.1rem;
+    }
+    .page-nav {
+      flex-wrap: wrap;
+      gap: 1.5rem 2rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="page-title">
+    <h1>elsewhere</h1>
+  </div>
+
+  <div class="show">
+    <h2 class="show-title">
+      <a href="https://objkt.com/exhibitions/visual-voice-31564025" target="_blank" rel="noopener">Visual Voice</a>
+    </h2>
+    <div class="show-meta">objkt · online</div>
+
+    <p class="show-desc">
+      An audiovisual collaboration in which contributors ground words from <i>the liminal lexicon</i> into their own realities, as waveforms translate speech, sound, and movement into new sensory experience.
+    </p>
+
+    <div class="credit">
+      <div class="credit-label">voiced by</div>
+      <p class="credit-names">0xDEAFBEEF, Ana María Caballero, Byron Kives, Christian Bök, Connie Bakshi, David Fahl, Emberly Johnston, fingacode, Franziska Ostermann, Grant Cummings, John Privett, Kate Armstrong, Kevin Esherick, Kiara Calloway, Lauren Jones, Margaret Murphy, Masako Shiba, Melinda Johnston, Mieke Marple, Nina Knaack, Peter Franklin, Pierre Gervois, Samantha Arato, Sanin Dosa, Shannon Chen See, Shen Ge, SOLIENNE</p>
+    </div>
+
+    <div class="credit">
+      <div class="credit-label">conducted by</div>
+      <p class="credit-names">Tendrela</p>
+    </div>
+
+    <div class="credit">
+      <div class="credit-label">produced by</div>
+      <p class="credit-names">Elisabeth Sweet</p>
+    </div>
+  </div>
+
+  <div class="page-nav">
+    <a href="index.html">home</a>
+    <a href="lexicon.html">the liminal lexicon</a>
+    <a href="about.html">who</a>
+    <a href="now.html">now</a>
+    <a href="elsewhere.html">elsewhere</a>
+  </div>
+
+</div>
+
+<!-- Shared handwriting palette -->
+<script src="handwritings.js"></script>
+<script>
+// Apply a random handwriting palette to the page
+if (typeof HANDWRITINGS !== 'undefined' && HANDWRITINGS.length > 0) {
+  var hw = HANDWRITINGS[Math.floor(Math.random() * HANDWRITINGS.length)];
+  document.documentElement.style.setProperty('--letter-color', hw.letter);
+  document.documentElement.style.setProperty('--bg-color', hw.bg);
+}
+</script>
+</body>
+</html>

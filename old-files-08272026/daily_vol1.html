@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tendrela</title>
+<meta name="robots" content="noindex">
+<noscript><meta http-equiv="refresh" content="0; url=lexicon.html"></noscript>
+<!--
+  daily_vol1.html — one word per day, in Tendrela's order, Volume 1.
+
+  Nothing runs on a schedule. The visitor's browser resolves today's date and
+  counts forward from START. Upload once; it needs no maintenance.
+
+  The word is fixed for the day. The version is drawn at random on every click,
+  read from lexicon.html's data-versions at load — so new alts appear here with
+  no edit to this file.
+-->
+<script>
+(function () {
+  var START = '2026-08-16';        // day 1 — matches volume_sequences.start_date
+  var TZ    = 'America/Chicago';   // midnight here, DST handled by Intl
+
+  var WORDS = [
+    'zorzantu', 'alorissi', 'barampacha', 'arutae', 'emanzaa', 'tantemieli',
+    'solsuvai', 'goyohaya', 'patinoa', 'saapuvai', 'fermavui', 'gusmunar',
+    'denitan', 'kaduyojo', 'goyohawl', 'sunnresa', 'horampatu', 'postnarsae',
+    'allayoz', 'ezuntreo', 'kokthuong', 'stataz', 'delsala', 'wusebel',
+    'sirusalao', 'tendalais', 'nieparlam', 'disgofo', 'doxamoha', 'sanmidyna',
+    'satyadol', 'satyakat', 'dhimadanskam', 'vazdawand', 'cedozsabir',
+    'famapako', 'limeribo', 'semulto', 'saldalumo', 'ismismir', 'najidaai',
+    'sasalaysu', 'elader', 'haqqasina', 'gwirbricco', 'scherzobrouni',
+    'idiopillu', 'yokojopo', 'gilanbu', 'amalgre', 'hulludarak', 'hazkaman',
+    'kizbhargra', 'thulitagra', 'lakaroha', 'delhaf', 'cordanbuha',
+    'yongkatasa', 'biglanti', 'karibumar', 'tetzinto', 'ehdayad', 'saccadir',
+    'qatmunbhid', 'kirbrtseqat', 'wuwolani', 'kalerakar', 'oznamaful',
+    'hazfaba', 'dukon', 'barjall', 'aucomitansi', 'vacasemo', 'colligakusma',
+    'bokkalonas', 'untakhluk', 'nevolnokhor', 'femevaba', 'manqhakawsay',
+    'tilisol', 'mangaltor', 'jaiparlajik', 'dugkrise', 'pharmakosali',
+    'sabablayen', 'taitofall', 'kazuzy', 'gamsimie', 'mikkimach', 'lingao',
+    'punguji', 'kirumbrakros', 'zaospalt', 'vojnakte', 'jahlrigh', 'yasgord',
+    'kalabianzo', 'abtel', 'akrosanti', 'lunkalaya', 'tardutau', 'salethedon',
+    'kryolera', 'privosabi', 'duubomlalu', 'nomalila', 'rizanaho',
+    'pukllahaft', 'hunowali', 'wynnkalitam', 'veltikhon'
+  ];
+
+  var today;
+  try {
+    today = new Intl.DateTimeFormat('en-CA', {
+      timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date());
+  } catch (e) {
+    var d = new Date();
+    today = d.getFullYear() + '-' +
+            ('0' + (d.getMonth() + 1)).slice(-2) + '-' +
+            ('0' + d.getDate()).slice(-2);
+  }
+
+  // Midday UTC on both ends so no offset can push either across a boundary.
+  var i = Math.round(
+    (Date.parse(today + 'T12:00:00Z') - Date.parse(START + 'T12:00:00Z')) / 864e5
+  );
+  if (!isFinite(i)) i = 0;
+
+  var slug = WORDS[((i % WORDS.length) + WORDS.length) % WORDS.length];
+  var sent = false;
+
+  // replace(), not href: with href, Back from a word page re-runs this and
+  // throws the visitor forward again.
+  function go(file) {
+    if (sent) return;
+    sent = true;
+    window.location.replace('words/' + file);
+  }
+
+  var giveUp = setTimeout(function () { go(slug + '.html'); }, 4000);
+
+  fetch('lexicon.html')
+    .then(function (r) { return r.text(); })
+    .then(function (html) {
+      clearTimeout(giveUp);
+      var entries = new DOMParser()
+        .parseFromString(html, 'text/html')
+        .querySelectorAll('.lex-entry[data-versions]');
+      var base = slug + '.html';
+      for (var n = 0; n < entries.length; n++) {
+        var v = entries[n].getAttribute('data-versions').split(',');
+        for (var k = 0; k < v.length; k++) v[k] = v[k].trim();
+        if (v[0] === base) return go(v[Math.floor(Math.random() * v.length)]);
+      }
+      go(base);
+    })
+    .catch(function () { clearTimeout(giveUp); go(slug + '.html'); });
+})();
+</script>
+</head>
+<body></body>
+</html>
